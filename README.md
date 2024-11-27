@@ -64,7 +64,7 @@ classDiagram
         - Name: String
         - Description: String
     }
-    
+
 %% Marketplace Things
     class Move_Request {
         - Id: int
@@ -76,7 +76,7 @@ classDiagram
         - Trip_Date: DateTime
         - Trip_Time: DateTime
     }
-    
+
     class Move_Bid {
         - Id: int
         - Price: cur
@@ -90,18 +90,19 @@ classDiagram
         - Move_Request: (Move_Request)
         - Move_Bid: (Move_Bid)
     }
-    
+
 %% Relationships
 
 %% User Entities
     User <|-- Mover
     User <|-- Driver
 
-    
+
 %% Things Entities
 
 
-    %% Addresses
+    %% Users have Preferences
+    User "1..*" -- "1..*" Pref
 
     %% Users have Address
     User "1" -- "1" Address
@@ -127,7 +128,7 @@ classDiagram
 
     Mover "1" -- "0..*" Move_Request
     Driver "1" -- "0..*" Move_Bid
-    
+
     Move_Trip "1" *-- "1" Move_Request
     Move_Trip "1" *-- "1" Move_Bid
 ```
