@@ -1,6 +1,0 @@
-@SwiftMove.Server_HostAddress = http://localhost:5130
-
-GET {{SwiftMove.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
