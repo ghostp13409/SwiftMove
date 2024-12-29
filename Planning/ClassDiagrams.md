@@ -20,9 +20,11 @@ classDiagram
     }
     class Driver {
         - Rating: float
+        - DrivingExperience: int
         - Preferences: (list<Pref>)
         - Range: float
         - radius: add
+        - DrivingLicense: (Doc)
     }
 
 %% Things
@@ -35,6 +37,12 @@ classDiagram
         - Usable_Vo: String
         - Price/Km: cur
     }
+    class Document {
+        - Id: int
+        - docUrl: String
+        - docType: enum
+    }
+
     class Address {
         - Id: int
         - Line1: String
