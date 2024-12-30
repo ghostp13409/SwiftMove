@@ -1,67 +1,44 @@
 ```mermaid
 classDiagram
-
-%% Classes
-
-%% People
-    class User {
-        - Id: int
+    class Client {
+        - Id: Long
         - Username: String
         - Password: String
         - UserType: enum
         - Name: String
-        - Age: int
-        - Gender: enum
-        - Location: (Address)
-    }
-    class Mover {
-        - Rating: float
-        - Preferences: (list<Pref>)
+        - dob: int
+        - Gender: String
     }
     class Driver {
-        - Rating: float
-        - Preferences: (list<Pref>)
-        - Range: float
-        - radius: add
+        - Id: Long
+        - Username: String
+        - Password: String
+        - UserType: enum
+        - Name: String
+        - dob: int
+        - Gender: String
     }
-
-%% Things
     class Vehicle {
-        - Id: int
+        - Id: Long
         - Model: String
         - Make: String
         - Weight_Capacity: float
         - Volume_Capacity: float
         - Usable_Vo: String
         - Price/Km: cur
+        - Driver_Id: Long ()-> Driver
     }
     class Address {
-        - Id: int
+        - Id: Long
         - Line1: String
         - Line2: String
         - City: String
         - State: String
         - Country: String
         - Postal_Code: String
+        - clientId: Long ()-> Client
+        - driverId: Long ()-> Driver
     }
-    class Bag {
-        - Id: int
-        - Weight: float
-        - Size: (BagSize)
-        - Price: cur
-    }
-    class BagSize {
-        - Id: int
-        - Name: String
-        - Volume: float
-    }
-    class Pref {
-        - Id: int
-        - Name: String
-        - Description: String
-    }
-    
-%% Marketplace Things
     class Move_Request {
         - Id: int
         - Pickup: (Address)
@@ -71,38 +48,37 @@ classDiagram
         - appx_Weight: float
         - Trip_Date: DateTime
         - Trip_Time: DateTime
+        - Client_Id: Long ()-> Client
     }
-    
     class Move_Bid {
         - Id: int
         - Price: cur
         - Trip_Time_offer: DT
         - Vehicle: (Vehicle)
         - Pref_list: list<Pref>
+        - Driver_Id: Long ()-> Driver
     }
-
     class Move_Trip {
         - Id: int
-        - Move_Request: (Move_Request)
-        - Move_Bid: (Move_Bid)
+        - Move_Request_Id: Long ()-> Move_Request
+        - Move_Bid_Id: Long ()-> Move_Bid
     }
-    
-%% Relationships
+    class Bag {
+        - Id: Long
+        - Weight: float
+        - BagSize_Id: Long ()-> BagSize
+        - Move_Request_Id: Long ()-> Move_Request
+    }
+    class BagSize {
+        - Id: Long
+        - Name: String
+        - Volume: float
+    }
 
-%% User Entities
-    User <|-- Mover
-    User <|-- Driver
+    %% Relations
 
-    
-%% Things Entities
-
-
-    %% Addresses
-
-    %% Users have Address
-    User "1" -- "1" Address
     %% Move_Request have 2 Addresses
-    Move_Request "1" -- "1..*" Address
+    Move_Request "1" -- "2" Address
 
     %% Drivers can have Many Vehicles
     Driver "1" -- "1..*" Vehicle
@@ -121,16 +97,18 @@ classDiagram
     %% Movers can Create Many Move_Request
     %% Drivers can Create Many Move_Bid
 
-    Mover "1" -- "0..*" Move_Request
+    Client "1" -- "0..*" Move_Request
     Driver "1" -- "0..*" Move_Bid
-    
+
     Move_Trip "1" *-- "1" Move_Request
     Move_Trip "1" *-- "1" Move_Bid
 
-    
-    
-    
 
-    
 
 ```
+
+# Questions:
+
+- Should Clients and Drivers be saparate tables?
+- Should Address table have clientId and driverId? or just a userId?
+- Should BagSize be a table or just a field in Bag table?
