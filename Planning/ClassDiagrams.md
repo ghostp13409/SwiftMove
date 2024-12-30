@@ -10,7 +10,7 @@ classDiagram
         - Password: String
         - UserType: enum
         - Name: String
-        - Age: int
+        - dob: int
         - Gender: enum
         - Location: (Address)
     }
@@ -20,9 +20,11 @@ classDiagram
     }
     class Driver {
         - Rating: float
+        - DrivingExperience: int
         - Preferences: (list<Pref>)
         - Range: float
         - radius: add
+        - DrivingLicense: (Doc)
     }
 
 %% Things
@@ -60,7 +62,12 @@ classDiagram
         - Name: String
         - Description: String
     }
-    
+    class Document {
+        - Id: int
+        - docUrl: String
+        - docType: enum
+    }
+
 %% Marketplace Things
     class Move_Request {
         - Id: int
@@ -72,7 +79,7 @@ classDiagram
         - Trip_Date: DateTime
         - Trip_Time: DateTime
     }
-    
+
     class Move_Bid {
         - Id: int
         - Price: cur
@@ -86,14 +93,14 @@ classDiagram
         - Move_Request: (Move_Request)
         - Move_Bid: (Move_Bid)
     }
-    
+
 %% Relationships
 
 %% User Entities
     User <|-- Mover
     User <|-- Driver
 
-    
+
 %% Things Entities
 
 
@@ -123,14 +130,14 @@ classDiagram
 
     Mover "1" -- "0..*" Move_Request
     Driver "1" -- "0..*" Move_Bid
-    
+
     Move_Trip "1" *-- "1" Move_Request
     Move_Trip "1" *-- "1" Move_Bid
 
-    
-    
-    
 
-    
+
+
+
+
 
 ```
