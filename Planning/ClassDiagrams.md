@@ -17,6 +17,7 @@ classDiagram
     class Mover {
         - Rating: float
         - Preferences: (list<Pref>)
+        - UserId: (Users)
     }
     class Driver {
         - Rating: float
@@ -25,6 +26,8 @@ classDiagram
         - Range: float
         - radius: add
         - DrivingLicense: (Doc)
+        - UserId: (Users)
+
     }
 
 %% Things
@@ -36,6 +39,9 @@ classDiagram
         - Volume_Capacity: float
         - Usable_Vo: String
         - Price/Km: cur
+        - IsActive: Bool
+        - DriverId: int (Driver)
+
     }
     class Address {
         - Id: int
@@ -78,6 +84,7 @@ classDiagram
         - appx_Weight: float
         - Trip_Date: DateTime
         - Trip_Time: DateTime
+
     }
 
     class Move_Bid {
@@ -92,6 +99,8 @@ classDiagram
         - Id: int
         - Move_Request: (Move_Request)
         - Move_Bid: (Move_Bid)
+        - Start_Time: DateTime
+        - End_Time: DateTime
     }
 
 %% Relationships
@@ -123,6 +132,12 @@ classDiagram
     %% Bags have BagSize
     Bag "1" -- "1" BagSize
 
+    %% MoveResuests have preferences
+    Move_Request "1" -- "0..*" Pref
+
+    %% MoveBid have preferences
+    Move_Bid "1" -- "0..*" Pref
+
     %% Marketplace Entities
 
     %% Movers can Create Many Move_Request
@@ -133,6 +148,7 @@ classDiagram
 
     Move_Trip "1" *-- "1" Move_Request
     Move_Trip "1" *-- "1" Move_Bid
+
 
 
 
