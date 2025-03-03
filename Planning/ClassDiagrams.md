@@ -132,7 +132,7 @@ classDiagram
     %% Bags have BagSize
     Bag "1" -- "1" BagSize
 
-    %% MoveResuests have preferences
+    %% MoveRequests have preferences
     Move_Request "1" -- "0..*" Pref
 
     %% MoveBid have preferences
