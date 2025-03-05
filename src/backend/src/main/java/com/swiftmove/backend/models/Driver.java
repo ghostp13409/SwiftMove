@@ -16,7 +16,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Builder
 
-
 @Entity
 @Table(name = "driver_details")
 
@@ -40,7 +39,5 @@ public class Driver {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
-
-    
 
 }

@@ -6,14 +6,18 @@ erDiagram
         String Password
         String Name
         Date DateOfBirth
+        int Rating
         int Location FK
         int UserTypeId FK
         int GenderId FK
     }
+    %% // NOTE: Gender is Enum
     Gender{
         int Id PK
         String Name
     }
+
+    %% //NOTE: UserType is Enum
     UserType{
         int Id PK
         String Name
@@ -27,27 +31,41 @@ erDiagram
         String Country
         String PostalCode
     }
+    %% // NOTE: Mover Table is not needed, Mover is a User
     Mover {
         int MoverId PK
         int UserId FK
         float Rating
     }
+
     Driver {
         int DriverId PK
         int UserId FK
-        float Rating
         int DrivingExperience
+        String LicenseNumber
         float Range
-
+        %% // NOTE: the implementation is not confirmed yet
+        bool isVarified
         int DrivingLicenseId FK
     }
+
+%% // NOTE: Document and Driving Licience implementation is not confirmed yet
+    Document {
+        int Id PK
+        String DocUrl
+        enum DocType
+        bool isVarified
+    }
+
     DrivingLicense {
         int Id PK
         String Number
         enum Type
         Date ExpiryDate
+        bool isVarified
         int DocumentId FK
     }
+
     Vehicle {
         int Id PK
         String Model
@@ -60,42 +78,30 @@ erDiagram
         boolean IsActive
         int DriverId FK
     }
+    
+    %% // TODO: Fields are not confirmed yet
     Bag {
         int Id PK
         float Weight
         int SizeId FK
         decimal Price
     }
+    
+    %% // TODO: Explore the possibility of using Enum
     BagSize {
         int Id PK
         String Name
         float Volume
     }
+
+    %% // NOTE: All Preference related functionalies are not implemented yet
     Preference {
         int Id PK
         String Name
         String Description
     }
-    Document {
-        int Id PK
-        String DocUrl
-        enum DocType
-    }
-    MoveRequest {
-        int Id PK
-        int PickupId FK
-        int DestinationId FK
-        decimal BudgetMax
-        float ApproxWeight
-        DateTime TripDate
-        DateTime TripTime
-        int MoverId FK
-    }
-    RequestBag {
-        int RequestId FK
-        int BagId FK
-    }
-    MoverPreference {
+
+        MoverPreference {
         int MoverId FK
         int PreferenceId FK
     }
@@ -103,21 +109,30 @@ erDiagram
         int DriverId FK
         int PreferenceId FK
     }
-    RequestPreference {
-        int RequestId FK
-        int PreferenceId FK
+
+    
+    MoveRequest {
+        int Id PK
+        int PickupId FK
+        int DestinationId FK
+        %% // TODO: Make it integer in cents
+        decimal BudgetMax      
+        float ApproxWeight
+        DateTime TripDate
+        DateTime TripStartTime
+        int MoverId FK
     }
+
     MoveBid {
         int Id PK
-        decimal Price
+        %%  // TODO: Make it integer in cents\
+        decimal Price          
         DateTime TripTimeOffer
         int VehicleId FK
         int DriverId FK
     }
-    BidPreference {
-        int BidId FK
-        int PreferenceId FK
-    }
+
+
     MoveTrip {
         int Id PK
         int MoveRequestId FK
@@ -125,6 +140,7 @@ erDiagram
         DateTime StartTime
         DateTime EndTime
     }
+
 
     User ||--o| Address : "has"
     User ||--o{ Mover : "can be"
@@ -138,14 +154,8 @@ erDiagram
     MoverPreference }|--|| Preference : "references"
     MoveRequest ||--|| Address : "has pickup" 
     MoveRequest ||--|| Address : "has destination"
-    MoveRequest ||--|{ RequestBag : "includes"
-    RequestBag }|--|| Bag : "references"
     Bag ||--|| BagSize : "uses size of"
     MoveBid ||--|| Vehicle : "uses"
-    MoveBid ||--|{ BidPreference : "offers"
-    BidPreference }|--|| Preference : "references"
-    MoveRequest ||--|{ RequestPreference : "requires"
-    RequestPreference }|--|| Preference : "references"
     Mover ||--|{ MoveRequest : "creates"
     Driver ||--|{ MoveBid : "submits"
     MoveTrip ||--|| MoveRequest : "fulfills"
