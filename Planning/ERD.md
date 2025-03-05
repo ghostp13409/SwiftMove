@@ -4,11 +4,19 @@ erDiagram
         int Id PK
         String Username
         String Password
-        enum UserType
         String Name
         Date DateOfBirth
-        enum Gender
         int Location FK
+        int UserTypeId FK
+        int GenderId FK
+    }
+    Gender{
+        int Id PK
+        String Name
+    }
+    UserType{
+        int Id PK
+        String Name
     }
     Address {
         int Id PK
@@ -30,7 +38,7 @@ erDiagram
         float Rating
         int DrivingExperience
         float Range
-        float Radius
+
         int DrivingLicenseId FK
     }
     DrivingLicense {
@@ -47,6 +55,7 @@ erDiagram
         float WeightCapacity
         float VolumeCapacity
         float UsableVolume
+        float Radius
         decimal PricePerKm
         boolean IsActive
         int DriverId FK
