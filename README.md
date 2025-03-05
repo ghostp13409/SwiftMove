@@ -2,6 +2,6 @@
 A simple solution for moving between houses.
 
 # Tech Stack
-- Frontend: React Native
+- Frontend: Flutter
 - Backend: SpringBoot
-- Database: MySQL
+- Database: Postgresql
