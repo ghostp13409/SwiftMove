@@ -9,39 +9,40 @@ classDiagram
         - Username: String
         - Password: String
         - UserType: enum
-        - Name: String
+        - FName: String
+        - LName: String
         - dob: int
-        - Gender: enum
-        - Location: (Address)
+        - Address: (Address)
     }
     class Mover {
         - Rating: float
         - Preferences: (list<Pref>)
         - UserId: (Users)
     }
-    class Driver {
-        - Rating: float
+    class DriverInfo {
+        - id: int
+        - UserId : int FK
         - DrivingExperience: int
-        - Preferences: (list<Pref>)
         - Range: float
-        - radius: add
         - DrivingLicense: (Doc)
-        - UserId: (Users)
-
     }
 
 %% Things
     class Vehicle {
         - Id: int
+        - UserId: int (Driver) FK
         - Model: String
         - Make: String
-        - Weight_Capacity: float
-        - Volume_Capacity: float
-        - Usable_Vo: String
+        - Year: int
+        - Color: String
+        - vehicleTypeId: int FK
         - Price/Km: cur
         - IsActive: Bool
-        - DriverId: int (Driver)
-
+    }
+    class VehicleType{
+        - Type: van/sadan/SUV/mini Truck
+        - Max Weight: int
+        - Capacity
     }
     class Address {
         - Id: int
