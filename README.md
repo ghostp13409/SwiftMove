@@ -1,7 +1,10 @@
 # SwiftMove
+
 A simple solution for moving between houses.
 
 # Tech Stack
-- Frontend: Flutter
+
+- Frontend: React
+- Mobile: Flutter
 - Backend: SpringBoot
 - Database: Postgresql
