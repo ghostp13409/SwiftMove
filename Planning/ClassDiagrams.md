@@ -13,10 +13,10 @@ classDiagram
         - LName: String
         - dob: int
         - Address: (Address)
-    }
-    class Mover {
         - Rating: float
         - Preferences: (list<Pref>)
+    }
+    class Mover {
         - UserId: (Users)
     }
     class DriverInfo {
@@ -38,9 +38,10 @@ classDiagram
         - vehicleTypeId: int FK
         - Price/Km: cur
         - IsActive: Bool
+        - CanCarryFurniture: Bool
     }
     class VehicleType{
-        - Type: van/sadan/SUV/mini Truck
+        - Type: Enum
         - Max Weight: int
         - Capacity
     }
@@ -53,16 +54,15 @@ classDiagram
         - Country: String
         - Postal_Code: String
     }
-    class Bag {
-        - Id: int
-        - Weight: float
-        - Size: (BagSize)
-        - Price: cur
-    }
-    class BagSize {
-        - Id: int
+    class LuggageType {
+        - Type (S/M/L/Xl)
         - Name: String
         - Volume: float
+    }
+    class LuggageEntry{
+        - MoveRequestId
+        - LuggageTypeId
+        - Quantity
     }
     class Pref {
         - Id: int
@@ -78,17 +78,18 @@ classDiagram
 %% Marketplace Things
     class Move_Request {
         - Id: int
-        - Pickup: (Address)
-        - Destination: (Address)
+        - UserId: int
+        - StartLocation: (Address)
+        - EndLocation: (Address)
+        - PreferredTime: DateTime
+        - hasfurnitureL: Bool
         - Budget_Max: cur
-        - Bags: list<Bag>
-        - appx_Weight: float
-        - Trip_Date: DateTime
-        - Trip_Time: DateTime
-
+        - totalWeight:
+        - TotalVolume:
     }
 
-    class Move_Bid {
+    class Move_Offer {
+        - Move_RequestId: int
         - Id: int
         - Price: cur
         - Trip_Time_offer: DT
@@ -96,7 +97,7 @@ classDiagram
         - Pref_list: list<Pref>
     }
 
-    class Move_Trip {
+    class MoveTrip {
         - Id: int
         - Move_Request: (Move_Request)
         - Move_Bid: (Move_Bid)
@@ -104,51 +105,64 @@ classDiagram
         - End_Time: DateTime
     }
 
+    class LuggageType{
+        -Type (S/M/L/XL/XXL)
+        - Weight
+        - Volumn
+    }
+
+    %% Joint Table NO relations
+    class LuggageEntry{
+        - MoveRequestId
+        - LuggageTypeId
+        - Quantity
+    }
+
 %% Relationships
 
 %% User Entities
     User <|-- Mover
-    User <|-- Driver
+
 
 
 %% Things Entities
 
+    %% -------------------Addresses-------------------
 
-    %% Addresses
+
+    %% VehicleType Can have many Vehicles
+
+
+    %% DriverInfo can have many  MoveOffer
+    DriverInfo "1" -- "1.." Move_Offer
 
     %% Users have Address
     User "1" -- "1" Address
+
     %% Move_Request have 2 Addresses
     Move_Request "1" -- "1..*" Address
 
     %% Drivers can have Many Vehicles
-    Driver "1" -- "1..*" Vehicle
+    DriverInfo "1" -- "1..*" Vehicle
 
-    %% Move_Request can have Many Bags
-    Move_Request "1" -- "0..*" Bag
 
-    %% Move_Bid has a Vehicle
-    Move_Bid "1" -- "1" Vehicle
 
-    %% Bags have BagSize
-    Bag "1" -- "1" BagSize
+    %% Move_Offer has a Vehicle
+    Move_Offer "1" -- "1" Vehicle
 
-    %% MoveRequests have preferences
-    Move_Request "1" -- "0..*" Pref
 
-    %% MoveBid have preferences
-    Move_Bid "1" -- "0..*" Pref
 
-    %% Marketplace Entities
 
-    %% Movers can Create Many Move_Request
-    %% Drivers can Create Many Move_Bid
+    %% -------------------Marketplace Entities-------------------
 
-    Mover "1" -- "0..*" Move_Request
-    Driver "1" -- "0..*" Move_Bid
+    %% User can Create Many Move_Request
+    %% Drivers can Create Many Move_Offer
 
-    Move_Trip "1" *-- "1" Move_Request
-    Move_Trip "1" *-- "1" Move_Bid
+    User "1" -- "0..*" Move_Request
+    DriverInfo "1" -- "0..*" Move_Offer
+
+    MoveTrip "1" *-- "1" Move_Request
+    MoveTrip "1" *-- "1" Move_Offer
 
 
 
