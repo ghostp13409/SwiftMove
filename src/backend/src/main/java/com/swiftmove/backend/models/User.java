@@ -35,9 +35,6 @@ public class User {
     private String lastName;
     private Date doB;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = false)
-    private Gender gender;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "user_type", nullable = false)
@@ -58,10 +55,7 @@ public class User {
 
     // Relationships    
 
-    // Address Information
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
-    private Address address;    
+    // Addresses
 
 
 }

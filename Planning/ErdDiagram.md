@@ -8,7 +8,7 @@ erDiagram
         String LName
         Date dob
         float Rating
-        UserType UserType
+        UserRole UserRole
         long AddressId Fk
     }
 
