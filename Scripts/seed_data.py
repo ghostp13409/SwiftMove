@@ -154,7 +154,7 @@ with open('Planning/seed_data.sql', 'w') as f:
     vt_values = [
         "(1, 'SEDAN', 500.0, 4.0)",
         "(2, 'SUV', 800.0, 6.0)",
-        "(3, 'HATCHBACKS', 400.0, 4.0)",
+        "(3, 'HATCHBACK', 400.0, 4.0)",
         "(4, 'MINIVAN', 600.0, 7.0)",
         "(5, 'VAN', 1000.0, 10.0)",
         "(6, 'TRUCK', 2000.0, 2.0)"

@@ -3,7 +3,7 @@
 
 CREATE TYPE user_role AS ENUM ('CLIENT', 'DRIVER', 'ADMIN');
 
-CREATE TYPE vehicle_type_enum AS ENUM ('SEDAN', 'SUV', 'HACHBACKS', 'MINIVAN', 'VAN', 'TRUCK');
+CREATE TYPE vehicle_type_enum AS ENUM ('SEDAN', 'SUV', 'HATCHBACK', 'MINIVAN', 'VAN', 'TRUCK');
 
 CREATE TYPE luggage_type_enum AS ENUM ('SMALL', 'MEDIUM', 'LARGE', 'EXTRA_LARGE', 'EXTRA_EXTRA_LARGE');
 
