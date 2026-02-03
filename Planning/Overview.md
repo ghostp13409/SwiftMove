@@ -1,0 +1,22 @@
+# Overview
+
+- Users can Login and Register
+- Clients can make move requests
+- Clients can manage their own move requests
+- Drivers can view and accept move requests
+- Drivers can create move offer on a move request
+- Drivers can manage their own move offers
+- Clients can view and accept move offers on their move requests
+- Upon acceptance of a move offer, a move trip is created
+- Drivers can have and manage Vehicles
+- Both Drivers and Clients are Users in the system
+- Admins can manage all Users, Clients, Drivers, Vehicles, Move Requests, Move Offers, and Move Trips
+- Users have an associated Address
+- Driver has a Range for how far they are willing to travel for a move from their base address
+- Move Requests have Luggage Entries associated with them
+- Luggage Entries have a Luggage Type and Quantities
+- Price is calculated based on distance(from move request to and from), and car's price per km
+- System probably needs a Payment Service, Notification Service and a Map Service integration
+- Maps Service calculates distance between two addresses (to and from in a move request, and driver's base address)
+- Payment Service handles payments for move trips
+- Notification Service handles notifications to users (e.g., when a move offer is made, accepted, etc.)
