@@ -94,3 +94,14 @@
 | Method | Path           | Description                          | Auth | Roles |
 | ------ | -------------- | ------------------------------------ | ---- | ----- |
 | GET    | /maps/distance | Calculate distance between addresses | No   |       |
+
+# Microservices
+
+- Auth Microservice
+- User Microservice
+- Driver Management Microservice (Driver Info + Vehicles + MoveOffers)
+- Client Management Microservice
+- Trip Management Microservice
+- Payment Microservice
+- Notification Microservice
+- Map Service Microservice
