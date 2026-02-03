@@ -30,7 +30,7 @@ erDiagram
         Bool IsActive
         Bool CanCarryFurniture
         %% UserId
-        long DriverId Fk
+        long DriverInfoId Fk
         long vehicleTypeId Fk
     }
 
@@ -100,7 +100,7 @@ erDiagram
 
     %% Relationships
     USER ||--o{ DRIVER_INFO: has
-    USER ||--o{ VEHICLE: owns
+    DRIVER_INFO ||--o{ VEHICLE: owns
     VEHICLE_TYPE ||--o{ VEHICLE: classifies
     ADDRESS ||--o{ USER: located_at
     ADDRESS ||--o{ MOVE_REQUEST: from_address
