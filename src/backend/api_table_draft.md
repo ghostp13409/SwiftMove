@@ -10,6 +10,8 @@
 
 | Method | Path         | Description              | Auth | Roles       |
 | ------ | ------------ | ------------------------ | ---- | ----------- |
+| GET    | /users       | Get all users            | Yes  | Admin       |
+| GET    | /users/{id}  | Get user by ID           | Yes  | Admin       |
 | GET    | /iam/profile | Get current user profile | Yes  | User, Admin |
 | POST   | /user        | Create new user          | No   | -           |
 | PUT    | /iam/profile | Update user profile      | Yes  | User, Admin |
@@ -89,11 +91,16 @@
 | GET    | /notifications           | Get user notifications    | Yes  | User, Admin |
 | PUT    | /notifications/{id}/read | Mark notification as read | Yes  | User, Admin |
 
-# Map Service Microservice
+# Location Service Microservice
 
-| Method | Path           | Description                          | Auth | Roles |
-| ------ | -------------- | ------------------------------------ | ---- | ----- |
-| GET    | /maps/distance | Calculate distance between addresses | No   |       |
+| Method | Path          | Description                          | Auth | Roles       |
+| ------ | ------------- | ------------------------------------ | ---- | ----------- |
+| GET    | /map/distance | Calculate distance between addresses | No   |             |
+| GET    | /address/{id} | Get address details                  | Yes  | User, Admin |
+| POST   | /address      | Add new address                      | Yes  | User, Admin |
+| PUT    | /address/{id} | Update address                       | Yes  | User, Admin |
+| PATCH  | /address/{id} | Partially update address             | Yes  | User, Admin |
+| DELETE | /address/{id} | Delete address                       | Yes  | User, Admin |
 
 # Microservices
 
