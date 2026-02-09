@@ -6,6 +6,7 @@ erDiagram
         String PasswordHash
         String FName
         String LName
+        String Email
         Date dob
         float Rating
         UserType UserType

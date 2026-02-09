@@ -2,13 +2,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "UserApplication",
+      "request": "launch",
+      "mainClass": "com.swiftmove.user.UserApplication"
+    },
+    {
+      "type": "java",
       "name": "Spring Boot-ApiGatewayApplication<api-gateway>",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "mainClass": "com.swiftmove.apigateway.ApiGatewayApplication",
       "projectName": "api-gateway",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=55762 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=api-gateway"
     },
     {
       "type": "java",
@@ -18,7 +25,8 @@
       "mainClass": "com.swiftmove.eurekaserver.EurekaServerApplication",
       "projectName": "eureka-server",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=57084 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=eureka-server"
     },
     {
       "type": "java",
@@ -28,7 +36,8 @@
       "mainClass": "com.swiftmove.testservice.TestServiceApplication",
       "projectName": "test-service",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=57085 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=test-service"
     }
   ]
 }
