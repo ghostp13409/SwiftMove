@@ -1,6 +1,41 @@
 -- Create ENUM types if needed (assuming values based on context)
 -- Note: Adjust enum values as per actual requirements
 
+-- Drop all if exist
+
+-- Drop tables in reverse dependency order
+DROP TABLE IF EXISTS move_trip CASCADE;
+
+DROP TABLE IF EXISTS move_offer CASCADE;
+
+DROP TABLE IF EXISTS luggage_entry CASCADE;
+
+DROP TABLE IF EXISTS move_request CASCADE;
+
+DROP TABLE IF EXISTS vehicle CASCADE;
+
+DROP TABLE IF EXISTS driver_info CASCADE;
+
+DROP TABLE IF EXISTS "user" CASCADE;
+
+DROP TABLE IF EXISTS luggage_type CASCADE;
+
+DROP TABLE IF EXISTS vehicle_type CASCADE;
+
+DROP TABLE IF EXISTS address CASCADE;
+
+-- Drop ENUM types
+DROP TYPE IF EXISTS move_status_enum CASCADE;
+
+DROP TYPE IF EXISTS luggage_type_enum CASCADE;
+
+DROP TYPE IF EXISTS vehicle_type_enum CASCADE;
+
+DROP TYPE IF EXISTS user_role CASCADE;
+
+-- TYPES
+
+-- Create
 CREATE TYPE user_role AS ENUM ('CLIENT', 'DRIVER', 'ADMIN');
 
 CREATE TYPE vehicle_type_enum AS ENUM ('SEDAN', 'SUV', 'HATCHBACK', 'MINIVAN', 'VAN', 'TRUCK');
@@ -46,8 +81,9 @@ CREATE TABLE "user" (
     id BIGINT PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    f_name VARCHAR(100),
+    f_name VARCHAR(100) NOT NULL,
     l_name VARCHAR(100),
+    email VARCHAR(255) UNIQUE NOT NULL,
     dob DATE,
     rating REAL,
     role user_role NOT NULL,
@@ -81,7 +117,7 @@ CREATE TABLE vehicle (
     vehicle_type_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (driver_id) REFERENCES "user" (id),
+    FOREIGN KEY (driver_id) REFERENCES driver_info (id),
     FOREIGN KEY (vehicle_type_id) REFERENCES vehicle_type (id)
 );
 
