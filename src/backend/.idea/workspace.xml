@@ -5,13 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="95b3387c-2194-457f-8e72-32595b6f510e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/model/Vehicle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/repository/VehicleRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/services/IVehicleService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/services/VehicleService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/9991016b-320b-4e6a-97d0-02d885561c41.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vehicle-service/src/main/java/com/swiftMove/vehicleservice/VehicleServiceApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/vehicle-service/src/main/java/com/swiftMove/vehicleservice/VehicleServiceApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/controller/VehicleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/controller/VehicleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle-service/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle-service/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle-service/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle-service/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle-service/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle-service/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle-service/src/main/java/com/swiftMove/vehicleservice/VehicleServiceApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle-service/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle-service/src/test/java/com/swiftMove/vehicle_service/VehicleServiceApplicationTests.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,6 +38,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Spring REST Controller" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -73,7 +85,7 @@
     "Spring Boot.EurekaServerApplication.executor": "Run",
     "Spring Boot.TestServiceApplication.executor": "Run",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Vehicle-implementation",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
@@ -94,6 +106,12 @@
     ]
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.swiftmove.driverservice.services" />
+      <recent name="com.swiftmove.driverservice.repository" />
+    </key>
+  </component>
   <component name="RunDashboard">
     <option name="configurationTypes">
       <set>
@@ -103,24 +121,18 @@
         <option value="SpringBootApplicationConfigurationType" />
       </set>
     </option>
-    <option name="configurationStatuses">
-      <map>
-        <entry key="SpringBootApplicationConfigurationType">
-          <value>
-            <map>
-              <entry key="ApiGatewayApplication" value="STOPPED" />
-              <entry key="EurekaServerApplication" value="STOPPED" />
-              <entry key="TestServiceApplication" value="STOPPED" />
-            </map>
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
   <component name="RunManager" selected="Spring Boot.ApiGatewayApplication">
     <configuration name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="api-gateway" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.swiftmove.apigateway.ApiGatewayApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DriverServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="driver-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.swiftmove.driverservice.DriverServiceApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
