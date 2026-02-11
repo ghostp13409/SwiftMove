@@ -1,4 +1,4 @@
-package com.swiftMove.vehicle_service;
+package com.swiftMove.vehicleservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
