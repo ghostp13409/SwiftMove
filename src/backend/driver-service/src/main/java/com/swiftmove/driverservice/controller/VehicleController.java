@@ -1,8 +1,11 @@
 package com.swiftmove.driverservice.controller;
 
 import com.swiftmove.driverservice.model.Vehicle;
+import com.swiftmove.driverservice.services.IVehicleService;
 import com.swiftmove.driverservice.services.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,46 +14,59 @@ import java.util.List;
 @RequestMapping("/api/vehicles")
 public class VehicleController {
 
-    private VehicleService vehicleService;
+    private IVehicleService vehicleService;
+
     @Autowired
     public VehicleController(VehicleService vehicleService) {
         this.vehicleService = vehicleService;
     }
+
     @GetMapping("/test")
-    public String test() {
-        return "Vehicle Service is up and running!";
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("Vehicle Service is up and running!");
     }
 
+    // GET /api/vehicles - Get vehicles for driver
     @GetMapping
-    public List<Vehicle> getVehicles(long id) {
-        return vehicleService.getVehiclesByDriver(id);
+    public ResponseEntity<List<Vehicle>> getVehicles(@RequestParam Long driverId) {
+        List<Vehicle> vehicles = vehicleService.getVehiclesByDriver(driverId);
+        return ResponseEntity.ok(vehicles);
     }
 
+    // POST /api/vehicles - Add vehicle
     @PostMapping
-    public Vehicle addVehicle(@RequestBody Vehicle vehicle) {
-        return vehicleService.addVehicle(vehicle);
+    public ResponseEntity<Vehicle> addVehicle(@RequestBody Vehicle vehicle) {
+        Vehicle createdVehicle = vehicleService.addVehicle(vehicle);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdVehicle);
     }
 
-    @PutMapping("/{vehicleId}")
-    public Vehicle updateVehicle(@PathVariable Long id, @RequestBody Vehicle vehicle) {
-        return vehicleService.updateVehicle(id, vehicle);
-    }
-
-    @PatchMapping("/{id}")
-    public Vehicle patchVehicle(
+    // PUT /api/vehicles/{id} - Update vehicle
+    @PutMapping("/{id}")
+    public ResponseEntity<Vehicle> updateVehicle(
             @PathVariable Long id,
-            @RequestBody Vehicle vehicle
-    ) {
-        return vehicleService.patchVehicle(id, vehicle);
+            @RequestBody Vehicle vehicle) {
+        Vehicle updatedVehicle = vehicleService.updateVehicle(id, vehicle);
+        return ResponseEntity.ok(updatedVehicle);
     }
 
+    // PATCH /api/vehicles/{id} - Partially update vehicle
+    @PatchMapping("/{id}")
+    public ResponseEntity<Vehicle> patchVehicle(@PathVariable Long id,@RequestBody Vehicle vehicle) {
+        Vehicle patchedVehicle = vehicleService.patchVehicle(id, vehicle);
+        return ResponseEntity.ok(patchedVehicle);
+    }
+
+    // PATCH /api/vehicles/{id}/toggle-active - Toggle active status
     @PatchMapping("/{id}/toggle-active")
-    public Vehicle toggleVehicle(@PathVariable Long id) {
-        return vehicleService.toggleActive(Math.toIntExact(id));
+    public ResponseEntity<Vehicle> toggleVehicle(@PathVariable Long id) {
+        Vehicle toggledVehicle = vehicleService.toggleActive(Math.toIntExact(id));
+        return ResponseEntity.ok(toggledVehicle);
     }
 
+    // DELETE /api/vehicles/{id} - Delete vehicle
     @DeleteMapping("/{id}")
-    public void deleteVehicle(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         vehicleService.deleteVehicle(id);
+        return ResponseEntity.noContent().build();
     }
 }
