@@ -23,7 +23,7 @@ public class User {
     private String username;
 
     @Column(name = "password_hash")
-    private String password;
+    private String passwordHash;
 
     @Column(name = "f_name")
     private String firstName;
@@ -43,9 +43,9 @@ public class User {
     @Column(name = "role")
     private String role;
 
-    @ManyToOne
-    @JoinColumn(name = "address_id") //
-    private Address address;
+
+    @JoinColumn(name = "address_id", nullable = true)
+    private Long addressId;
 
     @Column(name = "created_at")
     private LocalDate createdAt;
