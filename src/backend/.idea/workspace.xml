@@ -5,12 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="95b3387c-2194-457f-8e72-32595b6f510e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/services/DriverInfoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/services/IDriverService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/model/MoveOffer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/repository/MoveOfferRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/services/IMoveOfferService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/services/MoveOfferService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/controller/DriverController.java" beforeDir="false" afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/controller/DriverController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/controller/VehicleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/controller/VehicleController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/repository/DriverRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/repository/DriverRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/controller/MoveOfferController.java" beforeDir="false" afterPath="$PROJECT_DIR$/driver-service/src/main/java/com/swiftmove/driverservice/controller/MoveOfferController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -169,7 +169,12 @@
       <workItem from="1770768641535" duration="65000" />
       <workItem from="1770769164992" duration="46000" />
       <workItem from="1770769497323" duration="3726000" />
-      <workItem from="1770911071177" duration="4045000" />
+      <workItem from="1770911071177" duration="4194000" />
+      <workItem from="1770934255434" duration="325000" />
+      <workItem from="1771023134679" duration="267000" />
+      <workItem from="1771293197865" duration="49000" />
+      <workItem from="1771434904327" duration="11000" />
+      <workItem from="1771438948619" duration="1118000" />
     </task>
     <servers />
   </component>
