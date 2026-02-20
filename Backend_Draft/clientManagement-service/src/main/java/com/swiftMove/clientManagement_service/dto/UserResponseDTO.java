@@ -1,16 +1,19 @@
-package com.swiftMove.user_service.dto;
+package com.swiftMove.clientManagement_service.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
+
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDTO {
-
-    public Long id;
-
+    private Long id;
     private String username;
 
     private String firstName;

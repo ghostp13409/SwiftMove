@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -29,7 +30,7 @@
         </processorPath>
         <module name="address-service" />
       </profile>
-      <profile name="Annotation profile for clientManagement-service" enabled="true">
+      <profile name="Annotation profile for tripManagement-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -37,8 +38,8 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-configuration-processor/3.5.11/spring-boot-configuration-processor-3.5.11.jar" />
         </processorPath>
-        <module name="clientManagement-service" />
         <module name="tripManagement-service" />
+        <module name="clientManagement-service" />
       </profile>
     </annotationProcessing>
   </component>
