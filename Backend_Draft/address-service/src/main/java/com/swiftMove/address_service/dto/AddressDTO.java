@@ -1,0 +1,18 @@
+package com.swiftMove.address_service.dto;
+
+import jakarta.persistence.Column;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class AddressDTO {
+    private String line1;
+    private String line2;
+    private String city;
+    private String stateOrProvince;
+    private String country;
+    private String postalOrZipCode;
+}
