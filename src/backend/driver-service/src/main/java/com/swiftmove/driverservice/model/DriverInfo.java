@@ -13,7 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Getter
 @Setter
 @Entity
-@Table(name = "drivers")
+@Table(name = "driver_info")
 public class DriverInfo {
 
     @Id
