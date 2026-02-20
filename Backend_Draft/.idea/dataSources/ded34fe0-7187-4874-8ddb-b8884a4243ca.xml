@@ -11,7 +11,7 @@
 4||10|c|G
 4||10|C|G
 4||10|T|G</Grants>
-      <IntrospectionStateNumber>877</IntrospectionStateNumber>
+      <IntrospectionStateNumber>883</IntrospectionStateNumber>
       <ServerVersion>17.7</ServerVersion>
       <StartupTime>1771556894</StartupTime>
       <TimeZones>true ACDT
@@ -810,7 +810,7 @@ false Zulu
 14751||10|C|G
 14751||-9223372036854775808|U|G
 14751||10|U|G</Grants>
-      <IntrospectionStateNumber>877</IntrospectionStateNumber>
+      <IntrospectionStateNumber>883</IntrospectionStateNumber>
       <ObjectId>5</ObjectId>
       <OwnerName>postgres</OwnerName>
     </database>
@@ -4233,11 +4233,11 @@ false Zulu
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <LastIntrospectionL1Xid>877</LastIntrospectionL1Xid>
-      <LastIntrospectionL2Xid>877</LastIntrospectionL2Xid>
-      <LastIntrospectionL3Xid>877</LastIntrospectionL3Xid>
+      <LastIntrospectionL1Xid>883</LastIntrospectionL1Xid>
+      <LastIntrospectionL2Xid>883</LastIntrospectionL2Xid>
+      <LastIntrospectionL3Xid>883</LastIntrospectionL3Xid>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2026-02-20.11:08:08</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-02-20.19:43:24</LastIntrospectionLocalTimestamp>
       <ObjectId>2200</ObjectId>
       <StateNumber>532</StateNumber>
       <OwnerName>pg_database_owner</OwnerName>
@@ -4379,7 +4379,7 @@ TRUCK</Labels>
     <table id="279" parent="264" name="move_trip">
       <DetailsLevel>2</DetailsLevel>
       <ObjectId>16784</ObjectId>
-      <StateNumber>790</StateNumber>
+      <StateNumber>880</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
@@ -4910,23 +4910,23 @@ TRUCK</Labels>
     <column id="354" parent="279" name="status">
       <NotNull>1</NotNull>
       <Position>4</Position>
-      <StateNumber>790</StateNumber>
-      <StoredType>move_status_enum|0s</StoredType>
-      <TypeId>16630</TypeId>
+      <StateNumber>879</StateNumber>
+      <StoredType>varchar(255)|0s</StoredType>
+      <TypeId>1043</TypeId>
     </column>
     <column id="355" parent="279" name="created_at">
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <Position>5</Position>
-      <StateNumber>790</StateNumber>
-      <StoredType>timestamp|0s</StoredType>
-      <TypeId>1114</TypeId>
+      <StateNumber>878</StateNumber>
+      <StoredType>date|0s</StoredType>
+      <TypeId>1082</TypeId>
     </column>
     <column id="356" parent="279" name="updated_at">
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <Position>6</Position>
-      <StateNumber>790</StateNumber>
-      <StoredType>timestamp|0s</StoredType>
-      <TypeId>1114</TypeId>
+      <StateNumber>880</StateNumber>
+      <StoredType>date|0s</StoredType>
+      <TypeId>1082</TypeId>
     </column>
     <foreign-key id="357" parent="279" name="move_trip_move_request_id_fkey">
       <ColNames>move_request_id</ColNames>
@@ -4949,7 +4949,7 @@ TRUCK</Labels>
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>16789</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>790</StateNumber>
+      <StateNumber>880</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
