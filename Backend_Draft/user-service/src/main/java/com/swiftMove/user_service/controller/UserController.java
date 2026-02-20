@@ -1,6 +1,7 @@
 package com.swiftMove.user_service.controller;
 
 
+import com.swiftMove.user_service.dto.AddressDTO;
 import com.swiftMove.user_service.dto.UserRequestDTO;
 import com.swiftMove.user_service.dto.UserResponseDTO;
 import com.swiftMove.user_service.service.UserService;
@@ -46,6 +47,17 @@ public class UserController {
       userService.updateExistingUser(id, updateUser);
       return ResponseEntity.noContent().build();
 
+    }
+
+    @DeleteMapping("iam/delete/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+      userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/userAddress/{id}")
+    public ResponseEntity<AddressDTO> getCurrentUserAddress(@PathVariable Long id){
+      return ResponseEntity.ok(userService.getUserAddress(id));
     }
 
 }
