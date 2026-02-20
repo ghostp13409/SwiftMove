@@ -10,6 +10,7 @@ public class UserMapper {
     // connecting User -> Response Dto
     public static UserResponseDTO userToResponseDto(User user) {
         return new UserResponseDTO(
+                user.getId(),
                 user.getUsername(),
                 user.getFirstName(),
                 user.getLastName(),
