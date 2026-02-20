@@ -4,6 +4,7 @@ package com.swiftMove.user_service.controller;
 import com.swiftMove.user_service.dto.UserRequestDTO;
 import com.swiftMove.user_service.dto.UserResponseDTO;
 import com.swiftMove.user_service.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +15,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users/")
+@RequiredArgsConstructor
 public class UserController {
     @Autowired
-    private UserService userService;
+    private final UserService userService;
 
   @GetMapping("/allUsers")
     public ResponseEntity<List<UserResponseDTO>> getAll(){
