@@ -1,6 +1,7 @@
 package com.swiftmove.driverservice.controller;
 
 import com.swiftmove.driverservice.model.DriverInfo;
+import com.swiftmove.driverservice.services.DriverInfoService;
 import com.swiftmove.driverservice.services.IDriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,9 +13,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/drivers")
 public class DriverController {
-    private final IDriverService driverService;
+    private final DriverInfoService driverService;
     @Autowired
-    public DriverController(IDriverService driverService) {
+    public DriverController(DriverInfoService driverService) {
         this.driverService = driverService;
     }
 
