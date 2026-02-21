@@ -15,7 +15,7 @@ public interface IVehicleService {
     //PATCH
     Vehicle patchVehicle(Long id, Vehicle vehicle);
     //UPDATE ACTIVE
-    Vehicle toggleActive(int id);
+    Vehicle toggleActive(Long id);
     //DELETE
     void deleteVehicle(Long id);
 }

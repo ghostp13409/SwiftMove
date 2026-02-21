@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MoveOfferRepository extends JpaRepository<MoveOffer, Integer> {
+public interface MoveOfferRepository extends JpaRepository<MoveOffer, Long> {
     // GET /offers   Get offers for driver
     List<MoveOffer> findByDriverId(Long driverId);
 

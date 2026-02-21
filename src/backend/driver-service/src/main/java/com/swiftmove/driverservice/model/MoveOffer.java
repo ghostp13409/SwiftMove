@@ -18,10 +18,10 @@ import java.time.LocalDateTime;
 public class MoveOffer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "price", nullable = false)
-    private long price;
+    private Long price;
 
     @Column(name = "offered_date", nullable = false)
     private LocalDateTime offeredDate;
@@ -35,7 +35,7 @@ public class MoveOffer {
     @Column(name = "vehicle_id", nullable = false)
     private Long vehicleId;
 
-    @Column(name = "status_id", nullable = false)
+    @Column(name = "status", nullable = false)
     private Long statusId;
 
     @CreationTimestamp

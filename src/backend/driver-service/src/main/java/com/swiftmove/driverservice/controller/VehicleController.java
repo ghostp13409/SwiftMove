@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/api/vehicles")
 public class VehicleController {
 
-    private IVehicleService vehicleService;
+    private final VehicleService vehicleService;
 
     @Autowired
     public VehicleController(VehicleService vehicleService) {
@@ -59,7 +59,7 @@ public class VehicleController {
     // PATCH /api/vehicles/{id}/toggle-active - Toggle active status
     @PatchMapping("/{id}/toggle-active")
     public ResponseEntity<Vehicle> toggleVehicle(@PathVariable Long id) {
-        Vehicle toggledVehicle = vehicleService.toggleActive(Math.toIntExact(id));
+        Vehicle toggledVehicle = vehicleService.toggleActive(id);
         return ResponseEntity.ok(toggledVehicle);
     }
 

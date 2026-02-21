@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,7 +19,7 @@ public class Vehicle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "model", nullable = false)
     private String model;
@@ -27,13 +28,13 @@ public class Vehicle {
     private String make;
 
     @Column(name = "year", nullable = false)
-    private int year;
+    private Integer year;
 
     @Column(name = "color", nullable = false)
     private String color;
 
     @Column(name = "price_per_km", nullable = false)
-    private long pricePerKm;
+    private Long pricePerKm;
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
@@ -41,7 +42,7 @@ public class Vehicle {
     @Column(name = "can_carry_furniture", nullable = false)
     private Boolean canCarryFurniture;
 
-    @Column(name = "driver_info_id", nullable = false)
+    @Column(name = "driver_id", nullable = false)
     private Long driverInfoId;
 
     @Column(name = "vehicle_type_id", nullable = false)
