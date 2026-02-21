@@ -1,5 +1,6 @@
 package com.swiftMove.clientManagement_service.controller;
 
+import com.swiftMove.clientManagement_service.dto.MoveReqPostDto;
 import com.swiftMove.clientManagement_service.dto.MoveRequestDTO;
 import com.swiftMove.clientManagement_service.dto.UserResponseDTO;
 import com.swiftMove.clientManagement_service.service.ClientService;
@@ -36,7 +37,7 @@ public class ClientController {
         return ResponseEntity.ok(clientService.getAllActiveMovesClient(id));
     }
     @PostMapping("/{id}/addMoveRequest")
-    public ResponseEntity<MoveRequestDTO> addMoveRequest(@PathVariable Long id,@RequestBody MoveRequestDTO moveRequestDTO){
+    public ResponseEntity<MoveRequestDTO> addMoveRequest(@PathVariable Long id,@RequestBody MoveReqPostDto moveRequestDTO){
         return ResponseEntity.ok(clientService.addMoveRequest(id,moveRequestDTO));
     }
 
