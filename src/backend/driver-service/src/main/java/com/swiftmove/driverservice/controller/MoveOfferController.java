@@ -4,6 +4,7 @@ import com.swiftmove.driverservice.model.MoveOffer;
 import com.swiftmove.driverservice.services.IMoveOfferService;
 import com.swiftmove.driverservice.services.MoveOfferService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class MoveOfferController {
         return moveOfferService.createOffer(moveOffer);
     }
 
-    // PUT /offers/{id}
+    //PUT /offers/{id}
     @PutMapping("/offers/{id}")
     public MoveOffer updateOffer(@PathVariable Long id,
                                  @RequestBody MoveOffer moveOffer) {
@@ -53,5 +54,10 @@ public class MoveOfferController {
     @GetMapping("/move-offers/test")
     public String test() {
         return "Move Offer Service is up and running!";
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<MoveOffer> deleteDriver(@PathVariable Long id) {
+        return null;
     }
 }

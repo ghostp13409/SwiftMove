@@ -17,4 +17,7 @@ public interface IDriverService {
 
     // POST - Create driver profile
     DriverInfo createDriverProfile(DriverInfo driver);
+
+    // DELETE - Deletes driver
+    void deleteDriverProfile(Long id);
 }
