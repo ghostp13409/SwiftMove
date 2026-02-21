@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.swiftMove</groupId>
-	<artifactId>client-service</artifactId>
+	<artifactId>clientManagement-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>client-service</name>
+	<name>clientManagement-service</name>
 	<description>address-service for swift move </description>
 	<url/>
 	<licenses>
