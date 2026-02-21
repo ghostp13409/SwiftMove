@@ -16,6 +16,7 @@ import {
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
+import { authService } from "../services/authService";
 
 type NavItem = {
   name: string;
@@ -23,63 +24,110 @@ type NavItem = {
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
-    // TODO: Replace with actual icon on client and driver nav items
-
-const clientNavIteams: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Move Requests",
-    path: "/move-requests",
-  },
-  {
-    icon: <GridIcon />,
-    name: "Move History",
-    path: "/move-history",
-  },
-]
-
-const driverNavItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Vehicles",
-    path: "/vehicles",
-  },
-  {
-    icon: <GridIcon />,
-    name: "Browse Moves",   // Available Move Requests
-    path: "/browse-moves",
-  },
-  {
-    icon: <GridIcon />,
-    name: "Move Offers",
-    path: "/move-offers",
-  }
-]
-
-const adminNavItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Users",
-  },
-  ...clientNavIteams,
-  ...driverNavItems,
-]
+// TODO: Replace with actual icon for each item for admin, client and driver
 
 const navItems: NavItem[] = [
+  // Common Items for all roles
   {
     icon: <GridIcon />,
     name: "Dashboard",
     path: "/",
   },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
+  // Role-specific items
+
+  // Clients
+  ...(authService.getRole() === "Client"
+    ? [
+        {
+          icon: <GridIcon />,
+          name: "Move Requests",
+          path: "/move-requests",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Move History",
+          path: "/move-history",
+        },
+      ]
+    : []),
+
+  // Drivers
+  ...(authService.getRole() === "Driver"
+    ? [
+        {
+          icon: <GridIcon />,
+          name: "Vehicles",
+          path: "/vehicles",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Browse Moves", // Available Move Requests
+          path: "/browse-moves",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Move Offers",
+          path: "/move-offers",
+        },
+      ]
+    : []),
+
+  ...(authService.getRole() === "Admin"
+    ? [
+        {
+          icon: <GridIcon />,
+          name: "Clients",
+          path: "/clients",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Drivers", // Available Move Requests
+          path: "/drivers",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Vehicles",
+          path: "/vehicles",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Move Requests",
+          path: "/move-requests",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Move Offers",
+          path: "/move-offers",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Move Trips",
+          path: "/move-trips",
+        },
+      ]
+    : []),
   {
     icon: <UserCircleIcon />,
     name: "Profile",
     path: "/profile",
+  },
+
+  // TODO: Remove All the others
+
+  {
+    icon: <GridIcon />,
+    name: "Test",
+    subItems: [
+      {
+        name: "Move Requests",
+        path: "/move-requests",
+      },
+    ],
+  },
+  {
+    icon: <CalenderIcon />,
+    name: "Calendar",
+    path: "/calendar",
   },
   {
     name: "Forms",
@@ -141,14 +189,14 @@ const AppSidebar: React.FC = () => {
     index: number;
   } | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
+    {},
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
     (path: string) => location.pathname === path,
-    [location.pathname]
+    [location.pathname],
   );
 
   useEffect(() => {
@@ -330,8 +378,8 @@ const AppSidebar: React.FC = () => {
           isExpanded || isMobileOpen
             ? "w-[290px]"
             : isHovered
-            ? "w-[290px]"
-            : "w-[90px]"
+              ? "w-[290px]"
+              : "w-[90px]"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
