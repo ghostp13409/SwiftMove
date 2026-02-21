@@ -1,5 +1,6 @@
 package com.swiftMove.clientManagement_service.service;
 
+import com.swiftMove.clientManagement_service.dto.MoveReqPostDto;
 import com.swiftMove.clientManagement_service.dto.MoveRequestDTO;
 import com.swiftMove.clientManagement_service.dto.UserResponseDTO;
 import com.swiftMove.clientManagement_service.feign.UserClient;
@@ -70,11 +71,11 @@ public class ClientService {
         return activeMoves;
     }
 
-    public MoveRequestDTO addMoveRequest(Long id,MoveRequestDTO moveRequestDTO){
+    public MoveRequestDTO addMoveRequest(Long id, MoveReqPostDto dto){
         UserResponseDTO user=getClientById(id);
         if(user==null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"client not found");
-        MoveRequest moveRequest=MoveRequestMapper.toMoveRequest(moveRequestDTO);
+        MoveRequest moveRequest=MoveRequestMapper.toMoveRequest(dto);
         moveRequest.setClientId(user.getId());
         moveRequest.setCreatedAt(LocalDate.now());
         moveRequest.setUpdatedAt(LocalDate.now());

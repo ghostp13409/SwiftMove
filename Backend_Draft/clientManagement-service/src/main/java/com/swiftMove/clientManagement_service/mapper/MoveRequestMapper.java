@@ -1,5 +1,6 @@
 package com.swiftMove.clientManagement_service.mapper;
 
+import com.swiftMove.clientManagement_service.dto.MoveReqPostDto;
 import com.swiftMove.clientManagement_service.dto.MoveRequestDTO;
 import com.swiftMove.clientManagement_service.model.MoveRequest;
 import com.swiftMove.clientManagement_service.repo.MoveRequestRepo;
@@ -18,7 +19,7 @@ public class MoveRequestMapper {
         );
 
     }
-    public static MoveRequest toMoveRequest(MoveRequestDTO dto){
+    public static MoveRequest toMoveRequest(MoveReqPostDto dto){
         MoveRequest moveRequest = new MoveRequest();
         moveRequest.setMoveDate(dto.getMoveDate());
         moveRequest.setMaxBudget(dto.getMaxBudget());
@@ -29,4 +30,5 @@ public class MoveRequestMapper {
         return moveRequest;
 
     }
+
 }
