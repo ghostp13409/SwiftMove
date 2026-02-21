@@ -20,7 +20,6 @@ public class MoveRequestMapper {
     }
     public static MoveRequest toMoveRequest(MoveRequestDTO dto){
         MoveRequest moveRequest = new MoveRequest();
-        moveRequest.setId(dto.getId());
         moveRequest.setMoveDate(dto.getMoveDate());
         moveRequest.setMaxBudget(dto.getMaxBudget());
         moveRequest.setClientId(dto.getClientId());

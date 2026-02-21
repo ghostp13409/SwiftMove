@@ -4,12 +4,15 @@ import com.swiftMove.clientManagement_service.dto.MoveRequestDTO;
 import com.swiftMove.clientManagement_service.dto.UserResponseDTO;
 import com.swiftMove.clientManagement_service.feign.UserClient;
 import com.swiftMove.clientManagement_service.mapper.MoveRequestMapper;
+import com.swiftMove.clientManagement_service.model.MoveRequest;
 import com.swiftMove.clientManagement_service.repo.MoveRequestRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +28,7 @@ public class ClientService {
         List<UserResponseDTO> clientResponseDTOS = new ArrayList<>();
         for (UserResponseDTO dto : userResponseDTOS)
         {
-            if(dto.getRole().equals("PENDING")){
+            if(dto.getRole().equals("CLIENT")){
 
                 clientResponseDTOS.add(dto);
             }
@@ -35,8 +38,6 @@ public class ClientService {
     }
 
     public UserResponseDTO getClientById(Long id){
-
-
         UserResponseDTO user= userClient.getById(id);
         String role=user.getRole();
         if (!role.equals("CLIENT") && !role.equals("ADMIN"))
@@ -63,11 +64,24 @@ public class ClientService {
         List<MoveRequestDTO> activeMoves=new ArrayList<>();
 
         for (MoveRequestDTO dto : allMoves){
-            if(dto.getStatus().equals("ACTIVE"))
+            if(dto.getStatus().equals("PAYMENT_COMPLETED")||dto.getStatus().equals("IS_IN_TRANSIT"))
                 activeMoves.add(dto);
         }
         return activeMoves;
     }
 
+    public MoveRequestDTO addMoveRequest(Long id,MoveRequestDTO moveRequestDTO){
+        UserResponseDTO user=getClientById(id);
+        if(user==null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"client not found");
+        MoveRequest moveRequest=MoveRequestMapper.toMoveRequest(moveRequestDTO);
+        moveRequest.setClientId(user.getId());
+        moveRequest.setCreatedAt(LocalDate.now());
+        moveRequest.setUpdatedAt(LocalDate.now());
+
+        moveRequestRepo.save(moveRequest);
+        return MoveRequestMapper.toDTO(moveRequest);
+
+    }
 
 }

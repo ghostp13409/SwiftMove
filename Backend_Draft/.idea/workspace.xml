@@ -4,102 +4,121 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a87bbe18-a486-4edb-88fd-3658a4095917" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/controller/MoveRequestController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/dto/MoveRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/mapper/MoveRequestMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/model/MoveRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/repo/MoveRequestRepo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/service/MoveRequestService.java" afterDir="false" />
+    <list default="true" id="c795ac78-8085-4821-b0b9-bb6e83777ad8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/ded34fe0-7187-4874-8ddb-b8884a4243ca.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/ded34fe0-7187-4874-8ddb-b8884a4243ca/storage_v2/_src_/database/postgres.edMnLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/ded34fe0-7187-4874-8ddb-b8884a4243ca/storage_v2/_src_/database/postgres.edMnLQ/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/ded34fe0-7187-4874-8ddb-b8884a4243ca/storage_v2/_src_/database/postgres.edMnLQ/schema/pg_catalog.0S1ZNQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/ded34fe0-7187-4874-8ddb-b8884a4243ca/storage_v2/_src_/database/postgres.edMnLQ/schema/public.abK9xQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/address-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/address-service/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api-gateway/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/controller/ClientController.java" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/controller/ClientController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/mapper/MoveRequestMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/mapper/MoveRequestMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/model/MoveRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/model/MoveRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/service/ClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/service/ClientService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tripManagement-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/tripManagement-service/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/user-service/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/backend/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../src/backend/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/backend/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../src/backend/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/backend/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../src/backend/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Interface" />
-        <option value="Class" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;AnnlinGeorge&quot;
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "AnnlinGeorge"
   }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/ghostp13409/SwiftMove.git&quot;,
-    &quot;accountId&quot;: &quot;d93691cc-148a-408c-835d-6a92c7faf82f&quot;
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/ghostp13409/SwiftMove.git",
+    "accountId": "d93691cc-148a-408c-835d-6a92c7faf82f"
   }
-}</component>
-  <component name="KubernetesApiPersistence">{}</component>
-  <component name="KubernetesApiProvider">{
-  &quot;isMigrated&quot;: true
-}</component>
-  <component name="ProjectColorInfo">{
-  &quot;customColor&quot;: &quot;&quot;,
-  &quot;associatedIndex&quot;: 6
-}</component>
-  <component name="ProjectId" id="39woZcNuBn94rKyG8LYhHGTOfsh" />
+}]]></component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 6
+}]]></component>
+  <component name="ProjectId" id="39zhHlnjkIPXMa4yPoYYR9CFWvs" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.AddressServiceApplication.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.ApiGatewayApplication.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.ClientManagementServiceApplication.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.EurekaServerApplication.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.UserServiceApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;user-service&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Asus/Desktop/SwiftMove/Backend_Draft/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/model&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.AddressServiceApplication.executor": "Run",
+    "Spring Boot.ApiGatewayApplication.executor": "Run",
+    "Spring Boot.ClientManagementServiceApplication.executor": "Run",
+    "Spring Boot.DriverServiceApplication.executor": "Run",
+    "Spring Boot.EurekaServerApplication.executor": "Run",
+    "Spring Boot.TripManagementServiceApplication.executor": "Run",
+    "Spring Boot.UserServiceApplication.executor": "Run",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.configurations.included.in.services": "true",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
     ]
   }
-}</component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Asus\Desktop\SwiftMove\Backend_Draft\clientManagement-service\src\main\java\com\swiftMove\clientManagement_service\model" />
-      <recent name="C:\Users\Asus\Desktop\SwiftMove\Backend_Draft\clientManagement-service\src\main\java\com\swiftMove\clientManagement_service" />
-    </key>
+}]]></component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="KtorApplicationConfigurationType" />
+        <option value="MicronautRunConfigurationType" />
+        <option value="QuarkusRunConfigurationType" />
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+    <option name="configurationStatuses">
+      <map>
+        <entry key="SpringBootApplicationConfigurationType">
+          <value>
+            <map>
+              <entry key="AddressServiceApplication" value="STOPPED" />
+              <entry key="ApiGatewayApplication" value="STOPPED" />
+              <entry key="ClientManagementServiceApplication" value="STOPPED" />
+              <entry key="DriverServiceApplication" value="STOPPED" />
+              <entry key="EurekaServerApplication" value="STOPPED" />
+              <entry key="TripManagementServiceApplication" value="STOPPED" />
+              <entry key="UserServiceApplication" value="STOPPED" />
+            </map>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="RunManager" selected="Spring Boot.ClientManagementServiceApplication">
     <configuration name="AddressServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
@@ -119,6 +138,13 @@
     <configuration name="ClientManagementServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="clientManagement-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.swiftMove.clientManagement_service.ClientManagementServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DriverServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="driver-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.swiftmove.driverservice.DriverServiceApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -155,14 +181,12 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="a87bbe18-a486-4edb-88fd-3658a4095917" name="Changes" comment="" />
-      <created>1771616551158</created>
+      <changelist id="c795ac78-8085-4821-b0b9-bb6e83777ad8" name="Changes" comment="" />
+      <created>1771704721886</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1771616551158</updated>
-      <workItem from="1771616552846" duration="1303000" />
-      <workItem from="1771618768565" duration="8203000" />
-      <workItem from="1771688000260" duration="11845000" />
+      <updated>1771704721886</updated>
+      <workItem from="1771704724266" duration="4780000" />
     </task>
     <servers />
   </component>
