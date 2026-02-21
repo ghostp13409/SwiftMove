@@ -5,14 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c795ac78-8085-4821-b0b9-bb6e83777ad8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/6a911b47-2818-470b-9bef-0b6f02dcbbaa.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/6a911b47-2818-470b-9bef-0b6f02dcbbaa.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/6a911b47-2818-470b-9bef-0b6f02dcbbaa/storage_v2/_src_/database/postgres.edMnLQ/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/6a911b47-2818-470b-9bef-0b6f02dcbbaa/storage_v2/_src_/database/postgres.edMnLQ/schema/public.abK9xQ.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tripManagement-service/src/main/java/com/swiftMove/tripManagement_service/dto/UserResponseDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tripManagement-service/src/main/java/com/swiftMove/tripManagement_service/feignClient/userClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/controller/ClientController.java" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/controller/ClientController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/controller/MoveRequestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/controller/MoveRequestController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/mapper/MoveRequestMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/mapper/MoveRequestMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/service/ClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/service/ClientService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/service/MoveRequestService.java" beforeDir="false" afterPath="$PROJECT_DIR$/clientManagement-service/src/main/java/com/swiftMove/clientManagement_service/service/MoveRequestService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,6 +84,12 @@
     ]
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.swiftMove.tripManagement_service.dto" />
+      <recent name="com.swiftMove.tripManagement_service.feignClient" />
+    </key>
+  </component>
   <component name="RunDashboard">
     <option name="configurationTypes">
       <set>
@@ -182,7 +183,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1771704721886</updated>
-      <workItem from="1771704724266" duration="6948000" />
+      <workItem from="1771704724266" duration="9397000" />
     </task>
     <servers />
   </component>
