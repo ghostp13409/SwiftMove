@@ -2,15 +2,18 @@ package com.swiftmove.driverservice.controller;
 
 import com.swiftmove.driverservice.model.DriverInfo;
 import com.swiftmove.driverservice.services.IDriverService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/drivers")
 public class DriverController {
     private final IDriverService driverService;
-
+    @Autowired
     public DriverController(IDriverService driverService) {
         this.driverService = driverService;
     }
@@ -22,8 +25,8 @@ public class DriverController {
 
     // GET /api/drivers/{id} - Get driver info by ID
     @GetMapping("/{id}")
-    public ResponseEntity<DriverInfo> getDriverById(@PathVariable Long id) {
-        DriverInfo driver = driverService.getDriverInfoById(id);
+    public ResponseEntity<Optional<DriverInfo>> getDriverById(@PathVariable Long id) {
+        Optional<DriverInfo> driver = driverService.getDriverInfoById(id);
         return ResponseEntity.ok(driver);
     }
 

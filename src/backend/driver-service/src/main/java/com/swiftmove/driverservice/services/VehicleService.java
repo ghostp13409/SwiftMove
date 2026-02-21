@@ -18,7 +18,7 @@ public class VehicleService implements IVehicleService {
 
     @Override
     public List<Vehicle> getVehiclesByDriver(Long driverId) {
-        return vehicleRepository.getVehiclesByDriver(driverId);
+        return vehicleRepository.getVehiclesBydriverInfoId(driverId);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class VehicleService implements IVehicleService {
     // ChatGPT was used for this one
     @Override
     public Vehicle patchVehicle(Long id, Vehicle patch) {
-        Vehicle vehicle = vehicleRepository.findById(Math.toIntExact(id))
+        Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
 
         if (patch.getModel() != null) vehicle.setModel(patch.getModel());
@@ -54,7 +54,7 @@ public class VehicleService implements IVehicleService {
     }
 
     @Override
-    public Vehicle toggleActive(int id) {
+    public Vehicle toggleActive(Long id) {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vehicle not found"));
 
@@ -64,7 +64,7 @@ public class VehicleService implements IVehicleService {
 
     @Override
     public void deleteVehicle(Long id) {
-        Vehicle vehicle = vehicleRepository.findById(Math.toIntExact(id)).orElseThrow(() -> new EntityNotFoundException("Vehicle not found"));
+        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Vehicle not found"));
         vehicleRepository.delete(vehicle);
     }
 }

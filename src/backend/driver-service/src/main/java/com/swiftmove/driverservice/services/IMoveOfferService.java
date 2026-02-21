@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+
 public interface IMoveOfferService {
     // GET
     List<MoveOffer> getOffersByDriver(Long driverId);

@@ -5,20 +5,20 @@ import com.swiftmove.driverservice.model.DriverInfo;
 import com.swiftmove.driverservice.repository.DriverRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class DriverInfoService implements IDriverService{
 
     private DriverRepository driverRepository;
-
-
     public DriverInfoService(DriverRepository driverRepository) {
         this.driverRepository=driverRepository;
     }
 
     @Override
-    public DriverInfo getDriverInfoById(Long id) {
+    public Optional<DriverInfo> getDriverInfoById(Long id) {
         //Validation required
-        return driverRepository.findByUserId(id);
+        return driverRepository.findById(id);
     }
 
     // TODO --------------------------------------------------------
@@ -31,7 +31,7 @@ public class DriverInfoService implements IDriverService{
     @Override
     public DriverInfo updateDriver(Long id, DriverInfo driver) {
         //Validation required
-        DriverInfo existingDriver = driverRepository.findById(Math.toIntExact(id))
+        DriverInfo existingDriver = driverRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Driver not found with id: " + id));
 
         existingDriver.setDrivingExperience(driver.getDrivingExperience());

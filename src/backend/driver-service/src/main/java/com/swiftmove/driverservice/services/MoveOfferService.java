@@ -2,9 +2,10 @@ package com.swiftmove.driverservice.services;
 
 import com.swiftmove.driverservice.model.MoveOffer;
 import com.swiftmove.driverservice.repository.MoveOfferRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class MoveOfferService implements IMoveOfferService {
     private final MoveOfferRepository moveOfferRepository;
 
@@ -24,7 +25,7 @@ public class MoveOfferService implements IMoveOfferService {
 
     @Override
     public MoveOffer updateOffer(Long id, MoveOffer moveOffer) {
-        MoveOffer existingOffer = moveOfferRepository.findById(Math.toIntExact(id))
+        MoveOffer existingOffer = moveOfferRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Offer not found"));
 
         existingOffer.setPrice(moveOffer.getPrice());
@@ -42,7 +43,7 @@ public class MoveOfferService implements IMoveOfferService {
 
     @Override
     public MoveOffer acceptOffer(Long id) {
-        MoveOffer offer = moveOfferRepository.findById(Math.toIntExact(id))
+        MoveOffer offer = moveOfferRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Offer not found"));
 
         // Example: 2 = ACCEPTED (you can replace with constant later)

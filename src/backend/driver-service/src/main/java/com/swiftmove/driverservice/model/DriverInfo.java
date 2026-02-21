@@ -21,10 +21,10 @@ public class DriverInfo {
     private Long id;
 
     @Column(name = "driving_experience", nullable = false)
-    private int drivingExperience;
+    private Integer drivingExperience;
 
-    @Column(name = "range_km", nullable = false)
-    private float range;
+    @Column(name = "range", nullable = false)
+    private Float range;
 
     @Column(name = "driving_license", nullable = false, unique = true)
     private String drivingLicense;

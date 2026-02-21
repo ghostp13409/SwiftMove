@@ -2,6 +2,8 @@ package com.swiftmove.driverservice.controller;
 
 import com.swiftmove.driverservice.model.MoveOffer;
 import com.swiftmove.driverservice.services.IMoveOfferService;
+import com.swiftmove.driverservice.services.MoveOfferService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,9 +12,10 @@ import java.util.List;
 @RequestMapping("/api")
 public class MoveOfferController {
 
-    private final IMoveOfferService moveOfferService;
+    private final MoveOfferService moveOfferService;
 
-    public MoveOfferController(IMoveOfferService moveOfferService) {
+    @Autowired
+    public MoveOfferController(MoveOfferService moveOfferService) {
         this.moveOfferService = moveOfferService;
     }
 
