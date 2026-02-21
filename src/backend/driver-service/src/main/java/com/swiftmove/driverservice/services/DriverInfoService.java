@@ -3,6 +3,7 @@ package com.swiftmove.driverservice.services;
 
 import com.swiftmove.driverservice.model.DriverInfo;
 import com.swiftmove.driverservice.repository.DriverRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -47,5 +48,11 @@ public class DriverInfoService implements IDriverService{
         //Easy way
         //Validation required
         return driverRepository.save(driver);
+    }
+
+    @Override
+    public void deleteDriverProfile(Long id){
+        DriverInfo driver = driverRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Driver Info not found"));
+        driverRepository.delete(driver);
     }
 }

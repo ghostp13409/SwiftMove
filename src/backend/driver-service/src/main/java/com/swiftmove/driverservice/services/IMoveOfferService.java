@@ -20,4 +20,5 @@ public interface IMoveOfferService {
 
     // PUT
     MoveOffer acceptOffer(Long id);
+
 }
