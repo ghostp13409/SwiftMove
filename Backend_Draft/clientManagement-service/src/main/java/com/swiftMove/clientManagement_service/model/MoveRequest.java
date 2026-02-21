@@ -34,8 +34,8 @@ public class MoveRequest {
     @Column(name = "status")
     private String status;
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private LocalDate updatedAt;
 
 }

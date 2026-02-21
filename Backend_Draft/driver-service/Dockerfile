@@ -1,0 +1,14 @@
+FROM eclipse-temurin:17-jre-jammy
+
+WORKDIR /app
+
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+RUN ./mvnw dependency:go-offline
+
+COPY src ./src
+
+RUN ./mvnw clean package -DskipTests
+
+CMD ["java", "-jar", "target/*.jar"]
