@@ -4,6 +4,7 @@ import com.swiftmove.driverservice.model.Vehicle;
 import com.swiftmove.driverservice.repository.VehicleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -28,13 +29,21 @@ public class VehicleService implements IVehicleService {
 
     @Override
     public Vehicle updateVehicle(Long id, Vehicle vehicle) {
-        try{
-            return  vehicleRepository.save(vehicle);
-        }
-        catch(Exception e){
-            throw new RuntimeException(e);
-        }
+        Vehicle existingVehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Vehicle not found with id " + id));
 
+        // Update fields
+        existingVehicle.setModel(vehicle.getModel());
+        existingVehicle.setMake(vehicle.getMake());
+        existingVehicle.setYear(vehicle.getYear());
+        existingVehicle.setColor(vehicle.getColor());
+        existingVehicle.setPricePerKm(vehicle.getPricePerKm());
+        existingVehicle.setIsActive(vehicle.getIsActive());
+        existingVehicle.setCanCarryFurniture(vehicle.getCanCarryFurniture());
+        existingVehicle.setDriverInfoId(vehicle.getDriverInfoId());
+        existingVehicle.setVehicleTypeId(vehicle.getVehicleTypeId());
+
+        return vehicleRepository.save(existingVehicle);
     }
     // ChatGPT was used for this one
     @Override
