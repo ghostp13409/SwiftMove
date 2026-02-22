@@ -4,7 +4,6 @@ import com.swiftmove.driverservice.model.Vehicle;
 import com.swiftmove.driverservice.repository.VehicleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 

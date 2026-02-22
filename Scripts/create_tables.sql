@@ -4,25 +4,25 @@
 -- Drop all if exist
 
 -- Drop tables in reverse dependency order
-DROP TABLE IF EXISTS move_trip CASCADE;
+DROP TABLE IF EXISTS move_trips CASCADE;
 
-DROP TABLE IF EXISTS move_offer CASCADE;
+DROP TABLE IF EXISTS move_offers CASCADE;
 
-DROP TABLE IF EXISTS luggage_entry CASCADE;
+DROP TABLE IF EXISTS luggage_entries CASCADE;
 
-DROP TABLE IF EXISTS move_request CASCADE;
+DROP TABLE IF EXISTS move_requests CASCADE;
 
-DROP TABLE IF EXISTS vehicle CASCADE;
+DROP TABLE IF EXISTS vehicles CASCADE;
 
-DROP TABLE IF EXISTS driver_info CASCADE;
+DROP TABLE IF EXISTS driver_infos CASCADE;
 
-DROP TABLE IF EXISTS "user" CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
-DROP TABLE IF EXISTS luggage_type CASCADE;
+DROP TABLE IF EXISTS luggage_types CASCADE;
 
-DROP TABLE IF EXISTS vehicle_type CASCADE;
+DROP TABLE IF EXISTS vehicle_types CASCADE;
 
-DROP TABLE IF EXISTS address CASCADE;
+DROP TABLE IF EXISTS addresses CASCADE;
 
 -- Drop ENUM types
 DROP TYPE IF EXISTS move_status_enum CASCADE;
@@ -46,7 +46,7 @@ CREATE TYPE move_status_enum AS ENUM ('CREATED', 'OFFER_SENT', 'OFFER_AVAILABLE'
 
 -- Create tables
 
-CREATE TABLE address (
+CREATE TABLE addresses (
     id BIGINT PRIMARY KEY,
     line1 VARCHAR(255),
     line2 VARCHAR(255),
@@ -58,7 +58,7 @@ CREATE TABLE address (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE vehicle_type (
+CREATE TABLE vehicle_types (
     id BIGINT PRIMARY KEY,
     type vehicle_type_enum NOT NULL,
     max_weight REAL,
@@ -67,7 +67,7 @@ CREATE TABLE vehicle_type (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE luggage_type (
+CREATE TABLE luggage_types (
     id BIGINT PRIMARY KEY,
     type luggage_type_enum NOT NULL,
     name VARCHAR(100),
@@ -77,7 +77,7 @@ CREATE TABLE luggage_type (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE "user" (
+CREATE TABLE users (
     id BIGINT PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
@@ -90,10 +90,10 @@ CREATE TABLE "user" (
     address_id BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (address_id) REFERENCES address (id)
+    FOREIGN KEY (address_id) REFERENCES addresses (id)
 );
 
-CREATE TABLE driver_info (
+CREATE TABLE driver_infos (
     id BIGINT PRIMARY KEY,
     driving_experience INTEGER,
     range REAL,
@@ -101,10 +101,10 @@ CREATE TABLE driver_info (
     user_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES "user" (id)
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE vehicle (
+CREATE TABLE vehicles (
     id BIGINT PRIMARY KEY,
     model VARCHAR(100),
     make VARCHAR(100),
@@ -117,11 +117,11 @@ CREATE TABLE vehicle (
     vehicle_type_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (driver_id) REFERENCES driver_info (id),
-    FOREIGN KEY (vehicle_type_id) REFERENCES vehicle_type (id)
+    FOREIGN KEY (driver_id) REFERENCES driver_infos (id),
+    FOREIGN KEY (vehicle_type_id) REFERENCES vehicle_types (id)
 );
 
-CREATE TABLE move_request (
+CREATE TABLE move_requests (
     id BIGINT PRIMARY KEY,
     move_date TIMESTAMP,
     max_budget BIGINT,
@@ -131,23 +131,23 @@ CREATE TABLE move_request (
     status move_status_enum NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (client_id) REFERENCES "user" (id),
-    FOREIGN KEY (from_address_id) REFERENCES address (id),
-    FOREIGN KEY (to_address_id) REFERENCES address (id)
+    FOREIGN KEY (client_id) REFERENCES users (id),
+    FOREIGN KEY (from_address_id) REFERENCES addresses (id),
+    FOREIGN KEY (to_address_id) REFERENCES addresses (id)
 );
 
-CREATE TABLE luggage_entry (
+CREATE TABLE luggage_entries (
     id BIGINT PRIMARY KEY,
     quantity INTEGER,
     move_request_id BIGINT NOT NULL,
     luggage_type_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (move_request_id) REFERENCES move_request (id),
-    FOREIGN KEY (luggage_type_id) REFERENCES luggage_type (id)
+    FOREIGN KEY (move_request_id) REFERENCES move_requests (id),
+    FOREIGN KEY (luggage_type_id) REFERENCES luggage_types (id)
 );
 
-CREATE TABLE move_offer (
+CREATE TABLE move_offers (
     id BIGINT PRIMARY KEY,
     price BIGINT,
     offered_date TIMESTAMP,
@@ -157,18 +157,18 @@ CREATE TABLE move_offer (
     status move_status_enum NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (move_request_id) REFERENCES move_request (id),
-    FOREIGN KEY (driver_id) REFERENCES "user" (id),
-    FOREIGN KEY (vehicle_id) REFERENCES vehicle (id)
+    FOREIGN KEY (move_request_id) REFERENCES move_requests (id),
+    FOREIGN KEY (driver_id) REFERENCES users (id),
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles (id)
 );
 
-CREATE TABLE move_trip (
+CREATE TABLE move_trips (
     id BIGINT PRIMARY KEY,
     move_request_id BIGINT NOT NULL,
     move_offer_id BIGINT NOT NULL,
     status move_status_enum NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (move_request_id) REFERENCES move_request (id),
-    FOREIGN KEY (move_offer_id) REFERENCES move_offer (id)
+    FOREIGN KEY (move_request_id) REFERENCES move_requests (id),
+    FOREIGN KEY (move_offer_id) REFERENCES move_offers (id)
 );
