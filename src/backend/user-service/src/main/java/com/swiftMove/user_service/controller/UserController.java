@@ -1,10 +1,6 @@
 package com.swiftMove.user_service.controller;
 
-<<<<<<< HEAD
-=======
-
 import com.swiftMove.user_service.dto.AddressDTO;
->>>>>>> main
 import com.swiftMove.user_service.dto.UserRequestDTO;
 import com.swiftMove.user_service.dto.UserResponseDTO;
 import com.swiftMove.user_service.service.UserService;
@@ -20,13 +16,8 @@ import java.util.List;
 @RequestMapping("/users/")
 @RequiredArgsConstructor
 public class UserController {
-<<<<<<< HEAD
   @Autowired
-  private UserService userService;
-=======
-    @Autowired
-    private final UserService userService;
->>>>>>> main
+  private final UserService userService;
 
   @GetMapping("/allUsers")
   public ResponseEntity<List<UserResponseDTO>> getAll() {
@@ -56,15 +47,15 @@ public class UserController {
 
   }
 
-    @DeleteMapping("iam/delete/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
-      userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
+  @DeleteMapping("iam/delete/{id}")
+  public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    userService.deleteUser(id);
+    return ResponseEntity.noContent().build();
+  }
 
-    @GetMapping("/userAddress/{id}")
-    public ResponseEntity<AddressDTO> getCurrentUserAddress(@PathVariable Long id){
-      return ResponseEntity.ok(userService.getUserAddress(id));
-    }
+  @GetMapping("/userAddress/{id}")
+  public ResponseEntity<AddressDTO> getCurrentUserAddress(@PathVariable Long id) {
+    return ResponseEntity.ok(userService.getUserAddress(id));
+  }
 
 }
