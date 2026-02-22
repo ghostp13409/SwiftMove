@@ -1,6 +1,5 @@
 package com.swiftmove.driverservice.services;
 import com.swiftmove.driverservice.model.MoveOffer;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
