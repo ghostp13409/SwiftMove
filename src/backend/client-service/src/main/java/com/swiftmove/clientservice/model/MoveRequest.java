@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -36,5 +37,8 @@ public class MoveRequest {
     private LocalDate createdAt;
     @Column(name = "updated_at")
     private LocalDate updatedAt;
+
+    @OneToMany(mappedBy = "moveRequest", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<LuggageEntry> luggageEntries;
 
 }

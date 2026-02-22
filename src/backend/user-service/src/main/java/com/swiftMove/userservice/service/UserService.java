@@ -45,21 +45,6 @@ public class UserService {
         return UserMapper.userToResponseDto(savedUser);
     }
 
-    // Seed Data
-    public void seedUsers() {
-        for (int i = 0; i < 10; i++) {
-            User user = new User();
-            user.setUsername("test" + i);
-            user.setFirstName("John" + i);
-            user.setLastName("Doe" + i);
-            user.setEmail("test" + i + "@test.com");
-            user.setPasswordHash(passwordEncoder.encode("password"));
-            user.setRole("CLIENT");
-            user.setCreatedAt(LocalDate.now());
-            user.setUpdatedAt(LocalDate.now());
-            userRepo.save(user);
-        }
-    }
 
     // Get All Users
     public List<UserResponseDTO> findAll() {

@@ -24,7 +24,7 @@
         <module name="user-service" />
         <module name="client-service" />
       </profile>
-      <profile name="Annotation profile for trip-service" enabled="true">
+      <profile name="Annotation profile for auth-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -32,6 +32,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
         </processorPath>
         <module name="test-service" />
+        <module name="auth-service" />
         <module name="trip-service" />
       </profile>
     </annotationProcessing>
@@ -39,6 +40,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="api-gateway" options="-parameters" />
+      <module name="auth-service" options="-parameters" />
       <module name="client-service" options="-parameters" />
       <module name="config-service" options="-parameters" />
       <module name="driver-service" options="-parameters" />
