@@ -1,14 +1,12 @@
-FROM openjdk:17-jdk-slim
+# Use an official Java runtime as a base image
+FROM eclipse-temurin:17-jdk-alpine AS build
 
+# Set the working directory in the container
 WORKDIR /app
 
-COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw .
-RUN ./mvnw dependency:go-offline
+# Copy the built JAR file into the container
+# Replace 'your-app-name.jar' with your actual filena   me
+COPY target/*.jar app.jar
 
-COPY src ./src
-
-RUN ./mvnw clean package -DskipTests
-
-CMD ["java", "-jar", "target/*.jar"]
+# Specify the command to run your application
+ENTRYPOINT ["java", "-jar", "app.jar"]

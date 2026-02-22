@@ -1,8 +1,14 @@
 package com.swiftMove.user_service.controller;
 
+<<<<<<< HEAD
+=======
+
+import com.swiftMove.user_service.dto.AddressDTO;
+>>>>>>> main
 import com.swiftMove.user_service.dto.UserRequestDTO;
 import com.swiftMove.user_service.dto.UserResponseDTO;
 import com.swiftMove.user_service.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +18,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users/")
+@RequiredArgsConstructor
 public class UserController {
+<<<<<<< HEAD
   @Autowired
   private UserService userService;
+=======
+    @Autowired
+    private final UserService userService;
+>>>>>>> main
 
   @GetMapping("/allUsers")
   public ResponseEntity<List<UserResponseDTO>> getAll() {
@@ -43,5 +55,16 @@ public class UserController {
     return ResponseEntity.noContent().build();
 
   }
+
+    @DeleteMapping("iam/delete/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+      userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/userAddress/{id}")
+    public ResponseEntity<AddressDTO> getCurrentUserAddress(@PathVariable Long id){
+      return ResponseEntity.ok(userService.getUserAddress(id));
+    }
 
 }
