@@ -51,6 +51,7 @@ public class UserService {
 
     //Get All Users
     public List<UserResponseDTO> findAll(){
+        System.out.println(userRepo.findAll().stream().map(UserMapper::userToResponseDto).toList().stream().count());
         return userRepo.findAll().stream().map(UserMapper::userToResponseDto).toList();
     }
 
