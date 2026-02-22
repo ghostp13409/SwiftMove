@@ -1,7 +1,9 @@
 package com.swiftMove.user_service.service;
 
+import com.swiftMove.user_service.dto.AddressDTO;
 import com.swiftMove.user_service.dto.UserRequestDTO;
 import com.swiftMove.user_service.dto.UserResponseDTO;
+import com.swiftMove.user_service.feign.AddressClient;
 import com.swiftMove.user_service.mapper.UserMapper;
 import com.swiftMove.user_service.model.User;
 import com.swiftMove.user_service.repo.UserRepo;
@@ -13,16 +15,17 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+
 import java.util.List;
 
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final UserRepo userRepo;
    private final PasswordEncoder passwordEncoder;
-
+    private final AddressClient addressClient;
    //For Adding a new user
     public UserResponseDTO addNewUser(UserRequestDTO dto){
         // User email must be unique
@@ -39,7 +42,7 @@ public class UserService {
         // IMPORTANT JUST SETTING FOR TESTING PURPOSE ROLE
        user.setRole("CLIENT");
        user.setCreatedAt(LocalDate.now());
-       user.setUpdatedAt(LocalDate.now());;
+       user.setUpdatedAt(LocalDate.now());
 
        User savedUser = userRepo.save(user);
        return UserMapper.userToResponseDto(savedUser);
@@ -87,5 +90,14 @@ public class UserService {
         }
 
         userRepo.deleteById(id);
+    }
+
+    public AddressDTO getUserAddress(long id){
+        User user=userRepo.findById(id)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return addressClient.getAddress(user.getAddressId());
+
+
     }
 }
