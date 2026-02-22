@@ -1,9 +1,8 @@
 package com.swiftmove.driverservice.controller;
 
 import com.swiftmove.driverservice.model.Vehicle;
-import com.swiftmove.driverservice.services.IVehicleService;
 import com.swiftmove.driverservice.services.VehicleService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,15 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/vehicles")
+@RequestMapping("/vehicle/")
+@RequiredArgsConstructor
 public class VehicleController {
 
     private final VehicleService vehicleService;
 
-    @Autowired
-    public VehicleController(VehicleService vehicleService) {
-        this.vehicleService = vehicleService;
-    }
 
     @GetMapping("/test")
     public ResponseEntity<String> test() {

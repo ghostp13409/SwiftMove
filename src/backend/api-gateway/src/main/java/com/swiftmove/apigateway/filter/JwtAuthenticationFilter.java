@@ -1,6 +1,6 @@
 package com.swiftmove.apigateway.filter;
 
-import com.safalifter.gateway.util.JwtUtil;
+import com.swiftmove.apigateway.util.JwtUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.HttpStatus;
@@ -55,6 +55,6 @@ public class JwtAuthenticationFilter implements GatewayFilter {
     }
 
     private boolean authMissing(ServerHttpRequest request) {
-        return !request.getHeaders().containsKey("Authorization");
+        return !request.getHeaders().containsHeader("Authorization");
     }
 }

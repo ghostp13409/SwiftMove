@@ -2,7 +2,6 @@ package com.swiftmove.driverservice.controller;
 
 import com.swiftmove.driverservice.model.DriverInfo;
 import com.swiftmove.driverservice.services.DriverInfoService;
-import com.swiftmove.driverservice.services.IDriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/drivers")
+@RequestMapping("/drivers/")
 public class DriverController {
     private final DriverInfoService driverService;
     @Autowired
@@ -39,7 +38,7 @@ public class DriverController {
     }
 
     // POST /api/drivers - Create driver profile
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<DriverInfo> createDriverProfile(@RequestBody DriverInfo driver) {
         DriverInfo createdDriver = driverService.createDriverProfile(driver);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDriver);
