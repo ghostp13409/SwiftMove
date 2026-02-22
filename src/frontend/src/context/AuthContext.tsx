@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authService, GoogleUser } from '../services/authService';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { authService, GoogleUser } from "../services/authService";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -7,8 +13,16 @@ interface AuthContextType {
   userId: number | null;
   name: string | null;
   email: string | null;
-  //login: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    role?: string,
+  ) => Promise<void>;
   loginWithGoogle: () => void; // Google OAuth login
+  loginAsTestUser: (userType: "client" | "admin" | "driver") => void; // Test user login
   logout: () => Promise<void>;
   isAdmin: () => boolean;
   isLoading: boolean;
@@ -20,7 +34,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -64,7 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         }
       } catch (error) {
-        console.error('Error checking auth status:', error);
+        console.error("Error checking auth status:", error);
         // check localStorage
         const token = authService.getToken();
         const storedRole = authService.getRole();
@@ -83,13 +97,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuthStatus();
   }, []);
 
-
   useEffect(() => {
     const handleOAuthCallback = async () => {
       // Check if on callback page or just authenticated
       const urlParams = new URLSearchParams(window.location.search);
-      const isCallback = urlParams.has('code') || window.location.pathname.includes('callback');
-      
+      const isCallback =
+        urlParams.has("code") || window.location.pathname.includes("callback");
+
       if (isCallback) {
         try {
           setTimeout(async () => {
@@ -97,16 +111,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             if (authResult.isAuthenticated && authResult.user) {
               setIsAuthenticated(true);
               setRole(authResult.user.role);
-              setUserId(authResult.user.id ? parseInt(authResult.user.id) : null);
+              setUserId(
+                authResult.user.id ? parseInt(authResult.user.id) : null,
+              );
               setName(authResult.user.name || null);
               setEmail(authResult.user.email || null);
-              
+
               // Redirect
-                window.location.href = '/';
+              window.location.href = "/";
             }
           }, 500);
         } catch (error) {
-          console.error('Error handling OAuth callback:', error);
+          console.error("Error handling OAuth callback:", error);
         }
       }
     };
@@ -114,28 +130,74 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     handleOAuthCallback();
   }, []);
 
-  // Old Login
-  //const login = async (username: string, password: string) => {
-  //  const response = await authService.login({ username, password });
-  //  authService.setAuthData(response.token, response.role, response.userId, response.name, response.email);
+  // Email/Password Login
+  const login = async (email: string, password: string) => {
+    const response = await authService.login({ email, password });
+    authService.setAuthData(
+      response.token,
+      response.role,
+      response.userId,
+      response.name,
+      response.email,
+    );
 
-  //  setIsAuthenticated(true);
-  //  setRole(response.role);
-  //  setUserId(response.userId || null);
-  //  setName(response.name || null);
-  //  setEmail(response.email || null);
-  //};
+    setIsAuthenticated(true);
+    setRole(response.role);
+    setUserId(response.userId || null);
+    setName(response.name || null);
+    setEmail(response.email || null);
+  };
+
+  // Email/Password Register
+  const register = async (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    role?: string,
+  ) => {
+    const response = await authService.register({
+      email,
+      password,
+      firstName,
+      lastName,
+      role,
+    });
+    authService.setAuthData(
+      response.token,
+      response.role,
+      response.userId,
+      response.name,
+      response.email,
+    );
+
+    setIsAuthenticated(true);
+    setRole(response.role);
+    setUserId(response.userId || null);
+    setName(response.name || null);
+    setEmail(response.email || null);
+  };
 
   // Google OAuth login
   const loginWithGoogle = () => {
     authService.loginWithGoogle();
   };
 
+  // Test user login
+  const loginAsTestUser = (userType: "client" | "admin" | "driver") => {
+    const user = authService.loginAsTestUser(userType);
+    setIsAuthenticated(true);
+    setRole(user.role);
+    setUserId(parseInt(user.id));
+    setName(user.name);
+    setEmail(user.email);
+  };
+
   const logout = async () => {
     try {
       await authService.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       // Clear state
       setIsAuthenticated(false);
@@ -152,7 +214,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const isAdmin = () => {
-    return role === 'Admin';
+    return role === "Admin";
   };
 
   const value: AuthContextType = {
@@ -161,8 +223,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     userId,
     name,
     email,
-    //login,
+    login,
+    register,
     loginWithGoogle,
+    loginAsTestUser,
     logout,
     isAdmin,
     isLoading,

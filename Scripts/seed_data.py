@@ -36,6 +36,7 @@ for i in range(1, 81):
     }
     users.append(user)
 
+
 # Driver infos
 drivers = [u for u in users if u['role'] == 'DRIVER']
 driver_infos = []

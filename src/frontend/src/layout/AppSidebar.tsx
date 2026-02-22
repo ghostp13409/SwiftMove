@@ -39,12 +39,12 @@ const navItems: NavItem[] = [
   ...(authService.getRole() === "Client"
     ? [
         {
-          icon: <GridIcon />,
+          icon: <BoxCubeIcon />,
           name: "Move Requests",
           path: "/move-requests",
         },
         {
-          icon: <GridIcon />,
+          icon: <CalenderIcon />,
           name: "Move History",
           path: "/move-history",
         },
@@ -55,17 +55,17 @@ const navItems: NavItem[] = [
   ...(authService.getRole() === "Driver"
     ? [
         {
-          icon: <GridIcon />,
+          icon: <BoxCubeIcon />,
           name: "Vehicles",
           path: "/vehicles",
         },
         {
-          icon: <GridIcon />,
-          name: "Browse Moves", // Available Move Requests
+          icon: <ListIcon />,
+          name: "Browse Moves",
           path: "/browse-moves",
         },
         {
-          icon: <GridIcon />,
+          icon: <TableIcon />,
           name: "Move Offers",
           path: "/move-offers",
         },
@@ -75,32 +75,32 @@ const navItems: NavItem[] = [
   ...(authService.getRole() === "Admin"
     ? [
         {
-          icon: <GridIcon />,
+          icon: <UserCircleIcon />,
           name: "Clients",
           path: "/clients",
         },
         {
-          icon: <GridIcon />,
-          name: "Drivers", // Available Move Requests
+          icon: <UserCircleIcon />,
+          name: "Drivers",
           path: "/drivers",
         },
         {
-          icon: <GridIcon />,
+          icon: <BoxCubeIcon />,
           name: "Vehicles",
           path: "/vehicles",
         },
         {
-          icon: <GridIcon />,
+          icon: <ListIcon />,
           name: "Move Requests",
           path: "/move-requests",
         },
         {
-          icon: <GridIcon />,
+          icon: <TableIcon />,
           name: "Move Offers",
           path: "/move-offers",
         },
         {
-          icon: <GridIcon />,
+          icon: <CalenderIcon />,
           name: "Move Trips",
           path: "/move-trips",
         },
@@ -114,39 +114,39 @@ const navItems: NavItem[] = [
 
   // TODO: Remove All the others
 
-  {
-    icon: <GridIcon />,
-    name: "Test",
-    subItems: [
-      {
-        name: "Move Requests",
-        path: "/move-requests",
-      },
-    ],
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  },
-  {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
-    ],
-  },
+  // {
+  //   icon: <GridIcon />,
+  //   name: "Test",
+  //   subItems: [
+  //     {
+  //       name: "Move Requests",
+  //       path: "/move-requests",
+  //     },
+  //   ],
+  // },
+  // {
+  //   icon: <CalenderIcon />,
+  //   name: "Calendar",
+  //   path: "/calendar",
+  // },
+  // {
+  //   name: "Forms",
+  //   icon: <ListIcon />,
+  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+  // },
+  // {
+  //   name: "Tables",
+  //   icon: <TableIcon />,
+  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+  // },
+  // {
+  //   name: "Pages",
+  //   icon: <PageIcon />,
+  //   subItems: [
+  //     { name: "Blank Page", path: "/blank", pro: false },
+  //     { name: "404 Error", path: "/error-404", pro: false },
+  //   ],
+  // },
 ];
 
 const othersItems: NavItem[] = [
@@ -438,7 +438,7 @@ const AppSidebar: React.FC = () => {
               </h2>
               {renderMenuItems(navItems, "main")}
             </div>
-            <div className="">
+            {/* <div className="">
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
@@ -453,7 +453,7 @@ const AppSidebar: React.FC = () => {
                 )}
               </h2>
               {renderMenuItems(othersItems, "others")}
-            </div>
+            </div> */}
           </div>
         </nav>
       </div>

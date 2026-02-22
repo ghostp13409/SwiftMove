@@ -60,27 +60,46 @@
                   "maxBudget": {
                     "type": "string",
                     "description": "",
-                    "example": "9520"
+                    "example": "27573"
                   },
                   "clientId": {
                     "type": "string",
                     "description": "",
-                    "example": "26673"
+                    "example": "29220"
                   },
                   "fromAddressId": {
                     "type": "string",
                     "description": "",
-                    "example": "18660"
+                    "example": "2296"
                   },
                   "toAddressId": {
                     "type": "string",
                     "description": "",
-                    "example": "31623"
+                    "example": "29645"
                   },
                   "status": {
                     "type": "string",
                     "description": "",
                     "example": ""
+                  },
+                  "luggageEntries": {
+                    "type": "array",
+                    "description": "",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "quantity": {
+                          "type": "string",
+                          "description": "",
+                          "example": "10454"
+                        },
+                        "luggageTypeId": {
+                          "type": "string",
+                          "description": "",
+                          "example": "13691"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -129,27 +148,46 @@
                   "maxBudget": {
                     "type": "string",
                     "description": "",
-                    "example": "29231"
+                    "example": "6965"
                   },
                   "clientId": {
                     "type": "string",
                     "description": "",
-                    "example": "24253"
+                    "example": "28143"
                   },
                   "fromAddressId": {
                     "type": "string",
                     "description": "",
-                    "example": "30097"
+                    "example": "16578"
                   },
                   "toAddressId": {
                     "type": "string",
                     "description": "",
-                    "example": "13316"
+                    "example": "3886"
                   },
                   "status": {
                     "type": "string",
                     "description": "",
                     "example": ""
+                  },
+                  "luggageEntries": {
+                    "type": "array",
+                    "description": "",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "quantity": {
+                          "type": "string",
+                          "description": "",
+                          "example": "26613"
+                        },
+                        "luggageTypeId": {
+                          "type": "string",
+                          "description": "",
+                          "example": "32534"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -189,33 +227,61 @@
                   "maxBudget": {
                     "type": "string",
                     "description": "",
-                    "example": "10569"
+                    "example": "30596"
                   },
                   "clientId": {
                     "type": "string",
                     "description": "",
-                    "example": "545"
+                    "example": "22746"
                   },
                   "fromAddressId": {
                     "type": "string",
                     "description": "",
-                    "example": "6241"
+                    "example": "24691"
                   },
                   "toAddressId": {
                     "type": "string",
                     "description": "",
-                    "example": "2174"
+                    "example": "6572"
                   },
                   "status": {
                     "type": "string",
                     "description": "",
                     "example": ""
+                  },
+                  "luggageEntries": {
+                    "type": "array",
+                    "description": "",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "quantity": {
+                          "type": "string",
+                          "description": "",
+                          "example": "28037"
+                        },
+                        "luggageTypeId": {
+                          "type": "string",
+                          "description": "",
+                          "example": "4167"
+                        }
+                      }
+                    }
                   }
                 }
               }
             }
           }
         }
+      }
+    },
+    "/api/luggage-types": {
+      "summary": "getAllLuggageTypes",
+      "description": "/api/luggage-types",
+      "get": {
+        "summary": "getAllLuggageTypes",
+        "description": "/api/luggage-types",
+        "parameters": []
       }
     },
     "/drivers/test": {
@@ -262,17 +328,17 @@
                   "id": {
                     "type": "string",
                     "description": "",
-                    "example": "8199"
+                    "example": "7523"
                   },
                   "drivingExperience": {
                     "type": "string",
                     "description": "",
-                    "example": "12341"
+                    "example": "31623"
                   },
                   "range": {
                     "type": "string",
                     "description": "",
-                    "example": "11853.898"
+                    "example": "30088.662"
                   },
                   "drivingLicense": {
                     "type": "string",
@@ -282,17 +348,17 @@
                   "userId": {
                     "type": "string",
                     "description": "",
-                    "example": "9605"
+                    "example": "16679"
                   },
                   "createdAt": {
                     "type": "string",
                     "description": "",
-                    "example": "1771785656766"
+                    "example": "1771788884920"
                   },
                   "updatedAt": {
                     "type": "string",
                     "description": "",
-                    "example": "1771785656766"
+                    "example": "1771788884920"
                   }
                 }
               }
@@ -318,47 +384,47 @@
                   "id": {
                     "type": "string",
                     "description": "",
-                    "example": "9414"
+                    "example": "10711"
                   },
                   "price": {
                     "type": "string",
                     "description": "",
-                    "example": "2449"
+                    "example": "8222"
                   },
                   "offeredDate": {
                     "type": "string",
                     "description": "",
-                    "example": "2026-02-22 13:40:56"
+                    "example": "2026-02-22 14:34:44"
                   },
                   "moveRequestId": {
                     "type": "string",
                     "description": "",
-                    "example": "18419"
+                    "example": "21829"
                   },
                   "driverId": {
                     "type": "string",
                     "description": "",
-                    "example": "17359"
+                    "example": "27227"
                   },
                   "vehicleId": {
                     "type": "string",
                     "description": "",
-                    "example": "17952"
+                    "example": "20433"
                   },
                   "statusId": {
                     "type": "string",
                     "description": "",
-                    "example": "15158"
+                    "example": "4058"
                   },
                   "createdAt": {
                     "type": "string",
                     "description": "",
-                    "example": "1771785656778"
+                    "example": "1771788884938"
                   },
                   "updatedAt": {
                     "type": "string",
                     "description": "",
-                    "example": "1771785656778"
+                    "example": "1771788884938"
                   }
                 }
               }
@@ -384,47 +450,47 @@
                   "id": {
                     "type": "string",
                     "description": "",
-                    "example": "27146"
+                    "example": "3478"
                   },
                   "price": {
                     "type": "string",
                     "description": "",
-                    "example": "11327"
+                    "example": "21554"
                   },
                   "offeredDate": {
                     "type": "string",
                     "description": "",
-                    "example": "2026-02-22 13:40:56"
+                    "example": "2026-02-22 14:34:44"
                   },
                   "moveRequestId": {
                     "type": "string",
                     "description": "",
-                    "example": "18542"
+                    "example": "24483"
                   },
                   "driverId": {
                     "type": "string",
                     "description": "",
-                    "example": "5593"
+                    "example": "13406"
                   },
                   "vehicleId": {
                     "type": "string",
                     "description": "",
-                    "example": "29049"
+                    "example": "1976"
                   },
                   "statusId": {
                     "type": "string",
                     "description": "",
-                    "example": "24620"
+                    "example": "14259"
                   },
                   "createdAt": {
                     "type": "string",
                     "description": "",
-                    "example": "1771785656781"
+                    "example": "1771788884942"
                   },
                   "updatedAt": {
                     "type": "string",
                     "description": "",
-                    "example": "1771785656781"
+                    "example": "1771788884942"
                   }
                 }
               }
@@ -495,7 +561,7 @@
                   "id": {
                     "type": "string",
                     "description": "",
-                    "example": "14154"
+                    "example": "22775"
                   },
                   "model": {
                     "type": "string",
@@ -510,7 +576,7 @@
                   "year": {
                     "type": "string",
                     "description": "",
-                    "example": "22052"
+                    "example": "26557"
                   },
                   "color": {
                     "type": "string",
@@ -520,12 +586,12 @@
                   "pricePerKm": {
                     "type": "string",
                     "description": "",
-                    "example": "5440"
+                    "example": "10087"
                   },
                   "isActive": {
                     "type": "string",
                     "description": "",
-                    "example": "false"
+                    "example": "true"
                   },
                   "canCarryFurniture": {
                     "type": "string",
@@ -535,22 +601,22 @@
                   "driverInfoId": {
                     "type": "string",
                     "description": "",
-                    "example": "16385"
+                    "example": "16281"
                   },
                   "vehicleTypeId": {
                     "type": "string",
                     "description": "",
-                    "example": "16685"
+                    "example": "26384"
                   },
                   "createdAt": {
                     "type": "string",
                     "description": "",
-                    "example": "1771785656793"
+                    "example": "1771788884956"
                   },
                   "updatedAt": {
                     "type": "string",
                     "description": "",
-                    "example": "1771785656793"
+                    "example": "1771788884956"
                   }
                 }
               }
@@ -574,6 +640,15 @@
       "patch": {
         "summary": "toggleVehicle",
         "description": "/vehicle/{id}/toggle-active",
+        "parameters": []
+      }
+    },
+    "/api/vehicle-types": {
+      "summary": "getAllVehicleTypes",
+      "description": "/api/vehicle-types",
+      "get": {
+        "summary": "getAllVehicleTypes",
+        "description": "/api/vehicle-types",
         "parameters": []
       }
     },
@@ -762,22 +837,13 @@
                   "addressId": {
                     "type": "string",
                     "description": "",
-                    "example": "17981"
+                    "example": "11011"
                   }
                 }
               }
             }
           }
         }
-      }
-    },
-    "/users/all": {
-      "summary": "getAllUsers",
-      "description": "/users/all",
-      "get": {
-        "summary": "getAllUsers",
-        "description": "/users/all",
-        "parameters": []
       }
     },
     "/users/addUser": {
@@ -827,22 +893,13 @@
                   "addressId": {
                     "type": "string",
                     "description": "",
-                    "example": "16134"
+                    "example": "6148"
                   }
                 }
               }
             }
           }
         }
-      }
-    },
-    "/users/seed": {
-      "summary": "seedMoveRequestData",
-      "description": "/users/seed",
-      "get": {
-        "summary": "seedMoveRequestData",
-        "description": "/users/seed",
-        "parameters": []
       }
     },
     "/users/iam/delete/{id}": {
@@ -860,6 +917,24 @@
       "get": {
         "summary": "getCurrentUserAddress",
         "description": "/users/userAddress/{id}",
+        "parameters": []
+      }
+    },
+    "/users/all": {
+      "summary": "getAllUsers",
+      "description": "/users/all",
+      "get": {
+        "summary": "getAllUsers",
+        "description": "/users/all",
+        "parameters": []
+      }
+    },
+    "/users/seed": {
+      "summary": "seedMoveRequestData",
+      "description": "/users/seed",
+      "get": {
+        "summary": "seedMoveRequestData",
+        "description": "/users/seed",
         "parameters": []
       }
     },
