@@ -1,0 +1,526 @@
+{
+  "info": {
+    "name": "SwiftMove Backend APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Auto-generated collection of all paths from backend_api.json"
+  },
+  "item": [
+    {
+      "name": "Client",
+      "item": [
+        {
+          "name": "getAllClients",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/client/allClients"
+          }
+        },
+        {
+          "name": "getClient",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/client/getClient/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "getHistory",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/client/:id/move-requests/history",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "getActiveMoves",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/client/:id/move-requests/active",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "addMoveRequest",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/client/:id/addMoveRequest",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moveDate\": \"2026-02-22\",\n  \"maxBudget\": \"2974\",\n  \"clientId\": \"25824\",\n  \"fromAddressId\": \"19145\",\n  \"toAddressId\": \"19402\",\n  \"status\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "MoveRequest",
+      "item": [
+        {
+          "name": "getAllMoveRequest",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/move-request/get"
+          }
+        },
+        {
+          "name": "getMoveRequestById",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/move-request/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "addNewMoveRequest",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/move-request/add",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moveDate\": \"2026-02-22\",\n  \"maxBudget\": \"13498\",\n  \"clientId\": \"13997\",\n  \"fromAddressId\": \"21234\",\n  \"toAddressId\": \"19434\",\n  \"status\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteMoveRequest",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/move-request/delete/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "editMoveRequest",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/move-request/edit/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moveDate\": \"2026-02-22\",\n  \"maxBudget\": \"13168\",\n  \"clientId\": \"10152\",\n  \"fromAddressId\": \"26835\",\n  \"toAddressId\": \"21044\",\n  \"status\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Drivers",
+      "item": [
+        {
+          "name": "test",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/drivers/test"
+          }
+        },
+        {
+          "name": "deleteDriver",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/drivers/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "getCurrentDriver",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/drivers/me"
+          }
+        },
+        {
+          "name": "createDriverProfile",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/drivers/add",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"24839\",\n  \"drivingExperience\": \"3631\",\n  \"range\": \"452.30457\",\n  \"drivingLicense\": \"\",\n  \"userId\": \"12994\",\n  \"createdAt\": \"1771786525569\",\n  \"updatedAt\": \"1771786525569\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "MoveOffer",
+      "item": [
+        {
+          "name": "createOffer",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/move-offer/offers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"15891\",\n  \"price\": \"13203\",\n  \"offeredDate\": \"2026-02-22 13:55:25\",\n  \"moveRequestId\": \"24490\",\n  \"driverId\": \"3162\",\n  \"vehicleId\": \"16816\",\n  \"statusId\": \"22140\",\n  \"createdAt\": \"1771786525580\",\n  \"updatedAt\": \"1771786525580\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "updateOffer",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/move-offer/offers/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"11405\",\n  \"price\": \"24348\",\n  \"offeredDate\": \"2026-02-22 13:55:25\",\n  \"moveRequestId\": \"27757\",\n  \"driverId\": \"14665\",\n  \"vehicleId\": \"18203\",\n  \"statusId\": \"18475\",\n  \"createdAt\": \"1771786525582\",\n  \"updatedAt\": \"1771786525582\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "getOffersByMoveRequest",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/move-offer/move-requests/:id/offers",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "acceptOffer",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/move-offer/offers/:id/accept",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "test",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/move-offer/move-offers/test"
+          }
+        },
+        {
+          "name": "deleteDriver",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/move-offer/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicle",
+      "item": [
+        {
+          "name": "test",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/vehicle/test"
+          }
+        },
+        {
+          "name": "addVehicle",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/vehicle/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"27345\",\n  \"model\": \"\",\n  \"make\": \"\",\n  \"year\": \"26347\",\n  \"color\": \"\",\n  \"pricePerKm\": \"24910\",\n  \"isActive\": \"false\",\n  \"canCarryFurniture\": \"true\",\n  \"driverInfoId\": \"22717\",\n  \"vehicleTypeId\": \"23399\",\n  \"createdAt\": \"1771786525593\",\n  \"updatedAt\": \"1771786525593\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteVehicle",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/vehicle/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "toggleVehicle",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/vehicle/:id/toggle-active",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Address",
+      "item": [
+        {
+          "name": "getAllAddress",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/address/all"
+          }
+        },
+        {
+          "name": "getAddress",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/address/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "addNewAddress",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/address/addNewAddress",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"line1\": \"\",\n  \"line2\": \"\",\n  \"city\": \"\",\n  \"stateOrProvince\": \"\",\n  \"country\": \"\",\n  \"postalOrZipCode\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "updateAddress",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/address/update/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"line1\": \"\",\n  \"line2\": \"\",\n  \"city\": \"\",\n  \"stateOrProvince\": \"\",\n  \"country\": \"\",\n  \"postalOrZipCode\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteAddress",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/address/delete/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "getAll",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/allUsers"
+          }
+        },
+        {
+          "name": "updateUser",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/users/iam/profile/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"\",\n  \"password\": \"\",\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"email\": \"\",\n  \"dob\": \"2026-02-22\",\n  \"addressId\": \"22849\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "addNewUser",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users/addUser",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"\",\n  \"password\": \"\",\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"email\": \"\",\n  \"dob\": \"2026-02-22\",\n  \"addressId\": \"32599\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteUser",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/users/iam/delete/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "getCurrentUserAddress",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/userAddress/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trips",
+      "item": [
+        {
+          "name": "getAllTrips",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/trips/allTrips"
+          }
+        },
+        {
+          "name": "getTripById",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/trips/:id",
+            "urlVariables": [
+              {
+                "key": "id",
+                "value": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ]
+}
