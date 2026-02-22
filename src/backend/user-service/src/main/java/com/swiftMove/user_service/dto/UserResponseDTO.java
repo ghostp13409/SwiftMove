@@ -1,14 +1,15 @@
 package com.swiftMove.user_service.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDTO {
+
+    public Long id;
 
     private String username;
 
