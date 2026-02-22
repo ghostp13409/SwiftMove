@@ -19,6 +19,8 @@
         <option value="$PROJECT_DIR$/client-service/pom.xml" />
         <option value="$PROJECT_DIR$/driver-service/pom.xml" />
         <option value="$PROJECT_DIR$/location-service/pom.xml" />
+        <option value="$PROJECT_DIR$/client-service/trip-service/pom.xml" />
+        <option value="$PROJECT_DIR$/trip-service/pom.xml" />
       </list>
     </option>
   </component>
