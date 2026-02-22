@@ -1,0 +1,885 @@
+{
+  "openapi": "3.0.1",
+  "info": {},
+  "paths": {
+    "/client/allClients": {
+      "summary": "getAllClients",
+      "description": "/client/allClients",
+      "get": {
+        "summary": "getAllClients",
+        "description": "/client/allClients",
+        "parameters": []
+      }
+    },
+    "/client/getClient/{id}": {
+      "summary": "getClient",
+      "description": "/client/getClient/{id}",
+      "get": {
+        "summary": "getClient",
+        "description": "/client/getClient/{id}",
+        "parameters": []
+      }
+    },
+    "/client/{id}/move-requests/history": {
+      "summary": "getHistory",
+      "description": "/client/{id}/move-requests/history",
+      "get": {
+        "summary": "getHistory",
+        "description": "/client/{id}/move-requests/history",
+        "parameters": []
+      }
+    },
+    "/client/{id}/move-requests/active": {
+      "summary": "getActiveMoves",
+      "description": "/client/{id}/move-requests/active",
+      "get": {
+        "summary": "getActiveMoves",
+        "description": "/client/{id}/move-requests/active",
+        "parameters": []
+      }
+    },
+    "/client/{id}/addMoveRequest": {
+      "summary": "addMoveRequest",
+      "description": "/client/{id}/addMoveRequest",
+      "post": {
+        "summary": "addMoveRequest",
+        "description": "/client/{id}/addMoveRequest",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "moveDate": {
+                    "type": "string",
+                    "description": "",
+                    "example": "2026-02-22"
+                  },
+                  "maxBudget": {
+                    "type": "string",
+                    "description": "",
+                    "example": "9520"
+                  },
+                  "clientId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "26673"
+                  },
+                  "fromAddressId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "18660"
+                  },
+                  "toAddressId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "31623"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/move-request/get": {
+      "summary": "getAllMoveRequest",
+      "description": "/move-request/get",
+      "get": {
+        "summary": "getAllMoveRequest",
+        "description": "/move-request/get",
+        "parameters": []
+      }
+    },
+    "/move-request/{id}": {
+      "summary": "getMoveRequestById",
+      "description": "/move-request/{id}",
+      "get": {
+        "summary": "getMoveRequestById",
+        "description": "/move-request/{id}",
+        "parameters": []
+      }
+    },
+    "/move-request/add": {
+      "summary": "addNewMoveRequest",
+      "description": "/move-request/add",
+      "post": {
+        "summary": "addNewMoveRequest",
+        "description": "/move-request/add",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "moveDate": {
+                    "type": "string",
+                    "description": "",
+                    "example": "2026-02-22"
+                  },
+                  "maxBudget": {
+                    "type": "string",
+                    "description": "",
+                    "example": "29231"
+                  },
+                  "clientId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "24253"
+                  },
+                  "fromAddressId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "30097"
+                  },
+                  "toAddressId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "13316"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/move-request/delete/{id}": {
+      "summary": "deleteMoveRequest",
+      "description": "/move-request/delete/{id}",
+      "delete": {
+        "summary": "deleteMoveRequest",
+        "description": "/move-request/delete/{id}",
+        "parameters": []
+      }
+    },
+    "/move-request/edit/{id}": {
+      "summary": "editMoveRequest",
+      "description": "/move-request/edit/{id}",
+      "put": {
+        "summary": "editMoveRequest",
+        "description": "/move-request/edit/{id}",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "moveDate": {
+                    "type": "string",
+                    "description": "",
+                    "example": "2026-02-22"
+                  },
+                  "maxBudget": {
+                    "type": "string",
+                    "description": "",
+                    "example": "10569"
+                  },
+                  "clientId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "545"
+                  },
+                  "fromAddressId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "6241"
+                  },
+                  "toAddressId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "2174"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drivers/test": {
+      "summary": "test",
+      "description": "/drivers/test",
+      "get": {
+        "summary": "test",
+        "description": "/drivers/test",
+        "parameters": []
+      }
+    },
+    "/drivers/{id}": {
+      "summary": "deleteDriver",
+      "description": "/drivers/{id}",
+      "delete": {
+        "summary": "deleteDriver",
+        "description": "/drivers/{id}",
+        "parameters": []
+      }
+    },
+    "/drivers/me": {
+      "summary": "getCurrentDriver",
+      "description": "/drivers/me",
+      "get": {
+        "summary": "getCurrentDriver",
+        "description": "/drivers/me",
+        "parameters": []
+      }
+    },
+    "/drivers/add": {
+      "summary": "createDriverProfile",
+      "description": "/drivers/add",
+      "post": {
+        "summary": "createDriverProfile",
+        "description": "/drivers/add",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "",
+                    "example": "8199"
+                  },
+                  "drivingExperience": {
+                    "type": "string",
+                    "description": "",
+                    "example": "12341"
+                  },
+                  "range": {
+                    "type": "string",
+                    "description": "",
+                    "example": "11853.898"
+                  },
+                  "drivingLicense": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "userId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "9605"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "description": "",
+                    "example": "1771785656766"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "description": "",
+                    "example": "1771785656766"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/move-offer/offers": {
+      "summary": "createOffer",
+      "description": "/move-offer/offers",
+      "post": {
+        "summary": "createOffer",
+        "description": "/move-offer/offers",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "",
+                    "example": "9414"
+                  },
+                  "price": {
+                    "type": "string",
+                    "description": "",
+                    "example": "2449"
+                  },
+                  "offeredDate": {
+                    "type": "string",
+                    "description": "",
+                    "example": "2026-02-22 13:40:56"
+                  },
+                  "moveRequestId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "18419"
+                  },
+                  "driverId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "17359"
+                  },
+                  "vehicleId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "17952"
+                  },
+                  "statusId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "15158"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "description": "",
+                    "example": "1771785656778"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "description": "",
+                    "example": "1771785656778"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/move-offer/offers/{id}": {
+      "summary": "updateOffer",
+      "description": "/move-offer/offers/{id}",
+      "put": {
+        "summary": "updateOffer",
+        "description": "/move-offer/offers/{id}",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "",
+                    "example": "27146"
+                  },
+                  "price": {
+                    "type": "string",
+                    "description": "",
+                    "example": "11327"
+                  },
+                  "offeredDate": {
+                    "type": "string",
+                    "description": "",
+                    "example": "2026-02-22 13:40:56"
+                  },
+                  "moveRequestId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "18542"
+                  },
+                  "driverId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "5593"
+                  },
+                  "vehicleId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "29049"
+                  },
+                  "statusId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "24620"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "description": "",
+                    "example": "1771785656781"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "description": "",
+                    "example": "1771785656781"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/move-offer/move-requests/{id}/offers": {
+      "summary": "getOffersByMoveRequest",
+      "description": "/move-offer/move-requests/{id}/offers",
+      "get": {
+        "summary": "getOffersByMoveRequest",
+        "description": "/move-offer/move-requests/{id}/offers",
+        "parameters": []
+      }
+    },
+    "/move-offer/offers/{id}/accept": {
+      "summary": "acceptOffer",
+      "description": "/move-offer/offers/{id}/accept",
+      "put": {
+        "summary": "acceptOffer",
+        "description": "/move-offer/offers/{id}/accept",
+        "parameters": []
+      }
+    },
+    "/move-offer/move-offers/test": {
+      "summary": "test",
+      "description": "/move-offer/move-offers/test",
+      "get": {
+        "summary": "test",
+        "description": "/move-offer/move-offers/test",
+        "parameters": []
+      }
+    },
+    "/move-offer/{id}": {
+      "summary": "deleteDriver",
+      "description": "/move-offer/{id}",
+      "delete": {
+        "summary": "deleteDriver",
+        "description": "/move-offer/{id}",
+        "parameters": []
+      }
+    },
+    "/vehicle/test": {
+      "summary": "test",
+      "description": "/vehicle/test",
+      "get": {
+        "summary": "test",
+        "description": "/vehicle/test",
+        "parameters": []
+      }
+    },
+    "/vehicle/": {
+      "summary": "addVehicle",
+      "description": "/vehicle/",
+      "post": {
+        "summary": "addVehicle",
+        "description": "/vehicle/",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "",
+                    "example": "14154"
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "make": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "year": {
+                    "type": "string",
+                    "description": "",
+                    "example": "22052"
+                  },
+                  "color": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "pricePerKm": {
+                    "type": "string",
+                    "description": "",
+                    "example": "5440"
+                  },
+                  "isActive": {
+                    "type": "string",
+                    "description": "",
+                    "example": "false"
+                  },
+                  "canCarryFurniture": {
+                    "type": "string",
+                    "description": "",
+                    "example": "false"
+                  },
+                  "driverInfoId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "16385"
+                  },
+                  "vehicleTypeId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "16685"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "description": "",
+                    "example": "1771785656793"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "description": "",
+                    "example": "1771785656793"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vehicle/{id}": {
+      "summary": "deleteVehicle",
+      "description": "/vehicle/{id}",
+      "delete": {
+        "summary": "deleteVehicle",
+        "description": "/vehicle/{id}",
+        "parameters": []
+      }
+    },
+    "/vehicle/{id}/toggle-active": {
+      "summary": "toggleVehicle",
+      "description": "/vehicle/{id}/toggle-active",
+      "patch": {
+        "summary": "toggleVehicle",
+        "description": "/vehicle/{id}/toggle-active",
+        "parameters": []
+      }
+    },
+    "/address/all": {
+      "summary": "getAllAddress",
+      "description": "/address/all",
+      "get": {
+        "summary": "getAllAddress",
+        "description": "/address/all",
+        "parameters": []
+      }
+    },
+    "/address/{id}": {
+      "summary": "getAddress",
+      "description": "/address/{id}",
+      "get": {
+        "summary": "getAddress",
+        "description": "/address/{id}",
+        "parameters": []
+      }
+    },
+    "/address/addNewAddress": {
+      "summary": "addNewAddress",
+      "description": "/address/addNewAddress",
+      "post": {
+        "summary": "addNewAddress",
+        "description": "/address/addNewAddress",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "line1": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "line2": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "city": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "stateOrProvince": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "postalOrZipCode": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/address/update/{id}": {
+      "summary": "updateAddress",
+      "description": "/address/update/{id}",
+      "put": {
+        "summary": "updateAddress",
+        "description": "/address/update/{id}",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "line1": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "line2": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "city": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "stateOrProvince": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "postalOrZipCode": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/address/delete/{id}": {
+      "summary": "deleteAddress",
+      "description": "/address/delete/{id}",
+      "delete": {
+        "summary": "deleteAddress",
+        "description": "/address/delete/{id}",
+        "parameters": []
+      }
+    },
+    "/users/allUsers": {
+      "summary": "getAll",
+      "description": "/users/allUsers",
+      "get": {
+        "summary": "getAll",
+        "description": "/users/allUsers",
+        "parameters": []
+      }
+    },
+    "/users/iam/profile/{id}": {
+      "summary": "updateUser",
+      "description": "/users/iam/profile/{id}",
+      "put": {
+        "summary": "updateUser",
+        "description": "/users/iam/profile/{id}",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "userName": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "dob": {
+                    "type": "string",
+                    "description": "",
+                    "example": "2026-02-22"
+                  },
+                  "addressId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "17981"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/all": {
+      "summary": "getAllUsers",
+      "description": "/users/all",
+      "get": {
+        "summary": "getAllUsers",
+        "description": "/users/all",
+        "parameters": []
+      }
+    },
+    "/users/addUser": {
+      "summary": "addNewUser",
+      "description": "/users/addUser",
+      "post": {
+        "summary": "addNewUser",
+        "description": "/users/addUser",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "",
+                "properties": {
+                  "userName": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "",
+                    "example": ""
+                  },
+                  "dob": {
+                    "type": "string",
+                    "description": "",
+                    "example": "2026-02-22"
+                  },
+                  "addressId": {
+                    "type": "string",
+                    "description": "",
+                    "example": "16134"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/seed": {
+      "summary": "seedMoveRequestData",
+      "description": "/users/seed",
+      "get": {
+        "summary": "seedMoveRequestData",
+        "description": "/users/seed",
+        "parameters": []
+      }
+    },
+    "/users/iam/delete/{id}": {
+      "summary": "deleteUser",
+      "description": "/users/iam/delete/{id}",
+      "delete": {
+        "summary": "deleteUser",
+        "description": "/users/iam/delete/{id}",
+        "parameters": []
+      }
+    },
+    "/users/userAddress/{id}": {
+      "summary": "getCurrentUserAddress",
+      "description": "/users/userAddress/{id}",
+      "get": {
+        "summary": "getCurrentUserAddress",
+        "description": "/users/userAddress/{id}",
+        "parameters": []
+      }
+    },
+    "/trips/allTrips": {
+      "summary": "getAllTrips",
+      "description": "/trips/allTrips",
+      "get": {
+        "summary": "getAllTrips",
+        "description": "/trips/allTrips",
+        "parameters": []
+      }
+    },
+    "/trips/{id}": {
+      "summary": "getTripById",
+      "description": "/trips/{id}",
+      "get": {
+        "summary": "getTripById",
+        "description": "/trips/{id}",
+        "parameters": []
+      }
+    }
+  }
+}

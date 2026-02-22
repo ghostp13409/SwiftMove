@@ -5,6 +5,7 @@ package com.swiftmove.userservice.controller;
 import com.swiftmove.userservice.dto.UserRequestDTO;
 import com.swiftmove.userservice.dto.UserResponseDTO;
 import com.swiftmove.userservice.dto.AddressDTO;
+import com.swiftmove.userservice.model.User;
 import com.swiftmove.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ public class UserController {
 
   @GetMapping("/allUsers")
     public ResponseEntity<List<UserResponseDTO>> getAll(){
+      userService.seedUsers();
         return ResponseEntity.ok(userService.findAll());
     }
 
@@ -35,6 +37,13 @@ public class UserController {
         }
         return ResponseEntity.ok(userResponseDTO);
     }
+    @GetMapping("/all")
+    public ResponseEntity<Iterable<User>> getAllUsers(){
+      userService.seedUsers();
+      Iterable<User> users = userService.getAll();
+        System.out.println(users);
+        return ResponseEntity.ok(userService.getAll());
+    }
 
  @PostMapping("/addUser")
     public ResponseEntity<UserResponseDTO> addNewUser(@RequestBody UserRequestDTO userRequestDTO){
@@ -42,7 +51,12 @@ public class UserController {
       UserResponseDTO newUserResponseDto=userService.addNewUser(userRequestDTO);
       return ResponseEntity.status(HttpStatus.CREATED).body(newUserResponseDto);
     }
-
+    // Seed Data
+    @GetMapping("/seed")
+    public ResponseEntity<Void> seedMoveRequestData(){
+        userService.seedUsers();
+        return ResponseEntity.ok().build();
+    }
     @PutMapping("/iam/profile/{id}")
     public ResponseEntity<Void> updateUser( @PathVariable Long id, @RequestBody UserRequestDTO updateUser){
       userService.updateExistingUser(id, updateUser);
