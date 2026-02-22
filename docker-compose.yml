@@ -8,7 +8,11 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: microservice
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # Newer Postgres images (18+) expect a single mount at /var/lib/postgresql
+      # so that the database directory (e.g. main) is managed by pg_ctlcluster and
+      # allows pg_upgrade to work correctly.  See error message and
+      # https://github.com/docker-library/postgres/issues/37
+      - postgres_data:/var/lib/postgresql
     ports:
       - "5432:5432"
 
@@ -53,44 +57,44 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9093
       - KAFKA_CLUSTERS_0_ZOOKEEPER=localhost:2181
 
-  eureka-server:
-    container_name: eureka-server
-    build:
-      context: ./src/backend/eureka-server
-    ports:
-      - "8761:8761"
-    depends_on:
-      - postgres
+  # eureka-server:
+  #   container_name: eureka-server
+  #   build:
+  #     context: ./src/backend/eureka-server
+  #   ports:
+  #     - "8761:8761"
+  #   depends_on:
+  #     - postgres
 
-  config-service:
-    container_name: config-service
-    build:
-      context: ./src/backend/config-service
-    ports:
-      - "8888:8888"
-    depends_on:
-      - eureka-server
+  # config-service:
+  #   container_name: config-service
+  #   build:
+  #     context: ./src/backend/config-service
+  #   ports:
+  #     - "8888:8888"
+  #   depends_on:
+  #     - eureka-server
 
-  api-gateway:
-    container_name: api-gateway
-    build:
-      context: ./src/backend/api-gateway
-    ports:
-      - "8080:8080"
-    depends_on:
-      - eureka-server
-      - config-service
+  # api-gateway:
+  #   container_name: api-gateway
+  #   build:
+  #     context: ./src/backend/api-gateway
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - eureka-server
+  #     - config-service
 
-  user-service:
-    container_name: user-service
-    build:
-      context: ./src/backend/user-service
-    ports:
-      - "8081:8081"
-    depends_on:
-      - eureka-server
-      - config-service
-      - api-gateway
+  # user-service:
+  #   container_name: user-service
+  #   build:
+  #     context: ./src/backend/user-service
+  #   ports:
+  #     - "8081:8081"
+  #   depends_on:
+  #     - eureka-server
+  #     - config-service
+  #     - api-gateway
 
 volumes:
   zookeeper_data:

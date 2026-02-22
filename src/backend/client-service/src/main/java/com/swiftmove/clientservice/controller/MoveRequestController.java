@@ -30,6 +30,7 @@ public class MoveRequestController {
         moveRequestService.addMoveRequest(moveReqPostDto);
         return ResponseEntity.ok().build();
     }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteMoveRequest(@PathVariable Long id){
         moveRequestService.deleteMoveRequest(id);
