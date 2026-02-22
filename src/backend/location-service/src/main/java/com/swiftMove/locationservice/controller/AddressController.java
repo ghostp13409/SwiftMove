@@ -1,6 +1,5 @@
 package com.swiftmove.locationservice.controller;
 
-
 import com.swiftmove.locationservice.dto.AddressDTO;
 import com.swiftmove.locationservice.service.AddressService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import java.util.List;
 @RequestMapping("/address/")
 @RequiredArgsConstructor
 public class AddressController {
-    @Autowired
     private final AddressService addressService;
 
     //get all address

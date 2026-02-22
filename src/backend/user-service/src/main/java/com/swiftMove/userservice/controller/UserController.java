@@ -1,4 +1,4 @@
-package com.swiftmove.userservice.controller;
+package com.swiftMove.userservice.controller;
 
 
 
