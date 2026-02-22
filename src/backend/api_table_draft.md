@@ -93,14 +93,22 @@
 
 # Location Service Microservice
 
-| Method | Path          | Description                          | Auth | Roles       |
-| ------ | ------------- | ------------------------------------ | ---- | ----------- |
-| GET    | /map/distance | Calculate distance between addresses | No   |             |
-| GET    | /address/{id} | Get address details                  | Yes  | User, Admin |
-| POST   | /address      | Add new address                      | Yes  | User, Admin |
-| PUT    | /address/{id} | Update address                       | Yes  | User, Admin |
-| PATCH  | /address/{id} | Partially update address             | Yes  | User, Admin |
-| DELETE | /address/{id} | Delete address                       | Yes  | User, Admin |
+\
+
+## Maps
+
+| Method | Path          | Description                          | Auth | Roles |
+| ------ | ------------- | ------------------------------------ | ---- | ----- |
+| GET    | /map/distance | Calculate distance between addresses | No   |       |
+
+## Address
+
+| Method| Path | Description | Auth | Roles |
+| GET | /address/{id} | Get address details | Yes | User, Admin |
+| POST | /address | Add new address | Yes | User, Admin |
+| PUT | /address/{id} | Update address | Yes | User, Admin |
+| PATCH | /address/{id} | Partially update address | Yes | User, Admin |
+| DELETE | /address/{id} | Delete address | Yes | User, Admin |
 
 # Microservices
 
