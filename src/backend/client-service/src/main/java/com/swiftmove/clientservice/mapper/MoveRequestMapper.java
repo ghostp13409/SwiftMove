@@ -1,13 +1,12 @@
 package com.swiftmove.clientservice.mapper;
 
-
 import com.swiftmove.clientservice.dto.MoveReqPostDto;
 import com.swiftmove.clientservice.dto.MoveRequestDTO;
 import com.swiftmove.clientservice.model.MoveRequest;
 
 public class MoveRequestMapper {
 
-    public static MoveRequestDTO toDTO(MoveRequest moveRequest ){
+    public static MoveRequestDTO toDTO(MoveRequest moveRequest) {
         return new MoveRequestDTO(
                 moveRequest.getId(),
                 moveRequest.getMoveDate(),
@@ -15,11 +14,13 @@ public class MoveRequestMapper {
                 moveRequest.getClientId(),
                 moveRequest.getFromAddressId(),
                 moveRequest.getToAddressId(),
-                moveRequest.getStatus()
+                moveRequest.getStatus(),
+                null // luggageEntries not mapped yet
         );
 
     }
-    public static MoveRequest toMoveRequest(MoveReqPostDto dto){
+
+    public static MoveRequest toMoveRequest(MoveReqPostDto dto) {
         MoveRequest moveRequest = new MoveRequest();
         moveRequest.setMoveDate(dto.getMoveDate());
         moveRequest.setMaxBudget(dto.getMaxBudget());
