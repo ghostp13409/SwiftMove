@@ -25,26 +25,33 @@ public class JwtAuthenticationFilter implements GatewayFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
-        final List<String> apiEndpoints = List.of("/v1/auth/login", "/v1/auth/register", "/eureka");
+        final List<String> publicEndpoints = List.of("/v1/auth/login", "/v1/auth/register", "/v1/auth/logout",
+                "/v1/auth/check", "/eureka");
 
-        Predicate<ServerHttpRequest> isApiSecured = r -> apiEndpoints.stream()
-                .noneMatch(uri -> r.getURI().getPath().contains(uri));
+        // Check if request path matches any public endpoint
+        boolean isPublicEndpoint = publicEndpoints.stream()
+                .anyMatch(endpoint -> request.getURI().getPath().contains(endpoint));
 
-        if (isApiSecured.test(request)) {
-            if (authMissing(request))
-                return onError(exchange);
-
-            String token = request.getHeaders().getOrEmpty("Authorization").get(0);
-
-            if (token != null && token.startsWith("Bearer "))
-                token = token.substring(7);
-
-            try {
-                jwtUtil.validateToken(token);
-            } catch (Exception e) {
-                return onError(exchange);
-            }
+        // If it's a public endpoint, skip JWT validation
+        if (isPublicEndpoint) {
+            return chain.filter(exchange);
         }
+
+        // For secured endpoints, validate JWT token
+        if (authMissing(request))
+            return onError(exchange);
+
+        String token = request.getHeaders().getOrEmpty("Authorization").get(0);
+
+        if (token != null && token.startsWith("Bearer "))
+            token = token.substring(7);
+
+        try {
+            jwtUtil.validateToken(token);
+        } catch (Exception e) {
+            return onError(exchange);
+        }
+
         return chain.filter(exchange);
     }
 

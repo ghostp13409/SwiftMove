@@ -1,176 +1,212 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import { useState } from "react";
+import { StatusBadge } from "../common/StatusBadge";
 
-import Badge from "../ui/badge/Badge";
-
-interface Order {
-  id: number;
-  user: {
-    image: string;
-    name: string;
-    role: string;
-  };
-  projectName: string;
-  team: {
-    images: string[];
-  };
+interface MoveRequest {
+  id: string | number;
+  fromAddress?: { line1: string; city: string };
+  toAddress?: { line1: string; city: string };
+  moveDate: string;
+  maxBudget: number;
   status: string;
-  budget: string;
+  createdAt?: string;
 }
 
-interface MoveRequestItem {
-  driver: string;
-  car: string;
-  date: Date;
-  time: string;
-  status: string;
-  price: number;
+interface MoveRequestTableProps {
+  requests: MoveRequest[];
+  loading?: boolean;
+  onSelect?: (request: MoveRequest) => void;
+  onEdit?: (request: MoveRequest) => void;
+  onDelete?: (id: string | number) => void;
+  selectedId?: string | number;
 }
 
-// Define the table data using the interface
-const tableData: MoveRequestItem[] = [
-  {
-    driver: "John Doe",
-    car: "Toyota Camry",
-    date: new Date("2024-07-01"),
-    time: "10:00 AM",
-    status: "Active",
-    price: 150,
-  },
-  {
-    driver: "Jane Smith",
-    car: "Honda Accord",
-    date: new Date("2024-07-02"),
-    time: "2:00 PM",
-    status: "Confirmed",
-    price: 200,
-  },
-  {
-    driver: "Mike Johnson",
-    car: "Ford Explorer",
-    date: new Date("2024-07-03"),
-    time: "9:00 AM",
-    status: "Cancelled",
-    price: 50,
-  },
-];
+export const MoveRequestTable: React.FC<MoveRequestTableProps> = ({
+  requests,
+  loading = false,
+  onSelect,
+  onEdit,
+  onDelete,
+  selectedId,
+}) => {
+  const [sortBy, setSortBy] = useState<"date" | "budget" | "status">("date");
+  const [filterStatus, setFilterStatus] = useState<string | null>(null);
 
-export default function BasicTableOne() {
+  const filteredRequests = filterStatus
+    ? requests.filter(
+        (r) => r.status.toLowerCase() === filterStatus.toLowerCase(),
+      )
+    : requests;
+
+  const sortedRequests = [...filteredRequests].sort((a, b) => {
+    switch (sortBy) {
+      case "date":
+        return new Date(b.moveDate).getTime() - new Date(a.moveDate).getTime();
+      case "budget":
+        return b.maxBudget - a.maxBudget;
+      case "status":
+        return a.status.localeCompare(b.status);
+      default:
+        return 0;
+    }
+  });
+
+  const uniqueStatuses = Array.from(new Set(requests.map((r) => r.status)));
+
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-      <div className="max-w-full overflow-x-auto">
-        <Table>
-          {/* Table Header */}
-          <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-            <TableRow>
-              <TableCell
-                isHeader
-                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setFilterStatus(null)}
+            className={`px-3 py-1 rounded text-sm transition-colors ${
+              filterStatus === null
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+            }`}
+          >
+            All ({requests.length})
+          </button>
+          {uniqueStatuses.map((status) => {
+            const count = requests.filter((r) => r.status === status).length;
+            return (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                className={`px-3 py-1 rounded text-sm transition-colors ${
+                  filterStatus === status
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                }`}
               >
-                Driver
-              </TableCell>
-              <TableCell
-                isHeader
-                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Car
-              </TableCell>
-              <TableCell
-                isHeader
-                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Date
-              </TableCell>
-              <TableCell
-                isHeader
-                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Time
-              </TableCell>
-              <TableCell
-                isHeader
-                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Status
-              </TableCell>
-              <TableCell
-                isHeader
-                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Price
-              </TableCell>
-              <TableCell
-                isHeader
-                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Action
-              </TableCell>
-            </TableRow>
-          </TableHeader>
+                {status} ({count})
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Table Body */}
-          <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-            {tableData.map((moveRequest) => (
-              <TableRow key={moveRequest.price}>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  <div className="flex items-center gap-3">
-                    {moveRequest.driver}
-                  </div>
-                </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  {moveRequest.car}
-                </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  <div className="flex -space-x-2">
-                    {moveRequest.date.toLocaleDateString()}
-                  </div>
-                </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  <div className="flex -space-x-2">{moveRequest.time}</div>
-                </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  <Badge
-                    size="sm"
-                    color={
-                      moveRequest.status === "Active"
-                        ? "success"
-                        : moveRequest.status === "Pending"
-                          ? "warning"
-                          : "error"
-                    }
-                  >
-                    {moveRequest.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  ${moveRequest.price}
-                </TableCell>
-                <TableCell className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
-                  <div className="flex gap-2">
-                    Confirm
-                    {/* Button for Chat */}
-                    <button className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300">
-                      View Offers
-                    </button>
-                    {moveRequest.status === "Active" && (
-                      <>
-                        <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                          Cancel
+        {/* Sort */}
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as any)}
+          className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-sm"
+        >
+          <option value="date">Sort by Date</option>
+          <option value="budget">Sort by Budget</option>
+          <option value="status">Sort by Status</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+        {loading ? (
+          <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+            Loading move requests...
+          </div>
+        ) : sortedRequests.length === 0 ? (
+          <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+            No move requests found
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  From
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  To
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  Budget
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  Status
+                </th>
+                {(onEdit || onDelete) && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    Actions
+                  </th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {sortedRequests.map((request) => (
+                <tr
+                  key={request.id}
+                  onClick={() => onSelect?.(request)}
+                  className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
+                    selectedId === request.id
+                      ? "bg-blue-50 dark:bg-blue-900"
+                      : ""
+                  }`}
+                >
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-medium">
+                    #{request.id}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    {request.fromAddress?.line1 || "N/A"}
+                    <br />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {request.fromAddress?.city}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    {request.toAddress?.line1 || "N/A"}
+                    <br />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {request.toAddress?.city}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    {new Date(request.moveDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                    ${request.maxBudget}
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <StatusBadge status={request.status} />
+                  </td>
+                  {(onEdit || onDelete) && (
+                    <td className="px-6 py-4 text-sm space-x-2">
+                      {onEdit && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(request);
+                          }}
+                          className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        >
+                          Edit
                         </button>
-                      </>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                      )}
+                      {onDelete && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm("Are you sure?")) {
+                              onDelete(request.id);
+                            }
+                          }}
+                          className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
-}
+};
