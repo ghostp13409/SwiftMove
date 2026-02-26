@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,4 +19,5 @@ public class MoveReqPostDto {
     private Long fromAddressId;
     private Long toAddressId;
     private String status;
+    private List<LuggageEntryDto> luggageEntries;
 }

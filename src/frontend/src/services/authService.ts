@@ -2,8 +2,16 @@ import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role?: string;
 }
 
 export interface LoginResponse {
@@ -22,44 +30,103 @@ export interface GoogleUser {
   role: string;
 }
 
+// Hardcoded test users for development
+const HARDCODED_USERS = {
+  client: {
+    id: '1',
+    email: 'client@example.com',
+    name: 'John Client',
+    role: 'Client',
+  },
+  admin: {
+    id: '2',
+    email: 'admin@example.com',
+    name: 'Jane Admin',
+    role: 'Admin',
+  },
+  driver: {
+    id: '3',
+    email: 'driver@example.com',
+    name: 'Bob Driver',
+    role: 'Driver',
+  },
+};
+
 export const authService = {
-  // Old Login
-  //login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-  //  try {
-  //    const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
-  //    return response.data;
-  //  } catch (error) {
-  //    if (axios.isAxiosError(error)) {
-  //      throw error.response?.data || 'Login failed';
-  //    }
-  //    throw 'Login failed';
-  //  }
-  //},
+  // Email/Password Login
+  login: async (credentials: LoginRequest): Promise<LoginResponse> => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/v1/auth/login`, credentials);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data || 'Login failed';
+      }
+      throw 'Login failed';
+    }
+  },
+
+  // Email/Password Register
+  register: async (credentials: RegisterRequest): Promise<LoginResponse> => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/v1/auth/register`, credentials);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data || 'Registration failed';
+      }
+      throw 'Registration failed';
+    }
+  },
 
   // Init Google OAuth login
   loginWithGoogle: () => {
     window.location.href = `${API_BASE_URL}/auth/google-login`;
   },
 
-  // Check Auth
-  checkAuth: async (): Promise<{isAuthenticated: boolean, user?: GoogleUser }> => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/auth/check`, {
-        withCredentials: true,
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Failed to check auth:', error);
-      return { isAuthenticated: false };
-    }
-  },
-  
+ // Check Auth
+ checkAuth: async (): Promise<{isAuthenticated: boolean, user?: GoogleUser }> => {
+   try {
+     const token = authService.getToken();
+     if (!token) {
+       // Check for hardcoded test user
+       const userType = localStorage.getItem('userType') as keyof typeof HARDCODED_USERS | null;
+       if (userType && userType in HARDCODED_USERS) {
+         return { isAuthenticated: true, user: HARDCODED_USERS[userType] };
+       }
+       return { isAuthenticated: false };
+     }
+
+     const response = await axios.get(`${API_BASE_URL}/v1/auth/check`, {
+       headers: {
+         Authorization: `Bearer ${token}`,
+       },
+     });
+     return response.data;
+   } catch (error) {
+     console.error('Failed to check auth:', error);
+     // Check for hardcoded test user
+     const userType = localStorage.getItem('userType') as keyof typeof HARDCODED_USERS | null;
+     if (userType && userType in HARDCODED_USERS) {
+       return { isAuthenticated: true, user: HARDCODED_USERS[userType] };
+     }
+     return { isAuthenticated: false };
+   }
+ },
+
 
   // Get current user info
   getCurrentUser: async (): Promise<GoogleUser | null> => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/auth/me`, {
-        withCredentials: true,
+      const token = authService.getToken();
+      if (!token) {
+        return null;
+      }
+
+      const response = await axios.get(`${API_BASE_URL}/v1/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       return response.data;
     } catch (error) {
@@ -71,9 +138,14 @@ export const authService = {
 
   logout: async () => {
     try {
-      await axios.post(`${API_BASE_URL}/auth/logout`, {}, {
-        withCredentials: true,
-      });
+      const token = authService.getToken();
+      if (token) {
+        await axios.post(`${API_BASE_URL}/v1/auth/logout`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
     } catch (error) {
       console.error('Failed to logout:', error);
     }
@@ -82,6 +154,7 @@ export const authService = {
     localStorage.removeItem('userId');
     localStorage.removeItem('name');
     localStorage.removeItem('email');
+    localStorage.removeItem('userType');
   },
 
   getToken: (): string | null => {
@@ -123,7 +196,18 @@ export const authService = {
     return !!localStorage.getItem('token');
   },
 
-  isAdmin: (): boolean => {
-    return localStorage.getItem('role') === 'Admin';
-  }
+ isAdmin: (): boolean => {
+   return localStorage.getItem('role') === 'Admin';
+ },
+
+ // Login with hardcoded test user
+ loginAsTestUser: (userType: 'client' | 'admin' | 'driver'): GoogleUser => {
+   const user = HARDCODED_USERS[userType];
+   authService.setAuthData('test-token-' + userType, user.role, parseInt(user.id), user.name, user.email);
+   localStorage.setItem('userType', userType);
+   return user;
+ },
+
+ // Get hardcoded test users (for UI purposes)
+ getTestUsers: () => HARDCODED_USERS,
 };
