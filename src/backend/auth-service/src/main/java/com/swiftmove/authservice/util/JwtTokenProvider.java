@@ -1,5 +1,7 @@
 package com.swiftmove.authservice.util;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -39,6 +41,36 @@ public class JwtTokenProvider {
                 .setExpiration(expiryDate)
                 .signWith(getSignKey(), SignatureAlgorithm.HS512)
                 .compact();
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            return !claims.getExpiration().before(new Date());
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public Long getUserIdFromToken(String token) {
+        Claims claims = parseClaims(token);
+        return claims.get("userId", Long.class);
+    }
+
+    public String getEmailFromToken(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    public String getRoleFromToken(String token) {
+        return parseClaims(token).get("role", String.class);
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith((javax.crypto.SecretKey) getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private Key getSignKey() {

@@ -1,110 +1,106 @@
 package com.swiftmove.authservice.service;
 
+import com.swiftmove.authservice.client.UserCreateRequest;
+import com.swiftmove.authservice.client.UserDTO;
+import com.swiftmove.authservice.client.UserServiceClient;
 import com.swiftmove.authservice.dto.AuthResponse;
 import com.swiftmove.authservice.dto.LoginRequest;
 import com.swiftmove.authservice.dto.RegisterRequest;
 import com.swiftmove.authservice.dto.UserInfoResponse;
-import com.swiftmove.authservice.model.AuthUser;
-import com.swiftmove.authservice.repo.AuthUserRepository;
 import com.swiftmove.authservice.util.JwtTokenProvider;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final AuthUserRepository authUserRepository;
+    private final UserServiceClient userServiceClient;
     private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    @Transactional
     public AuthResponse register(RegisterRequest registerRequest) {
-        // Check if user already exists
-        if (authUserRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already registered");
-        }
-
-        // Create new user
-        AuthUser authUser = AuthUser.builder()
+        // Build the request to send to user-service
+        UserCreateRequest createRequest = UserCreateRequest.builder()
+                .userName(registerRequest.getUsername())
                 .email(registerRequest.getEmail())
-                .passwordHash(passwordEncoder.encode(registerRequest.getPassword()))
+                .password(registerRequest.getPassword())
                 .firstName(registerRequest.getFirstName())
                 .lastName(registerRequest.getLastName())
-                .role(registerRequest.getRole() != null ? registerRequest.getRole() : "Client")
-                .isActive(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .role(registerRequest.getRole() != null ? registerRequest.getRole() : "CLIENT")
                 .build();
 
-        AuthUser savedUser = authUserRepository.save(authUser);
+        UserDTO createdUser;
+        try {
+            createdUser = userServiceClient.createUser(createRequest);
+        } catch (FeignException.Conflict e) {
+            throw new RuntimeException("Email already registered");
+        } catch (FeignException e) {
+            throw new RuntimeException("Failed to create user: " + e.getMessage());
+        }
 
-        // Generate JWT token
-        String token = jwtTokenProvider.generateToken(savedUser.getId(), savedUser.getEmail(), savedUser.getRole());
+        String token = jwtTokenProvider.generateToken(
+                createdUser.getId(),
+                createdUser.getEmail(),
+                createdUser.getRole()
+        );
 
-        // Return response
         return AuthResponse.builder()
                 .token(token)
-                .role(savedUser.getRole())
-                .userId(savedUser.getId())
-                .name(savedUser.getFirstName() + " " + savedUser.getLastName())
-                .email(savedUser.getEmail())
+                .role(createdUser.getRole())
+                .userId(createdUser.getId())
+                .name(createdUser.getFirstName() + " " + createdUser.getLastName())
+                .email(createdUser.getEmail())
                 .build();
     }
 
-    @Transactional
     public AuthResponse login(LoginRequest loginRequest) {
-        // Find user by email
-        Optional<AuthUser> authUserOptional = authUserRepository.findByEmail(loginRequest.getEmail());
+        UserDTO user;
+        try {
+            user = userServiceClient.getUserByEmail(loginRequest.getEmail());
+        } catch (FeignException.NotFound e) {
+            throw new RuntimeException("Invalid email or password");
+        } catch (FeignException e) {
+            throw new RuntimeException("Failed to reach user-service: " + e.getMessage());
+        }
 
-        if (authUserOptional.isEmpty()) {
+        // Validate password against the stored hash returned by user-service
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid email or password");
         }
 
-        AuthUser authUser = authUserOptional.get();
+        String token = jwtTokenProvider.generateToken(
+                user.getId(),
+                user.getEmail(),
+                user.getRole()
+        );
 
-        // Check password
-        if (!passwordEncoder.matches(loginRequest.getPassword(), authUser.getPasswordHash())) {
-            throw new RuntimeException("Invalid email or password");
-        }
-
-        // Check if user is active
-        if (!authUser.getIsActive()) {
-            throw new RuntimeException("User account is inactive");
-        }
-
-        // Generate JWT token
-        String token = jwtTokenProvider.generateToken(authUser.getId(), authUser.getEmail(), authUser.getRole());
-
-        // Return response
         return AuthResponse.builder()
                 .token(token)
-                .role(authUser.getRole())
-                .userId(authUser.getId())
-                .name(authUser.getFirstName() + " " + authUser.getLastName())
-                .email(authUser.getEmail())
+                .role(user.getRole())
+                .userId(user.getId())
+                .name(user.getFirstName() + " " + user.getLastName())
+                .email(user.getEmail())
                 .build();
     }
 
     public UserInfoResponse getUserInfo(Long userId) {
-        Optional<AuthUser> authUserOptional = authUserRepository.findById(userId);
-
-        if (authUserOptional.isEmpty()) {
+        UserDTO user;
+        try {
+            user = userServiceClient.getUserById(userId);
+        } catch (FeignException.NotFound e) {
             throw new RuntimeException("User not found");
+        } catch (FeignException e) {
+            throw new RuntimeException("Failed to reach user-service: " + e.getMessage());
         }
 
-        AuthUser authUser = authUserOptional.get();
-
         return UserInfoResponse.builder()
-                .id(authUser.getId())
-                .email(authUser.getEmail())
-                .name(authUser.getFirstName() + " " + authUser.getLastName())
-                .role(authUser.getRole())
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getFirstName() + " " + user.getLastName())
+                .role(user.getRole())
                 .build();
     }
 }

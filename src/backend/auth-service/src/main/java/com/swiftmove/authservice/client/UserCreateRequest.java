@@ -1,19 +1,19 @@
-package com.swiftmove.authservice.dto;
+package com.swiftmove.authservice.client;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
 @Builder
-public class RegisterRequest {
-    private String username;
-    private String email;
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserCreateRequest {
+    private String userName;
     private String password;
     private String firstName;
     private String lastName;
+    private String email;
     private String role;
 }
