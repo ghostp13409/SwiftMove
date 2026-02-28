@@ -1,39 +1,27 @@
-package com.swiftmove.userservice.dto;
+package com.swiftmove.authservice.client;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
+@Builder
 @NoArgsConstructor
-public class UserResponseDTO {
-
-    public Long id;
-
+@AllArgsConstructor
+public class UserDTO {
+    private Long id;
     private String username;
-
     private String firstName;
-
     private String lastName;
-
     private String email;
-
     private String passwordHash;
-
     private LocalDate dob;
-
     private Float rating;
-
     private String role;
-
     private Long addressId;
-
     private LocalDate createdAt;
-
     private LocalDate updatedAt;
 }
