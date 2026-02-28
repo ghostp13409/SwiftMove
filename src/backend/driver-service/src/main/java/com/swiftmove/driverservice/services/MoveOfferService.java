@@ -59,8 +59,4 @@ public class MoveOfferService implements IMoveOfferService {
     public MoveOffer getOfferById(Long id) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    public MoveOffer getOfferById(Long id) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }
