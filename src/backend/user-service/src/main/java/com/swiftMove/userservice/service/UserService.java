@@ -35,9 +35,8 @@ public class UserService {
         // Bcrypt Hashing
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
 
-        // TODO: REMOVE THIS FOR PROD
-        // IMPORTANT JUST SETTING FOR TESTING PURPOSE ROLE
-        user.setRole("CLIENT");
+        // Use role from request, default to CLIENT if not provided
+        user.setRole(dto.getRole() != null && !dto.getRole().isBlank() ? dto.getRole().toUpperCase() : "CLIENT");
         user.setCreatedAt(LocalDate.now());
         user.setUpdatedAt(LocalDate.now());
 
@@ -63,6 +62,14 @@ public class UserService {
     public UserResponseDTO findById(long id) {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return UserMapper.userToResponseDto(user);
+    }
+
+    // GetByEmail
+    public UserResponseDTO findByEmail(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with email: " + email));
 
         return UserMapper.userToResponseDto(user);
     }

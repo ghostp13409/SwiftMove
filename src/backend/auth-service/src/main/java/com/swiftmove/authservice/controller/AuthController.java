@@ -1,18 +1,29 @@
 package com.swiftmove.authservice.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.swiftmove.authservice.dto.AuthResponse;
 import com.swiftmove.authservice.dto.LoginRequest;
 import com.swiftmove.authservice.dto.RegisterRequest;
 import com.swiftmove.authservice.dto.UserInfoResponse;
 import com.swiftmove.authservice.service.AuthService;
+import com.swiftmove.authservice.util.JwtTokenProvider;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
-
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -20,6 +31,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
@@ -27,6 +39,7 @@ public class AuthController {
             AuthResponse authResponse = authService.login(loginRequest);
             return ResponseEntity.ok(authResponse);
         } catch (RuntimeException e) {
+            log.error("Login failed for email {}: {}", loginRequest.getEmail(), e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
@@ -37,6 +50,7 @@ public class AuthController {
             AuthResponse authResponse = authService.register(registerRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
         } catch (RuntimeException e) {
+            log.error("Register failed for email {}: {}", registerRequest.getEmail(), e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -52,17 +66,15 @@ public class AuthController {
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         Map<String, Object> response = new HashMap<>();
 
-        if (authHeader == null || authHeader.isEmpty()) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             response.put("isAuthenticated", false);
             return ResponseEntity.ok(response);
         }
 
-        // In a real implementation, we would validate the JWT here
-        // For now, we just check if it exists
         try {
-            // Extract user info from token (simplified - in production use JwtUtil to
-            // parse)
-            response.put("isAuthenticated", true);
+            String token = authHeader.substring(7);
+            boolean valid = jwtTokenProvider.validateToken(token);
+            response.put("isAuthenticated", valid);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("isAuthenticated", false);
@@ -73,19 +85,15 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        if (authHeader == null || authHeader.isEmpty()) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         try {
-            // In a real implementation, we would parse the JWT and extract user info
-            // This is a simplified version
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", "1");
-            response.put("email", "user@example.com");
-            response.put("name", "User Name");
-            response.put("role", "Client");
-            return ResponseEntity.ok(response);
+            String token = authHeader.substring(7);
+            Long userId = jwtTokenProvider.getUserIdFromToken(token);
+            UserInfoResponse userInfo = authService.getUserInfo(userId);
+            return ResponseEntity.ok(userInfo);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
