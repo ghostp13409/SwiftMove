@@ -1,0 +1,10 @@
+# Ignore IntelliJ IDEA project files and folders
+.idea/
+*.iml
+
+# Cache and other generated files
+out/
+
+# OS files
+.DS_Store
+Thumbs.db
