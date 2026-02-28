@@ -30,6 +30,10 @@ export interface GoogleUser {
   role: string;
 }
 
+
+// Auth API Base
+const AUTH_API_BASE = `${API_BASE_URL}/auth`;
+
 // Hardcoded test users for development
 const HARDCODED_USERS = {
   client: {
@@ -56,7 +60,7 @@ export const authService = {
   // Email/Password Login
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/v1/auth/login`, credentials);
+      const response = await axios.post(`${AUTH_API_BASE}/login`, credentials);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -69,7 +73,7 @@ export const authService = {
   // Email/Password Register
   register: async (credentials: RegisterRequest): Promise<LoginResponse> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/v1/auth/register`, credentials);
+      const response = await axios.post(`${AUTH_API_BASE}/register`, credentials);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -81,7 +85,7 @@ export const authService = {
 
   // Init Google OAuth login
   loginWithGoogle: () => {
-    window.location.href = `${API_BASE_URL}/auth/google-login`;
+    window.location.href = `${AUTH_API_BASE}/google-login`;
   },
 
  // Check Auth
@@ -97,7 +101,7 @@ export const authService = {
        return { isAuthenticated: false };
      }
 
-     const response = await axios.get(`${API_BASE_URL}/v1/auth/check`, {
+     const response = await axios.get(`${AUTH_API_BASE}/check`, {
        headers: {
          Authorization: `Bearer ${token}`,
        },
@@ -123,7 +127,7 @@ export const authService = {
         return null;
       }
 
-      const response = await axios.get(`${API_BASE_URL}/v1/auth/me`, {
+      const response = await axios.get(`${AUTH_API_BASE}/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -140,7 +144,7 @@ export const authService = {
     try {
       const token = authService.getToken();
       if (token) {
-        await axios.post(`${API_BASE_URL}/v1/auth/logout`, {}, {
+        await axios.post(`${AUTH_API_BASE}/logout`, {}, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

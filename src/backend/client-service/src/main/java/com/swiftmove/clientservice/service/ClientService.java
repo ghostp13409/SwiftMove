@@ -40,6 +40,7 @@ public class ClientService {
 
     public UserResponseDTO getClientById(Long id){
         UserResponseDTO user= userClient.getById(id);
+        System.out.println(user);
         String role=user.getRole();
         if (!role.equals("CLIENT") && !role.equals("ADMIN"))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"ACCESS DENIED");
@@ -52,6 +53,13 @@ public class ClientService {
         if(user==null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"client not found");
 
+        if(user.getRole().equals("ADMIN"))
+            return moveRequestRepo
+                    .findAll()
+                    .stream()
+                    .map(MoveRequestMapper::toDTO)
+                    .toList();
+
         return moveRequestRepo
                 .getAllMoveRequestsByClientId(id)
                 .stream()
@@ -61,7 +69,7 @@ public class ClientService {
     }
 
     public List<MoveRequestDTO> getAllActiveMovesClient(Long id){
-        List<MoveRequestDTO> allMoves=getAllMovesClient(id);
+        List<MoveRequestDTO> allMoves= getAllMovesClient(id);
         List<MoveRequestDTO> activeMoves=new ArrayList<>();
 
         for (MoveRequestDTO dto : allMoves){
