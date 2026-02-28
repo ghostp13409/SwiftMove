@@ -10,6 +10,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
+    @Query(value = "SELECT * FROM users WHERE email = ?1", nativeQuery = true)
     Optional<User> findByEmail(String email);
 
     // Get All Users

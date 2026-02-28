@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
-    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/0a2f3334-f48b-48eb-9740-87e1680159de/console.sql" value="0a2f3334-f48b-48eb-9740-87e1680159de" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/424c9647-2b6c-4115-8a6c-d975225ebffe/console.sql" value="424c9647-2b6c-4115-8a6c-d975225ebffe" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/424c9647-2b6c-4115-8a6c-d975225ebffe/console_1.sql" value="424c9647-2b6c-4115-8a6c-d975225ebffe" />
     <file url="file://$PROJECT_DIR$/user-service/src/main/java/com/swiftmove/userservice/repo/UserRepo.java" value="424c9647-2b6c-4115-8a6c-d975225ebffe" />
