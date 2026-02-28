@@ -1,27 +1,113 @@
+import { useEffect, useState } from "react";
 import { FileText, Route, DollarSign, Clock } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import StatusBadge from "@/components/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockMoveRequests, mockMoveOffers, mockMoveTrips } from "@/data/mockData";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { clientService } from "@/services/clientService";
+import { moveOfferService } from "@/services/moveOfferService";
+import { tripService } from "@/services/tripService";
+import type { MoveRequest, MoveOffer, MoveTrip } from "@/types";
 
 const ClientDashboard = () => {
-  const myRequests = mockMoveRequests.filter((r) => r.clientId === 1);
-  const pendingRequests = myRequests.filter((r) => r.status === "PENDING").length;
-  const myTrips = mockMoveTrips.filter((t) => t.clientName === "John Doe");
-  const activeOffers = mockMoveOffers.filter((o) => myRequests.some((r) => r.id === o.moveRequestId && o.status === "PENDING")).length;
+  const { userId, name } = useAuth();
+  const [myRequests, setMyRequests] = useState<MoveRequest[]>([]);
+  const [myOffers, setMyOffers] = useState<MoveOffer[]>([]);
+  const [myTrips, setMyTrips] = useState<MoveTrip[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const displayName = name?.split(" ")[0] || "there";
+
+  useEffect(() => {
+    if (!userId) return;
+    const fetchData = async () => {
+      try {
+        const [activeReqs, allTrips] = await Promise.allSettled([
+          clientService.getActiveRequests(userId),
+          tripService.getTripsByClient(userId),
+        ]);
+
+        const reqData: MoveRequest[] =
+          activeReqs.status === "fulfilled"
+            ? (activeReqs.value as MoveRequest[])
+            : [];
+        const tripData: MoveTrip[] =
+          allTrips.status === "fulfilled" ? allTrips.value : [];
+
+        setMyRequests(reqData);
+        setMyTrips(tripData);
+
+        // Fetch offers for each request
+        if (reqData.length > 0) {
+          const offersResults = await Promise.allSettled(
+            reqData.map((r) => moveOfferService.getOffersByMoveRequest(r.id)),
+          );
+          const allOffers = offersResults
+            .filter((r) => r.status === "fulfilled")
+            .flatMap((r) => (r as PromiseFulfilledResult<MoveOffer[]>).value);
+          setMyOffers(allOffers);
+        }
+      } catch (err) {
+        console.error("Failed to load client dashboard data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [userId]);
+
+  const pendingRequests = myRequests.filter(
+    (r) => r.status === "PENDING",
+  ).length;
+  const activeOffers = myOffers.filter((o) => o.status === "PENDING").length;
+  const scheduledTrips = myTrips.filter((t) => t.status === "SCHEDULED").length;
+  const totalSpent = myTrips
+    .filter((t) => t.status === "COMPLETED")
+    .reduce((s, t) => s + (t.price || 0), 0);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold">Welcome back, John 👋</h1>
-        <p className="text-muted-foreground text-sm mt-1">Here's what's happening with your moves</p>
+        <h1 className="text-2xl font-bold">Welcome back, {displayName} 👋</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          Here's what's happening with your moves
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard title="Active Requests" value={pendingRequests} icon={<FileText className="w-4 h-4" />} description="Awaiting offers" />
-        <StatsCard title="Pending Offers" value={activeOffers} icon={<Clock className="w-4 h-4" />} description="Review & accept" />
-        <StatsCard title="Upcoming Trips" value={myTrips.filter((t) => t.status === "SCHEDULED").length} icon={<Route className="w-4 h-4" />} description="Scheduled moves" />
-        <StatsCard title="Total Spent" value={`$${myTrips.reduce((s, t) => s + t.price, 0)}`} icon={<DollarSign className="w-4 h-4" />} description="All time" />
+        <StatsCard
+          title="Active Requests"
+          value={pendingRequests}
+          icon={<FileText className="w-4 h-4" />}
+          description="Awaiting offers"
+        />
+        <StatsCard
+          title="Pending Offers"
+          value={activeOffers}
+          icon={<Clock className="w-4 h-4" />}
+          description="Review & accept"
+        />
+        <StatsCard
+          title="Upcoming Trips"
+          value={scheduledTrips}
+          icon={<Route className="w-4 h-4" />}
+          description="Scheduled moves"
+        />
+        <StatsCard
+          title="Total Spent"
+          value={`$${totalSpent.toLocaleString()}`}
+          icon={<DollarSign className="w-4 h-4" />}
+          description="Completed trips"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -30,18 +116,31 @@ const ClientDashboard = () => {
             <CardTitle className="text-base">Recent Move Requests</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {myRequests.slice(0, 3).map((req) => (
-              <div key={req.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-                <div>
-                  <p className="text-sm font-medium">{req.fromAddress.city} → {req.toAddress.city}</p>
-                  <p className="text-xs text-muted-foreground">{req.moveDate} · Budget: ${req.maxBudget}</p>
+            {myRequests.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No active move requests.
+              </p>
+            ) : (
+              myRequests.slice(0, 3).map((req) => (
+                <div
+                  key={req.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
+                >
+                  <div>
+                    <p className="text-sm font-medium">
+                      {req.fromAddress?.city || "—"} →{" "}
+                      {req.toAddress?.city || "—"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {req.moveDate} · Budget: ${req.maxBudget}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={req.status} />
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{req.offersCount} offers</span>
-                  <StatusBadge status={req.status} />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -50,15 +149,27 @@ const ClientDashboard = () => {
             <CardTitle className="text-base">Latest Offers</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {mockMoveOffers.filter((o) => myRequests.some((r) => r.id === o.moveRequestId)).slice(0, 3).map((offer) => (
-              <div key={offer.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-                <div>
-                  <p className="text-sm font-medium">{offer.driverName}</p>
-                  <p className="text-xs text-muted-foreground">{offer.vehicleInfo} · ${offer.price}</p>
+            {myOffers.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No offers yet.</p>
+            ) : (
+              myOffers.slice(0, 3).map((offer) => (
+                <div
+                  key={offer.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
+                >
+                  <div>
+                    <p className="text-sm font-medium">
+                      {offer.driverName || `Driver #${offer.driverId}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {offer.vehicleInfo || `Vehicle #${offer.vehicleId}`} · $
+                      {offer.price}
+                    </p>
+                  </div>
+                  <StatusBadge status={offer.status} />
                 </div>
-                <StatusBadge status={offer.status} />
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
       </div>

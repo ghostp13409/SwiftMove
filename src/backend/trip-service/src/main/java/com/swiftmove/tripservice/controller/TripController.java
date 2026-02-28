@@ -1,19 +1,21 @@
 package com.swiftmove.tripservice.controller;
 
-import com.swiftmove.tripservice.dto.TripDTO;
-import com.swiftmove.tripservice.service.TripService;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.swiftmove.tripservice.dto.TripDTO;
+import com.swiftmove.tripservice.service.TripService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/trips/")
+@RequestMapping("/trips")
 public class TripController {
     private final TripService tripService;
 
@@ -29,5 +31,19 @@ public class TripController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(trip);
+    }
+
+    // GET /trips/client/{clientId} - Get trips for a client
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<TripDTO>> getTripsForClient(@PathVariable Long clientId) {
+        List<TripDTO> trips = tripService.getTripsByClient(clientId);
+        return ResponseEntity.ok(trips);
+    }
+
+    // GET /trips/driver/{driverId} - Get trips for a driver
+    @GetMapping("/driver/{driverId}")
+    public ResponseEntity<List<TripDTO>> getTripsForDriver(@PathVariable Long driverId) {
+        List<TripDTO> trips = tripService.getTripsByDriver(driverId);
+        return ResponseEntity.ok(trips);
     }
 }

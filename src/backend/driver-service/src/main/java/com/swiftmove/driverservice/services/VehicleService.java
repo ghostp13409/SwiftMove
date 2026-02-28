@@ -22,6 +22,11 @@ public class VehicleService implements IVehicleService {
     }
 
     @Override
+    public List<Vehicle> getAllVehicles() {
+        return vehicleRepository.findAll();
+    }
+
+    @Override
     public Vehicle addVehicle(Vehicle vehicle) {
         return vehicleRepository.save(vehicle);
     }

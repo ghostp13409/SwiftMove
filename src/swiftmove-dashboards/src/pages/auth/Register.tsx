@@ -1,19 +1,58 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Package } from "lucide-react";
+import { Package, Eye, EyeOff, Loader2 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Register = () => {
-  const [role, setRole] = useState<"client" | "driver">("client");
+  const [role, setRole] = useState<"Client" | "Driver">("Client");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const { toast } = useToast();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(`/${role}`);
+    if (!firstName || !lastName || !email || !password) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await register(email, password, firstName, lastName, role);
+      if (role === "Driver") navigate("/driver");
+      else navigate("/client");
+    } catch (err: any) {
+      const msg =
+        err?.error || err?.message || "Registration failed. Please try again.";
+      toast({
+        title: "Registration Failed",
+        description: msg,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -36,13 +75,14 @@ const Register = () => {
           </CardHeader>
           <CardContent>
             <div className="flex rounded-lg bg-secondary p-1 mb-6">
-              {(["client", "driver"] as const).map((r) => (
+              {(["Client", "Driver"] as const).map((r) => (
                 <button
                   key={r}
+                  type="button"
                   onClick={() => setRole(r)}
                   className={`flex-1 text-sm py-2 rounded-md font-medium transition-all ${role === r ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  {r === "client" ? "I need a mover" : "I'm a driver"}
+                  {r === "Client" ? "I need a mover" : "I'm a driver"}
                 </button>
               ))}
             </div>
@@ -51,43 +91,84 @@ const Register = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>First Name</Label>
-                  <Input placeholder="John" />
+                  <Input
+                    placeholder="John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    disabled={isLoading}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Last Name</Label>
-                  <Input placeholder="Doe" />
+                  <Input
+                    placeholder="Doe"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    disabled={isLoading}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Email</Label>
-                <Input type="email" placeholder="you@example.com" />
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  autoComplete="email"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Password</Label>
-                <Input type="password" placeholder="••••••••" />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
               </div>
 
-              {role === "driver" && (
-                <>
-                  <div className="space-y-2">
-                    <Label>License Number</Label>
-                    <Input placeholder="DL-XX-XXXXX" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Driving Experience (years)</Label>
-                    <Input type="number" placeholder="5" />
-                  </div>
-                </>
-              )}
-
-              <Button type="submit" className="w-full gradient-brand text-primary-foreground border-0">
-                Create Account
+              <Button
+                type="submit"
+                className="w-full gradient-brand text-primary-foreground border-0"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating
+                    account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </form>
 
             <p className="text-center text-sm text-muted-foreground mt-4">
               Already have an account?{" "}
-              <Link to="/login" className="text-primary hover:underline font-medium">Sign in</Link>
+              <Link
+                to="/login"
+                className="text-primary hover:underline font-medium"
+              >
+                Sign in
+              </Link>
             </p>
           </CardContent>
         </Card>
