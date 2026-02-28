@@ -1,7 +1,11 @@
 import faker
 from faker import Faker
+import bcrypt
 
 fake = Faker()
+
+# Generate Query for deleteing all existing data
+
 
 # Generate addresses
 addresses = []
@@ -17,15 +21,17 @@ for i in range(1, 201):
     }
     addresses.append(addr)
 
-# Generate users
+# Generate users (ids are generated internally for relationship purposes but not inserted explicitly, database will auto-assign)
 users = []
 roles = ['CLIENT', 'DRIVER', 'ADMIN']
 for i in range(1, 81):
     role = fake.random_element(roles)
+    # bcrypt hash for constant password 'test'
+    pwd_hash = bcrypt.hashpw(b"test", bcrypt.gensalt()).decode('utf-8')
     user = {
-        'id': i,
+        'id': i,  # used internally for references; will not be written into SQL
         'username': fake.user_name(),
-        'password_hash': fake.sha256(),
+        'password_hash': pwd_hash,
         'f_name': fake.first_name(),
         'l_name': fake.last_name(),
         'email': fake.email(),
@@ -35,7 +41,44 @@ for i in range(1, 81):
         'address_id': fake.random_int(1, 200)
     }
     users.append(user)
-
+#  Add Manual Entries for Admin, Driver and Client Test Users
+admin_user = {
+    'id': 81,  # used internally for references; will not be written into SQL
+    'username': 'admin',
+    'password_hash': bcrypt.hashpw(b"test", bcrypt.gensalt()).decode('utf-8'),
+    'f_name': 'Test',
+    'l_name': 'Admin',
+    'email': 'test@admin.com',
+    'dob': fake.date_of_birth(minimum_age=30, maximum_age=50),
+    'rating': None,
+    'role': 'ADMIN',
+    'address_id': fake.random_int(1, 200)
+}
+driver_user = {
+    'id': 82,  # used internally for references; will not be written into SQL
+    'username': 'admin_user',
+    'password_hash': bcrypt.hashpw(b"test", bcrypt.gensalt()).decode('utf-8'),
+    'f_name': 'Test',
+    'l_name': 'Driver',
+    'email': 'test@driver.com',
+    'dob': fake.date_of_birth(minimum_age=30, maximum_age=50),
+    'rating': None,
+    'role': 'DRIVER',
+    'address_id': fake.random_int(1, 200)
+}
+client_user = {
+    'id': 83,  # used internally for references; will not be written into SQL
+    'username': 'admin_client',
+    'password_hash': bcrypt.hashpw(b"test", bcrypt.gensalt()).decode('utf-8'),
+    'f_name': 'Test',
+    'l_name': 'Client',
+    'email': 'test@client.com',
+    'dob': fake.date_of_birth(minimum_age=30, maximum_age=50),
+    'rating': None,
+    'role': 'CLIENT',
+    'address_id': fake.random_int(1, 200)
+}
+users.extend([admin_user, driver_user, client_user])
 
 # Driver infos
 drivers = [u for u in users if u['role'] == 'DRIVER']
@@ -183,12 +226,12 @@ with open('Scripts/seed_data.sql', 'w') as f:
         addr_values.append(val)
     f.write(",\n".join(addr_values) + ";\n\n")
 
-    # Users
-    f.write("INSERT INTO users (id, username, password_hash, f_name, l_name, email, dob, rating, role, address_id) VALUES\n")
+    # Users (omit id column; database will auto-generate)
+    f.write("INSERT INTO users (username, password_hash, f_name, l_name, email, dob, rating, role, address_id) VALUES\n")
     user_values = []
     for u in users:
         rating = str(u['rating']) if u['rating'] else 'NULL'
-        val = f"({u['id']}, '{u['username']}', '{u['password_hash']}', '{u['f_name']}', '{u['l_name']}', '{u['email']}', '{u['dob']}', {rating}, '{u['role']}', {u['address_id']})"
+        val = f"('{u['username']}', '{u['password_hash']}', '{u['f_name']}', '{u['l_name']}', '{u['email']}', '{u['dob']}', {rating}, '{u['role']}', {u['address_id']})"
         user_values.append(val)
     f.write(",\n".join(user_values) + ";\n\n")
 
