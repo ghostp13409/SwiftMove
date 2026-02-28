@@ -51,4 +51,16 @@ public class MoveOfferService implements IMoveOfferService {
 
         return moveOfferRepository.save(offer);
     }
+
+    public List<MoveOffer> getAllOffers() {
+        return moveOfferRepository.findAll();
+    }
+
+    public MoveOffer getOfferById(Long id) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MoveOffer getOfferById(Long id) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
