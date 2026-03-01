@@ -38,10 +38,10 @@ const Login = () => {
     try {
       await login(email, password);
       // role is set in AuthContext after login
-      const storedRole = localStorage.getItem("role");
-      if (storedRole === "Client") navigate("/client");
-      else if (storedRole === "Driver") navigate("/driver");
-      else if (storedRole === "Admin") navigate("/admin");
+      const storedRole = localStorage.getItem("role")?.toLowerCase();
+      if (storedRole === "client") navigate("/client");
+      else if (storedRole === "driver") navigate("/driver");
+      else if (storedRole === "admin") navigate("/admin");
       else navigate("/client");
     } catch (err: any) {
       const msg = err?.error || err?.message || "Invalid email or password.";

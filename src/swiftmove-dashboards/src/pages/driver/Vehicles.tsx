@@ -83,10 +83,18 @@ const Vehicles = () => {
 
   const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!driver || !make || !model || !year || !vehicleTypeId || !pricePerKm) {
+    const errors: string[] = [];
+    if (!driver)
+      errors.push("Driver profile not loaded. Please refresh the page.");
+    if (!make.trim()) errors.push("Make is required.");
+    if (!model.trim()) errors.push("Model is required.");
+    if (!year.trim()) errors.push("Year is required.");
+    if (!vehicleTypeId.trim()) errors.push("Vehicle Type is required.");
+    if (!pricePerKm.trim()) errors.push("Price per km is required.");
+    if (errors.length > 0) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields.",
+        description: errors.join(" "),
         variant: "destructive",
       });
       return;
