@@ -1,6 +1,17 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
+// Normalize roles to a consistent capitalized format used throughout the app
+const normalizeRole = (role: string | null): string | null => {
+  if (!role) return null;
+  const lower = role.toLowerCase();
+  if (lower === 'client') return 'Client';
+  if (lower === 'driver') return 'Driver';
+  if (lower === 'admin') return 'Admin';
+  // if it's already one of the expected forms just return as-is
+  return role;
+};
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -60,7 +71,9 @@ export const authService = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     try {
       const response = await axios.post(`${AUTH_API_BASE}/login`, credentials);
-      return response.data;
+      const data: LoginResponse = response.data;
+      data.role = normalizeRole(data.role) || data.role;
+      return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw error.response?.data || 'Login failed';
@@ -73,7 +86,9 @@ export const authService = {
   register: async (credentials: RegisterRequest): Promise<LoginResponse> => {
     try {
       const response = await axios.post(`${AUTH_API_BASE}/register`, credentials);
-      return response.data;
+      const data: LoginResponse = response.data;
+      data.role = normalizeRole(data.role) || data.role;
+      return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw error.response?.data || 'Registration failed';
@@ -87,36 +102,41 @@ export const authService = {
     window.location.href = `${AUTH_API_BASE}/google-login`;
   },
 
- // Check Auth
- checkAuth: async (): Promise<{isAuthenticated: boolean, user?: GoogleUser }> => {
-   try {
-     const token = authService.getToken();
-     if (!token) {
-       // Check for hardcoded test user
-       const userType = localStorage.getItem('userType') as keyof typeof HARDCODED_USERS | null;
-       if (userType && userType in HARDCODED_USERS) {
-         return { isAuthenticated: true, user: HARDCODED_USERS[userType] };
-       }
-       return { isAuthenticated: false };
-     }
+  // Check Auth
+  checkAuth: async (): Promise<{ isAuthenticated: boolean; user?: GoogleUser }> => {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        // Check for hardcoded test user
+        const userType =
+          localStorage.getItem('userType') as keyof typeof HARDCODED_USERS | null;
+        if (userType && userType in HARDCODED_USERS) {
+          return { isAuthenticated: true, user: HARDCODED_USERS[userType] };
+        }
+        return { isAuthenticated: false };
+      }
 
-     const response = await axios.get(`${AUTH_API_BASE}/check`, {
-       headers: {
-         Authorization: `Bearer ${token}`,
-       },
-     });
-     return response.data;
-   } catch (error) {
-     console.error('Failed to check auth:', error);
-     // Check for hardcoded test user
-     const userType = localStorage.getItem('userType') as keyof typeof HARDCODED_USERS | null;
-     if (userType && userType in HARDCODED_USERS) {
-       return { isAuthenticated: true, user: HARDCODED_USERS[userType] };
-     }
-     return { isAuthenticated: false };
-   }
- },
-
+      const response = await axios.get(`${AUTH_API_BASE}/check`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const result = response.data as { isAuthenticated: boolean; user?: GoogleUser };
+      if (result.user && result.user.role) {
+        result.user.role = normalizeRole(result.user.role) || result.user.role;
+      }
+      return result;
+    } catch (error) {
+      console.error('Failed to check auth:', error);
+      // Check for hardcoded test user
+      const userType =
+        localStorage.getItem('userType') as keyof typeof HARDCODED_USERS | null;
+      if (userType && userType in HARDCODED_USERS) {
+        return { isAuthenticated: true, user: HARDCODED_USERS[userType] };
+      }
+      return { isAuthenticated: false };
+    }
+  },
 
   // Get current user info
   getCurrentUser: async (): Promise<GoogleUser | null> => {
@@ -131,23 +151,30 @@ export const authService = {
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.data;
+      const user: GoogleUser = response.data;
+      if (user.role) {
+        user.role = normalizeRole(user.role) || user.role;
+      }
+      return user;
     } catch (error) {
       console.error('Failed to get current user:', error);
       return null;
     }
   },
 
-
   logout: async () => {
     try {
       const token = authService.getToken();
       if (token) {
-        await axios.post(`${AUTH_API_BASE}/logout`, {}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        await axios.post(
+          `${AUTH_API_BASE}/logout`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
       }
     } catch (error) {
       console.error('Failed to logout:', error);
@@ -165,7 +192,8 @@ export const authService = {
   },
 
   getRole: (): string | null => {
-    return localStorage.getItem('role');
+    const role = localStorage.getItem('role');
+    return normalizeRole(role);
   },
 
   getUserId: (): number | null => {
@@ -181,9 +209,16 @@ export const authService = {
     return localStorage.getItem('email');
   },
 
-  setAuthData: (token: string, role: string, userId?: number, name?: string, email?: string) => {
+  setAuthData: (
+    token: string,
+    role: string,
+    userId?: number,
+    name?: string,
+    email?: string,
+  ) => {
+    const normalizedRole = normalizeRole(role) || role;
     localStorage.setItem('token', token);
-    localStorage.setItem('role', role);
+    localStorage.setItem('role', normalizedRole);
     if (userId) {
       localStorage.setItem('userId', userId.toString());
     }
@@ -199,18 +234,26 @@ export const authService = {
     return !!localStorage.getItem('token');
   },
 
- isAdmin: (): boolean => {
-   return localStorage.getItem('role') === 'Admin';
- },
+  isAdmin: (): boolean => {
+    return authService.getRole() === 'Admin';
+  },
 
- // Login with hardcoded test user
- loginAsTestUser: (userType: 'client' | 'admin' | 'driver'): GoogleUser => {
-   const user = HARDCODED_USERS[userType];
-   authService.setAuthData('test-token-' + userType, user.role, parseInt(user.id), user.name, user.email);
-   localStorage.setItem('userType', userType);
-   return user;
- },
+  // Login with hardcoded test user
+  loginAsTestUser: (
+    userType: 'client' | 'admin' | 'driver',
+  ): GoogleUser => {
+    const user = HARDCODED_USERS[userType];
+    authService.setAuthData(
+      'test-token-' + userType,
+      user.role,
+      parseInt(user.id),
+      user.name,
+      user.email,
+    );
+    localStorage.setItem('userType', userType);
+    return user;
+  },
 
- // Get hardcoded test users (for UI purposes)
- getTestUsers: () => HARDCODED_USERS,
+  // Get hardcoded test users (for UI purposes)
+  getTestUsers: () => HARDCODED_USERS,
 };

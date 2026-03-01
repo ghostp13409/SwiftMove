@@ -91,34 +91,6 @@ This document provides a summary of backend API endpoints invoked by services wi
 
 ---
 
-## customerService
-
-| Method | Endpoint                       | Description                  |
-| ------ | ------------------------------ | ---------------------------- |
-| GET    | `/customer`                    | Get all customers (admin)    |
-| GET    | `/customer/{id}`               | Get customer by ID           |
-| GET    | `/customer/{id}/rentals`       | Get customer's rentals       |
-| GET    | `/customer/{id}/active-rental` | Get customer's active rental |
-| POST   | `/customer`                    | Create customer (admin)      |
-| PUT    | `/customer/{id}`               | Update customer              |
-| DELETE | `/customer/{id}`               | Delete customer              |
-
----
-
-## equipmentService
-
-| Method | Endpoint               | Description                  |
-| ------ | ---------------------- | ---------------------------- |
-| GET    | `/equipment`           | Get all equipment            |
-| GET    | `/equipment/{id}`      | Get equipment by ID          |
-| GET    | `/equipment/available` | Get available equipment      |
-| GET    | `/equipment/rented`    | Get rented equipment (admin) |
-| POST   | `/equipment`           | Create equipment (admin)     |
-| PUT    | `/equipment/{id}`      | Update equipment (admin)     |
-| DELETE | `/equipment/{id}`      | Delete equipment (admin)     |
-
----
-
 ## luggageService
 
 | Method | Endpoint             | Description           |

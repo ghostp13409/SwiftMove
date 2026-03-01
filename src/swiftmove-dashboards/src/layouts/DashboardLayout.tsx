@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -66,7 +66,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { name, email, logout } = useAuth();
+  const { name, email, logout, role: userRole } = useAuth();
 
   const navItems =
     role === "CLIENT" ? clientNav : role === "DRIVER" ? driverNav : adminNav;
@@ -81,6 +81,19 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  // Redirect if user role doesn't match the required role for this layout
+  useEffect(() => {
+    if (!userRole) return;
+    const expectedRole =
+      role === "CLIENT" ? "Client" : role === "DRIVER" ? "Driver" : "Admin";
+    if (userRole !== expectedRole) {
+      if (userRole === "Client") navigate("/client", { replace: true });
+      else if (userRole === "Driver") navigate("/driver", { replace: true });
+      else if (userRole === "Admin") navigate("/admin", { replace: true });
+      else navigate("/client", { replace: true });
+    }
+  }, [userRole, role, navigate]);
 
   const handleLogout = async () => {
     await logout();

@@ -3,10 +3,14 @@
   <component name="CoolRequestSetting">
     <option name="serializePaths">
       <list>
-        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\da50570658f64a1aafb9ac9f2b9fa6d6" />
-        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\6e536a054f1d478d93722a3f056682e3" />
-        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\af2757dae6d745b0b81723d7e41dada9" />
         <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\a7e5175d68214980a31650e73c5d7fc8" />
+        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\86675259638c4e23a2ef12cc865aff2e" />
+        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\3510988b2d934afdb2ab1947b280a10f" />
+        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\f2aec26750ed41c3a6a414e011dc37d8" />
+        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\9bb85cd135ae4c1e938a62e962876af6" />
+        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\a8708e548f4845dd88b2a3bee6fa73d6" />
+        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\371cdffe5fba4c9496f68565f6e447d4" />
+        <option value="C:\Users\DayDreamer\.config\.cool-request\request\serialize\86a375a8b0204b1d855070a19300694d" />
       </list>
     </option>
     <option name="projectCachePath" value="project-7b8901b1-5b42-40b1-a885-1faeeeb24b1c" />
