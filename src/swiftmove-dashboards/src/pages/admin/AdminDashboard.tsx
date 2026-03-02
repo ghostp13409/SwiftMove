@@ -34,7 +34,7 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
       try {
         const [users, requests, trips, vehicles] = await Promise.allSettled([
-          userService.getAllUsersAlt(),
+          userService.getAllUsers(),
           moveRequestService.getAllMoveRequests(),
           tripService.getAllTrips(),
           vehicleService.getVehicles(),

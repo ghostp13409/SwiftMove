@@ -4,10 +4,12 @@ import { User, UserUpdateData, UserProfile } from '../types';
 const API_BASE = '/users';
 
 export const userService = {
-  // Get all users (admin)
+
+
+  // Get all users (alt endpoint)
   getAllUsers: async (): Promise<User[]> => {
     try {
-      const response = await apiClient.get(`${API_BASE}/all`);
+      const response = await apiClient.get(`${API_BASE}`);
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -15,13 +17,14 @@ export const userService = {
     }
   },
 
-  // Get all users (alt endpoint)
-  getAllUsersAlt: async (): Promise<User[]> => {
+  // Get user by Id (Not used anywhere)
+  getUserById: async (id: string | number): Promise<User> => {
     try {
-      const response = await apiClient.get(`${API_BASE}/allUsers`);
+      const response = await apiClient.get(`${API_BASE}/${id}`);
       return response.data.data || response.data;
-    } catch (error) {
-      console.error('Error fetching users:', error);
+    }
+    catch (error) {
+      console.error('Error fetching user by ID:', error);
       throw error;
     }
   },
@@ -29,7 +32,7 @@ export const userService = {
   // Create new user
   createUser: async (userData: any): Promise<User> => {
     try {
-      const response = await apiClient.post(`${API_BASE}/addUser`, userData);
+      const response = await apiClient.post(`${API_BASE}`, userData);
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error creating user:', error);
