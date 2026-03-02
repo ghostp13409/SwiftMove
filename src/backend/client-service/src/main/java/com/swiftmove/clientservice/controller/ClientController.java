@@ -1,19 +1,26 @@
 package com.swiftmove.clientservice.controller;
 
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.swiftmove.clientservice.dto.MoveReqPostDto;
 import com.swiftmove.clientservice.dto.MoveRequestDTO;
 import com.swiftmove.clientservice.dto.UserResponseDTO;
 import com.swiftmove.clientservice.service.ClientService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/client/")
+@RequestMapping("/client")
 public class ClientController {
 
     private final ClientService clientService;
@@ -25,6 +32,7 @@ public class ClientController {
     }
     @GetMapping("/getClient/{id}")
     public ResponseEntity<UserResponseDTO> getClient(@PathVariable Long id){
+        System.out.println(clientService.getClientById(id));
         return ResponseEntity.ok(clientService.getClientById(id));
     }
     @GetMapping("/{id}/move-requests/history")
@@ -40,6 +48,4 @@ public class ClientController {
     public ResponseEntity<MoveRequestDTO> addMoveRequest(@PathVariable Long id,@RequestBody MoveReqPostDto moveRequestDTO){
         return ResponseEntity.ok(clientService.addMoveRequest(id,moveRequestDTO));
     }
-
-
 }

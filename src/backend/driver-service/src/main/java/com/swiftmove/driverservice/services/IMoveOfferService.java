@@ -1,7 +1,7 @@
 package com.swiftmove.driverservice.services;
-import com.swiftmove.driverservice.model.MoveOffer;
-
 import java.util.List;
+
+import com.swiftmove.driverservice.model.MoveOffer;
 
 
 public interface IMoveOfferService {
@@ -13,6 +13,9 @@ public interface IMoveOfferService {
 
     // PUT
     MoveOffer updateOffer(Long id, MoveOffer moveOffer);
+
+    // DELETE
+    void deleteOffer(Long id);
 
     // GET
     List<MoveOffer> getOffersByMoveRequest(Long moveRequestId);

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/move-offer/")
+@RequestMapping("/move-offer")
 public class MoveOfferController {
 
     private final MoveOfferService moveOfferService;
@@ -19,9 +19,9 @@ public class MoveOfferController {
         this.moveOfferService = moveOfferService;
     }
 
-    // GET /offers?driverId=1
-    @GetMapping("/offers")
-    public List<MoveOffer> getOffersByDriver(@RequestParam Long driverId) {
+    // GET /move-offer/driver/{driverId}
+    @GetMapping("/driver/{driverId}")
+    public List<MoveOffer> getOffersByDriver(@PathVariable Long driverId) {
         return moveOfferService.getOffersByDriver(driverId);
     }
 
@@ -55,8 +55,10 @@ public class MoveOfferController {
         return "Move Offer Service is up and running!";
     }
 
+    // DELETE /move-offer/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<MoveOffer> deleteDriver(@PathVariable Long id) {
-        return null;
+    public ResponseEntity<Void> deleteOffer(@PathVariable Long id) {
+        moveOfferService.deleteOffer(id);
+        return ResponseEntity.noContent().build();
     }
 }
