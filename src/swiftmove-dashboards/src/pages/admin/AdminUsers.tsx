@@ -24,7 +24,7 @@ const AdminUsers = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await userService.getAllUsersAlt();
+        const data = await userService.getAllUsers();
         setUsers(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to load users:", err);
@@ -113,7 +113,7 @@ const AdminUsers = () => {
                         <Badge
                           variant={
                             getUserRole(user).toUpperCase() === "ADMIN" ||
-                            getUserRole(user) === "Admin"
+                              getUserRole(user) === "Admin"
                               ? "default"
                               : "secondary"
                           }
