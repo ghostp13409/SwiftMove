@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "move_trip")
+@Table(name = "move_trips")
 public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +29,4 @@ public class Trip {
     private LocalDate createdAt;
     @Column(name = "updated_at")
     private LocalDate updatedAt;
-
-
-
 }

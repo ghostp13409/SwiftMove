@@ -18,4 +18,7 @@ public interface IVehicleService {
     Vehicle toggleActive(Long id);
     //DELETE
     void deleteVehicle(Long id);
+
+    // GET all vehicles (admin)
+    List<Vehicle> getAllVehicles();
 }

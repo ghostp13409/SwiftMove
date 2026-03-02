@@ -8,7 +8,32 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true
+          enabled: false
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**
+        - id: trip-service
+          uri: lb://trip-service
+          predicates:
+            - Path=/trips/**
+        - id: location-service
+          uri: lb://location-service
+          predicates:
+            - Path=/address/**
+        - id: client-service
+          uri: lb://client-service
+          predicates:
+            - Path=/client/**,/move-request/**,/api/luggage-types/**,/api/vehicle-types/**
+        - id: driver-service
+          uri: lb://driver-service
+          predicates:
+            - Path=/drivers/**,/move-offer/**,/vehicle/**
       httpclient:
         connect-timeout: 60000
         response-timeout: 60s

@@ -1,13 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import {
-  LayoutDashboard, FileText, Truck, User, Package, Users, HandCoins, Route,
-  LogOut, ChevronLeft, ChevronRight, Menu,
+  LayoutDashboard,
+  FileText,
+  Truck,
+  User,
+  Package,
+  Users,
+  HandCoins,
+  Route,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import type { UserRole } from "@/types";
+import { useAuth } from "@/context/AuthContext";
 
 interface NavItem {
   title: string;
@@ -55,11 +66,44 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { name, email, logout, role: userRole } = useAuth();
 
-  const navItems = role === "CLIENT" ? clientNav : role === "DRIVER" ? driverNav : adminNav;
+  const navItems =
+    role === "CLIENT" ? clientNav : role === "DRIVER" ? driverNav : adminNav;
+
+  const displayName =
+    name ||
+    (role === "CLIENT" ? "Client" : role === "DRIVER" ? "Driver" : "Admin");
+  const displayEmail = email || "";
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  // Redirect if user role doesn't match the required role for this layout
+  useEffect(() => {
+    if (!userRole) return;
+    const expectedRole =
+      role === "CLIENT" ? "Client" : role === "DRIVER" ? "Driver" : "Admin";
+    if (userRole !== expectedRole) {
+      if (userRole === "Client") navigate("/client", { replace: true });
+      else if (userRole === "Driver") navigate("/driver", { replace: true });
+      else if (userRole === "Admin") navigate("/admin", { replace: true });
+      else navigate("/client", { replace: true });
+    }
+  }, [userRole, role, navigate]);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   const sidebar = (
-    <div className={`flex flex-col h-full bg-sidebar text-sidebar-foreground transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
+    <div
+      className={`flex flex-col h-full bg-sidebar text-sidebar-foreground transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}
+    >
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
         <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center shrink-0">
@@ -67,8 +111,12 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
         </div>
         {!collapsed && (
           <div className="overflow-hidden">
-            <h1 className="font-bold text-sm text-sidebar-accent-foreground">SwiftMove</h1>
-            <p className="text-[10px] text-sidebar-foreground opacity-70">{roleLabels[role]}</p>
+            <h1 className="font-bold text-sm text-sidebar-accent-foreground">
+              SwiftMove
+            </h1>
+            <p className="text-[10px] text-sidebar-foreground opacity-70">
+              {roleLabels[role]}
+            </p>
           </div>
         )}
       </div>
@@ -76,7 +124,10 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       {/* Nav */}
       <nav className="flex-1 py-4 px-2 space-y-1">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.url || (item.url !== `/${role.toLowerCase()}` && location.pathname.startsWith(item.url));
+          const isActive =
+            location.pathname === item.url ||
+            (item.url !== `/${role.toLowerCase()}` &&
+              location.pathname.startsWith(item.url));
           return (
             <NavLink
               key={item.url}
@@ -98,14 +149,14 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
         {!collapsed && (
           <div className="flex items-center gap-3 px-2 py-2 mb-2">
             <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-medium text-sidebar-accent-foreground">
-              {role === "CLIENT" ? "JD" : role === "DRIVER" ? "MJ" : "AD"}
+              {initials}
             </div>
             <div className="overflow-hidden">
               <p className="text-xs font-medium text-sidebar-accent-foreground truncate">
-                {role === "CLIENT" ? "John Doe" : role === "DRIVER" ? "Mike Johnson" : "Admin User"}
+                {displayName}
               </p>
               <p className="text-[10px] text-sidebar-foreground opacity-60 truncate">
-                {role === "CLIENT" ? "john@example.com" : role === "DRIVER" ? "mike@example.com" : "admin@swiftmove.com"}
+                {displayEmail}
               </p>
             </div>
           </div>
@@ -113,7 +164,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/50 px-3"
-          onClick={() => navigate("/login")}
+          onClick={handleLogout}
         >
           <LogOut className="w-4 h-4 shrink-0" />
           {!collapsed && <span className="text-sm">Sign Out</span>}
@@ -125,7 +176,11 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
         onClick={() => setCollapsed(!collapsed)}
         className="hidden lg:flex absolute -right-3 top-7 w-6 h-6 rounded-full bg-card border border-border items-center justify-center shadow-sm hover:bg-secondary transition-colors"
       >
-        {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
+        {collapsed ? (
+          <ChevronRight className="w-3 h-3" />
+        ) : (
+          <ChevronLeft className="w-3 h-3" />
+        )}
       </button>
     </div>
   );
@@ -134,16 +189,19 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
     <div className="flex h-screen bg-background">
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 bg-foreground/20 lg:hidden" onClick={() => setMobileOpen(false)} />
+        <div
+          className="fixed inset-0 z-40 bg-foreground/20 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
       )}
 
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex relative shrink-0">
-        {sidebar}
-      </aside>
+      <aside className="hidden lg:flex relative shrink-0">{sidebar}</aside>
 
       {/* Sidebar - Mobile */}
-      <aside className={`fixed inset-y-0 left-0 z-50 lg:hidden transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 lg:hidden transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+      >
         {sidebar}
       </aside>
 
@@ -158,10 +216,10 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <span className="text-xs text-muted-foreground hidden sm:inline">
-              {role === "CLIENT" ? "John Doe" : role === "DRIVER" ? "Mike Johnson" : "Admin User"}
+              {displayName}
             </span>
             <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
-              {role === "CLIENT" ? "JD" : role === "DRIVER" ? "MJ" : "AD"}
+              {initials}
             </div>
           </div>
         </header>

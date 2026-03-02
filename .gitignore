@@ -8,3 +8,6 @@ out/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Environment variable files
+.env

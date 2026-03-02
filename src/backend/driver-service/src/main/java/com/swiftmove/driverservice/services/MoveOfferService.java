@@ -5,6 +5,7 @@ import com.swiftmove.driverservice.repository.MoveOfferRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class MoveOfferService implements IMoveOfferService {
     private final MoveOfferRepository moveOfferRepository;
@@ -45,11 +46,13 @@ public class MoveOfferService implements IMoveOfferService {
     public MoveOffer acceptOffer(Long id) {
         MoveOffer offer = moveOfferRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Offer not found"));
-
-        // Example: 2 = ACCEPTED (you can replace with constant later)
-        offer.setStatusId(2L);
-
+        offer.setStatusId(2L); // accepted status
         return moveOfferRepository.save(offer);
+    }
+
+    @Override
+    public void deleteOffer(Long id) {
+        moveOfferRepository.deleteById(id);
     }
 
     public List<MoveOffer> getAllOffers() {
@@ -57,6 +60,6 @@ public class MoveOfferService implements IMoveOfferService {
     }
 
     public MoveOffer getOfferById(Long id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return moveOfferRepository.findById(id).orElse(null);
     }
 }

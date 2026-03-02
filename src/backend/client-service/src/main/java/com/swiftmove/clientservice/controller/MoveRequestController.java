@@ -25,12 +25,12 @@ public class MoveRequestController {
     public ResponseEntity<MoveRequestDTO> getMoveRequestById(@PathVariable Long id){
         return ResponseEntity.ok(moveRequestService.getMoveRequestById(id));
     }
+
     @PostMapping("/add")
     public ResponseEntity<Void> addNewMoveRequest(@RequestBody MoveReqPostDto moveReqPostDto){
         moveRequestService.addMoveRequest(moveReqPostDto);
         return ResponseEntity.ok().build();
     }
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteMoveRequest(@PathVariable Long id){
         moveRequestService.deleteMoveRequest(id);
