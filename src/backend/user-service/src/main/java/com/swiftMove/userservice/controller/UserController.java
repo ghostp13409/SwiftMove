@@ -26,12 +26,12 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/allUsers")
+    @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAll() {
         return ResponseEntity.ok(userService.findAll());
     }
 
-    @GetMapping("/iam/profile/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getById(@PathVariable Long id) {
         UserResponseDTO userResponseDTO = userService.findById(id);
         if (userResponseDTO == null) {
@@ -49,26 +49,23 @@ public class UserController {
         return ResponseEntity.ok(userResponseDTO);
     }
 
-    @PostMapping("/addUser")
+    @PostMapping
     public ResponseEntity<UserResponseDTO> addNewUser(@RequestBody UserRequestDTO userRequestDTO) {
         UserResponseDTO newUserResponseDto = userService.addNewUser(userRequestDTO);
         return ResponseEntity.ok(newUserResponseDto);
     }
 
-    @PutMapping("/iam/profile/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Void> updateUser(@PathVariable Long id, @RequestBody UserRequestDTO updateUser) {
         userService.updateExistingUser(id, updateUser);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/iam/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/userAddress/{id}")
-    public ResponseEntity<AddressDTO> getCurrentUserAddress(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserAddress(id));
-    }
+
 }

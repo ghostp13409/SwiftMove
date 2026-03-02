@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "user-service")
 public interface UserServiceClient {
 
-    @PostMapping("/users/addUser")
+    @PostMapping("/users")
     UserDTO createUser(@RequestBody UserCreateRequest request);
 
     @GetMapping("/users/byEmail/{email}")
     UserDTO getUserByEmail(@PathVariable("email") String email);
 
-    @GetMapping("/users/iam/profile/{id}")
+    @GetMapping("/users/{id}")
     UserDTO getUserById(@PathVariable("id") Long id);
 }
