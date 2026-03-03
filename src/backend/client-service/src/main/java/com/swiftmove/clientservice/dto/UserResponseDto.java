@@ -7,13 +7,14 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponseDTO {
-    private Long id;
+public class UserResponseDto {
+
+    public Long id;
+
     private String username;
 
     private String firstName;
@@ -21,6 +22,8 @@ public class UserResponseDTO {
     private String lastName;
 
     private String email;
+
+    private String passwordHash;
 
     private LocalDate dob;
 
