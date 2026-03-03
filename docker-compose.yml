@@ -57,23 +57,23 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9093
       - KAFKA_CLUSTERS_0_ZOOKEEPER=localhost:2181
 
-  # eureka-server:
-  #   container_name: eureka-server
-  #   build:
-  #     context: ./src/backend/eureka-server
-  #   ports:
-  #     - "8761:8761"
-  #   depends_on:
-  #     - postgres
+  eureka-server:
+    container_name: eureka-server
+    build:
+      context: ./src/backend/eureka-server
+    ports:
+      - "8761:8761"
+    depends_on:
+      - postgres
 
-  # config-service:
-  #   container_name: config-service
-  #   build:
-  #     context: ./src/backend/config-service
-  #   ports:
-  #     - "8888:8888"
-  #   depends_on:
-  #     - eureka-server
+  config-service:
+    container_name: config-service
+    build:
+      context: ./src/backend/config-service
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
 
   # api-gateway:
   #   container_name: api-gateway
