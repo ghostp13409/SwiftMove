@@ -1,5 +1,6 @@
 package com.swiftmove.clientservice.model;
 
+import com.swiftmove.clientservice.dto.MoveOfferDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,13 +15,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "move_request")
+@Table(name = "move_requests")
 public class MoveRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-
     @Column(name = "move_date")
     private LocalDate moveDate;
     @Column(name = "max_budget")
@@ -37,8 +37,9 @@ public class MoveRequest {
     private LocalDate createdAt;
     @Column(name = "updated_at")
     private LocalDate updatedAt;
-
-    @OneToMany(mappedBy = "moveRequest", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Transient
+    private List<MoveOfferDto> moveOffers;
+    @Transient
     private List<LuggageEntry> luggageEntries;
 
 }

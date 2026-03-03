@@ -20,14 +20,14 @@ import com.swiftmove.locationservice.service.AddressService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/address")
+@RequestMapping("/addresses")
 @RequiredArgsConstructor
 public class AddressController {
     @Autowired
     private final AddressService addressService;
 
     //get all address
-    @GetMapping("/all")
+    @GetMapping
         public ResponseEntity<List<AddressDTO>> getAllAddress(){
         return ResponseEntity.ok(addressService.getAllAddresses());
     }
@@ -42,20 +42,20 @@ public class AddressController {
     }
 
     //Add new Address
-    @PostMapping("/addNewAddress")
+    @PostMapping
     public ResponseEntity<Void> addNewAddress(@RequestBody AddressDTO addressDTO){
         addressService.addNewAddress(addressDTO);
         return ResponseEntity.ok().build();
     }
 
     //Update an existing address
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<AddressDTO> updateAddress(@PathVariable Long id, @RequestBody AddressDTO addressDTO){
        return ResponseEntity.ok(addressService.updateAddress(id, addressDTO));
     }
 
     //Delete
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAddress(@PathVariable Long id){
         addressService.deleteAddressById(id);
         return ResponseEntity.noContent().build();
