@@ -4,6 +4,7 @@ import com.swiftmove.clientservice.client.AuthClient;
 import com.swiftmove.clientservice.dto.*;
 import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.model.LuggageEntry;
+import com.swiftmove.clientservice.model.LuggageType;
 import com.swiftmove.clientservice.model.MoveRequest;
 import com.swiftmove.clientservice.service.ClientService;
 import com.swiftmove.clientservice.service.LuggageService;
@@ -12,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -153,12 +153,15 @@ public class ClientController {
 
 //    Luggage
 
-
+//    Get All or by MoveRequestId
     @GetMapping("/move-requests/luggage")
-    public ResponseEntity<List<LuggageEntry>> getLuggageForMoveRequest(@RequestParam Long moveRequestId) {
+    public ResponseEntity<List<LuggageEntry>> getLuggageForMoveRequest(@RequestParam(required = false) Long moveRequestId) {
         try {
-            List<LuggageEntry> luggageItems = luggageService.getLuggageEntriesByMoveRequestId(moveRequestId);
-            return ResponseEntity.ok(luggageItems);
+            if(moveRequestId == null){
+                return ResponseEntity.ok(luggageService.getAll());
+            }
+            List<LuggageEntry> luggageEntries = luggageService.getByMoveRequestId(moveRequestId);
+            return ResponseEntity.ok(luggageEntries);
         } catch (Exception ex) {
             return ResponseEntity.status(500).body(null);
         }
@@ -207,6 +210,17 @@ public class ClientController {
             return ResponseEntity.ok().build();
         } catch (Exception ex) {
             return ResponseEntity.status(500).build();
+        }
+    }
+
+//    Get All Luggage Types
+    @GetMapping("/move-requests/luggage/types")
+    public ResponseEntity<List<LuggageType>> getAllLuggageTypes() {
+        try {
+            List<LuggageType> luggageTypes = luggageService.getAllTypes();
+            return ResponseEntity.ok(luggageTypes);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
         }
     }
 

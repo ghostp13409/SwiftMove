@@ -1,13 +1,13 @@
 import apiClient from './apiClient';
 import { Address, AddressFormData } from '../types';
 
-const API_BASE = '/address';
+const API_BASE = '/addresses';
 
 export const addressService = {
   // Get all addresses
   getAllAddresses: async (): Promise<Address[]> => {
     try {
-      const response = await apiClient.get(`${API_BASE}/all`);
+      const response = await apiClient.get(`${API_BASE}`);
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error fetching addresses:', error);
@@ -29,7 +29,7 @@ export const addressService = {
   // Create new address
   createAddress: async (data: AddressFormData): Promise<Address> => {
     try {
-      const response = await apiClient.post(`${API_BASE}/addNewAddress`, data);
+      const response = await apiClient.post(`${API_BASE}`, data);
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error creating address:', error);
@@ -40,7 +40,7 @@ export const addressService = {
   // Update address
   updateAddress: async (id: string | number, data: AddressFormData): Promise<Address> => {
     try {
-      const response = await apiClient.put(`${API_BASE}/update/${id}`, data);
+      const response = await apiClient.put(`${API_BASE}/${id}`, data);
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error updating address:', error);
@@ -51,7 +51,7 @@ export const addressService = {
   // Delete address
   deleteAddress: async (id: string | number): Promise<void> => {
     try {
-      await apiClient.delete(`${API_BASE}/delete/${id}`);
+      await apiClient.delete(`${API_BASE}/${id}`);
     } catch (error) {
       console.error('Error deleting address:', error);
       throw error;

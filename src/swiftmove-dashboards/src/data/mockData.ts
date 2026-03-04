@@ -42,8 +42,8 @@ export const mockUsers: User[] = [
 ];
 
 export const mockDrivers: DriverInfo[] = [
-  { id: 1, userId: 3, drivingExperience: 8, range: 150, licenseNumber: "DL-BC-12345", user: mockUsers[2] },
-  { id: 2, userId: 4, drivingExperience: 5, range: 200, licenseNumber: "DL-AB-67890", user: mockUsers[3] },
+  { id: 1, userId: 3, drivingExperience: 8, range: 150, drivingLicense: "DL-BC-12345", user: mockUsers[2] },
+  { id: 2, userId: 4, drivingExperience: 5, range: 200, drivingLicense: "DL-AB-67890", user: mockUsers[3] },
 ];
 
 export const mockVehicles: Vehicle[] = [

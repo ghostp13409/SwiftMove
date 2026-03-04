@@ -46,7 +46,6 @@ public class ClientService {
             throw new RuntimeException("Failed to retrieve clients from user service: " + ex.getMessage(), ex);
         }
     }
-
     public UserResponseDto getClientById(Long id) {
         try {
             ResponseEntity<UserResponseDto> userResponse = userClient.getById(id);

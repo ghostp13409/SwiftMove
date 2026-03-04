@@ -13,7 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Getter
 @Setter
 @Entity
-@Table(name = "vehicle")
+@Table(name = "vehicles")
 public class Vehicle {
 
     @Id
@@ -42,7 +42,7 @@ public class Vehicle {
     private Boolean canCarryFurniture;
 
     @Column(name = "driver_id", nullable = false)
-    private Long driverInfoId;
+    private Long driverId;
 
     @Column(name = "vehicle_type_id", nullable = false)
     private Long vehicleTypeId;
