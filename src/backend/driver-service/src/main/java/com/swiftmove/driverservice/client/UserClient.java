@@ -1,6 +1,6 @@
-package com.swiftmove.clientservice.client;
+package com.swiftmove.driverservice.client;
 
-import com.swiftmove.clientservice.dto.UserResponseDto;
+import com.swiftmove.driverservice.dto.UserResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,5 +18,6 @@ public interface UserClient {
     @GetMapping("/users/{id}")
     ResponseEntity<UserResponseDto> getById(@PathVariable Long id);
 
-
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> deleteUser(@PathVariable Long id);
 }
