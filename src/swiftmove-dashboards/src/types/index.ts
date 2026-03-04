@@ -59,7 +59,7 @@ export interface Driver {
   userId: number;
   drivingExperience?: number;
   range?: number;
-  licenseNumber?: string;
+  licenseNumber?: string; // TODO: Remove it
   drivingLicense?: string;
   user?: User;
   vehicles?: Vehicle[];
@@ -70,7 +70,7 @@ export interface DriverInfo {
   userId: number;
   drivingExperience: number;
   range: number;
-  licenseNumber: string;
+  drivingLicense: string;
   user?: User;
 }
 
@@ -106,7 +106,7 @@ export interface VehicleFormData {
   pricePerKm: number;
   isActive: boolean;
   canCarryFurniture: boolean;
-  driverInfoId: number;
+  driverId: number;
   licensePlate?: string;
 }
 

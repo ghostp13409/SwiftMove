@@ -1,13 +1,14 @@
-package com.swiftmove.locationservice.mapper;
+package com.swiftMove.locationservice.mapper;
 
 
-import com.swiftmove.locationservice.dto.AddressDTO;
-import com.swiftmove.locationservice.model.Address;
+import com.swiftMove.locationservice.dto.AddressDTO;
+import com.swiftMove.locationservice.model.Address;
 
 public class AddressMapper {
     //Address -> addressDTO
     public static AddressDTO toDTO(Address address) {
         return new AddressDTO(
+                address.getId(),
                 address.getLine1(),
                 address.getLine2(),
                 address.getCity(),
