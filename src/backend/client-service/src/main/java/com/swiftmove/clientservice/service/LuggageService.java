@@ -9,7 +9,6 @@ import com.swiftmove.clientservice.model.LuggageTypeEnum;
 import com.swiftmove.clientservice.model.MoveRequest;
 import com.swiftmove.clientservice.repository.LuggageEntryRepository;
 import com.swiftmove.clientservice.repository.LuggageTypeRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +22,11 @@ public class LuggageService {
     private final MoveRequestService moveRequestService;
     private final LuggageTypeRepository luggageTypeRepository;
 
-    public List<LuggageEntry> getLuggageEntriesByMoveRequestId(Long moveRequestId){
+    public List<LuggageEntry> getByMoveRequestId(Long moveRequestId){
         return luggageEntryRepository.findByMoveRequestId(moveRequestId);
     }
 
-    public List<LuggageEntry> getAllLuggageEntries(){
+    public List<LuggageEntry> getAll(){
         return luggageEntryRepository.findAll();
     }
 
@@ -69,6 +68,9 @@ public class LuggageService {
     public void deleteAllLuggageEntries(Long moveRequestId){
         List<LuggageEntry> luggageEntries = luggageEntryRepository.findByMoveRequestId(moveRequestId);
         luggageEntryRepository.deleteAll(luggageEntries);
+    }
+    public List<LuggageType> getAllTypes(){
+        return luggageTypeRepository.findAll();
     }
     private LuggageType getLuggageTypeByEnum(LuggageTypeEnum luggageTypeEnum){
         return luggageTypeRepository.findLuggageTypeByType(luggageTypeEnum);

@@ -28,7 +28,7 @@ public class DriverInfoService {
     public DriverInfoDto getCurrent(String authHeader) {
         try{
             Long driverId = authClient.getCurrentUser(authHeader).getBody().getId();
-            DriverInfo driverInfo = driverInfoRepository.findByDriverId(driverId);
+            DriverInfo driverInfo = driverInfoRepository.findByUserId(driverId);
             return Mapper.toDriverInfoDto(driverInfo);
         }
         catch (Exception ex){
@@ -47,7 +47,7 @@ public class DriverInfoService {
 
     public DriverInfoDto getByDriverId(Long driverId) {
         try{
-            DriverInfo driverInfo = driverInfoRepository.findByDriverId(driverId);
+            DriverInfo driverInfo = driverInfoRepository.findByUserId(driverId);
             return Mapper.toDriverInfoDto(driverInfo);
         }
         catch (Exception ex){

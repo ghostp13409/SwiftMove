@@ -63,7 +63,7 @@ public class VehicleService {
                         existingVehicle.setModel(vehicleDto.getModel());
                         existingVehicle.setYear(vehicleDto.getYear());
                         existingVehicle.setColor(vehicleDto.getColor());
-                        existingVehicle.setDriverInfoId(vehicleDto.getDriverInfoId());
+                        existingVehicle.setDriverId(vehicleDto.getDriverId());
                         return Mapper.toVehicleDto(vehicleRepository.save(existingVehicle));
                     })
                     .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + id));
@@ -114,7 +114,7 @@ public class VehicleService {
             errorMessages.append("Color cannot be null or empty.");
         }
 
-        if(vehicleDto.getDriverInfoId() == null || driverInfoService.getById(vehicleDto.getDriverInfoId()) == null) {
+        if(vehicleDto.getDriverId() == null || driverInfoService.getById(vehicleDto.getDriverId()) == null) {
             errorMessages.append("Driver Info ID must be valid and exist.");
         }
 
