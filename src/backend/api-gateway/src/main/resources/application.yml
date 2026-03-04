@@ -29,11 +29,11 @@ spring:
         - id: client-service
           uri: lb://client-service
           predicates:
-            - Path=/clients/**,/move-requests/**,/api/luggage-types/**,/api/vehicle-types/**
+            - Path=/clients/**
         - id: driver-service
           uri: lb://driver-service
           predicates:
-            - Path=/drivers/**,/move-offer/**,/vehicle/**
+            - Path=/drivers/**
       httpclient:
         connect-timeout: 60000
         response-timeout: 60s
