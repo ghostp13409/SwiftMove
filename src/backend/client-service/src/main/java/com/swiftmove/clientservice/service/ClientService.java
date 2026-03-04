@@ -1,96 +1,64 @@
 package com.swiftmove.clientservice.service;
 
-
-import com.swiftmove.clientservice.dto.MoveReqPostDto;
-import com.swiftmove.clientservice.dto.MoveRequestDTO;
-import com.swiftmove.clientservice.dto.UserResponseDTO;
-import com.swiftmove.clientservice.feign.UserClient;
-import com.swiftmove.clientservice.mapper.MoveRequestMapper;
-import com.swiftmove.clientservice.model.MoveRequest;
-import com.swiftmove.clientservice.repo.MoveRequestRepo;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import com.swiftmove.clientservice.client.AuthClient;
+import com.swiftmove.clientservice.client.UserClient;
+import com.swiftmove.clientservice.dto.AuthUserResponseDto;
+import com.swiftmove.clientservice.dto.UserResponseDto;
+import com.swiftmove.clientservice.model.Client;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ClientService {
+    private final AuthClient authClient;
     private final UserClient userClient;
-    private final MoveRequestRepo moveRequestRepo;
+    private final MoveRequestService moveRequestService;
 
-    // Getting all Clients
-    public List<UserResponseDTO> getAllClients(){
-        List<UserResponseDTO> userResponseDTOS=userClient.getAll();
-        List<UserResponseDTO> clientResponseDTOS = new ArrayList<>();
-        for (UserResponseDTO dto : userResponseDTOS)
-        {
-            if(dto.getRole().equals("CLIENT")){
+    public UserResponseDto getCurrentClient(String authHeader) {
 
-                clientResponseDTOS.add(dto);
+        try{
+            AuthUserResponseDto authUser =
+                     authClient.getCurrentUser(authHeader).getBody();
+
+            UserResponseDto user = userClient.getById(authUser.getId()).getBody();
+
+            return user;
+        }
+        catch (Exception ex){
+            throw new RuntimeException("Failed to retrieve current user from auth service: " + ex.getMessage(), ex);
+        }
+    }
+
+    public List<UserResponseDto> getAllClients() {
+        try {
+            ResponseEntity<List<UserResponseDto>> users = userClient.getAll();
+            
+            // Filter Clients by roles
+            return users.getBody().stream().filter(user -> user.getRole().equals("CLIENT")).toList();
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to retrieve clients from user service: " + ex.getMessage(), ex);
+        }
+    }
+
+    public UserResponseDto getClientById(Long id) {
+        try {
+            ResponseEntity<UserResponseDto> userResponse = userClient.getById(id);
+            UserResponseDto user = userResponse.getBody();
+            if (user != null && user.getRole().equals("CLIENT")) {
+                return user;
+            } else {
+                return null; // Not found or not a client
             }
-
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to retrieve client from user service: " + ex.getMessage(), ex);
         }
-        return clientResponseDTOS;
-    }
-
-    public UserResponseDTO getClientById(Long id){
-        UserResponseDTO user= userClient.getById(id);
-        System.out.println(user);
-        String role=user.getRole();
-        if (!role.equals("CLIENT") && !role.equals("ADMIN"))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"ACCESS DENIED");
-        return user;
-
-    }
-
-    public List<MoveRequestDTO> getAllMovesClient(Long id){
-        UserResponseDTO user= getClientById(id);
-        if(user==null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"client not found");
-
-        if(user.getRole().equals("ADMIN"))
-            return moveRequestRepo
-                    .findAll()
-                    .stream()
-                    .map(MoveRequestMapper::toDTO)
-                    .toList();
-
-        return moveRequestRepo
-                .getAllMoveRequestsByClientId(id)
-                .stream()
-                .map(MoveRequestMapper::toDTO)
-                .toList();
-
-    }
-
-    public List<MoveRequestDTO> getAllActiveMovesClient(Long id){
-        List<MoveRequestDTO> allMoves= getAllMovesClient(id);
-        List<MoveRequestDTO> activeMoves=new ArrayList<>();
-
-        for (MoveRequestDTO dto : allMoves){
-            if(dto.getStatus().equals("PAYMENT_COMPLETED")||dto.getStatus().equals("IS_IN_TRANSIT"))
-                activeMoves.add(dto);
-        }
-        return activeMoves;
-    }
-
-    public MoveRequestDTO addMoveRequest(Long id, MoveReqPostDto dto){
-        UserResponseDTO user=getClientById(id);
-        if(user==null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"client not found");
-        MoveRequest moveRequest=MoveRequestMapper.toMoveRequest(dto);
-        moveRequest.setClientId(user.getId());
-        moveRequest.setCreatedAt(LocalDate.now());
-        moveRequest.setUpdatedAt(LocalDate.now());
-
-        moveRequestRepo.save(moveRequest);
-        return MoveRequestMapper.toDTO(moveRequest);
-
     }
 
 }

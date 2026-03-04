@@ -47,7 +47,7 @@ CREATE TYPE move_status_enum AS ENUM ('CREATED', 'OFFER_SENT', 'OFFER_AVAILABLE'
 -- Create tables
 
 CREATE TABLE addresses (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     line1 VARCHAR(255),
     line2 VARCHAR(255),
     city VARCHAR(100),
@@ -59,7 +59,7 @@ CREATE TABLE addresses (
 );
 
 CREATE TABLE vehicle_types (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     type vehicle_type_enum NOT NULL,
     max_weight REAL,
     capacity REAL,
@@ -68,7 +68,7 @@ CREATE TABLE vehicle_types (
 );
 
 CREATE TABLE luggage_types (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     type luggage_type_enum NOT NULL,
     name VARCHAR(100),
     volume REAL,
@@ -78,7 +78,7 @@ CREATE TABLE luggage_types (
 );
 
 CREATE TABLE users (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     f_name VARCHAR(100) NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE driver_infos (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     driving_experience INTEGER,
     range REAL,
     driving_license VARCHAR(50),
@@ -105,7 +105,7 @@ CREATE TABLE driver_infos (
 );
 
 CREATE TABLE vehicles (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     model VARCHAR(100),
     make VARCHAR(100),
     year INTEGER,
@@ -122,7 +122,7 @@ CREATE TABLE vehicles (
 );
 
 CREATE TABLE move_requests (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     move_date TIMESTAMP,
     max_budget BIGINT,
     client_id BIGINT NOT NULL,
@@ -137,7 +137,7 @@ CREATE TABLE move_requests (
 );
 
 CREATE TABLE luggage_entries (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     quantity INTEGER,
     move_request_id BIGINT NOT NULL,
     luggage_type_id BIGINT NOT NULL,
@@ -148,7 +148,7 @@ CREATE TABLE luggage_entries (
 );
 
 CREATE TABLE move_offers (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     price BIGINT,
     offered_date TIMESTAMP,
     move_request_id BIGINT NOT NULL,
@@ -163,7 +163,7 @@ CREATE TABLE move_offers (
 );
 
 CREATE TABLE move_trips (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     move_request_id BIGINT NOT NULL,
     move_offer_id BIGINT NOT NULL,
     status move_status_enum NOT NULL,
