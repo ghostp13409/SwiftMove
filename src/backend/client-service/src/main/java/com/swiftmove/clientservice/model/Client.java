@@ -1,5 +1,6 @@
 package com.swiftmove.clientservice.model;
 
+import com.swiftmove.clientservice.dto.MoveTripDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,4 +24,5 @@ public class Client {
     private Float rating;
     private Long addressId;
     private List<MoveRequest> moveRequests;
+    private List<MoveTripDto> moveTrips;
 }

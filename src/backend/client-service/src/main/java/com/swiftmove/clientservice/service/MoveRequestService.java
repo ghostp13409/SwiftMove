@@ -1,13 +1,16 @@
 package com.swiftmove.clientservice.service;
 
-import com.swiftmove.clientservice.client.DriverClient;
+import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
+import com.swiftmove.clientservice.mapper.Mapper;
 import com.swiftmove.clientservice.model.MoveRequest;
 import com.swiftmove.clientservice.repository.LuggageEntryRepository;
 import com.swiftmove.clientservice.repository.MoveRequestRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -16,7 +19,6 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class MoveRequestService {
     private final MoveRequestRepository moveRequestRepository;
-    private final DriverClient driverClient;
     private final LuggageEntryRepository luggageEntryRepository;
 
 
@@ -32,12 +34,17 @@ public class MoveRequestService {
         }
         return moveRequestRepository.findById(moveRequestId).orElse(null);
     }
-    public MoveRequest update( MoveRequest moveRequest) {
+    public void update(Long id,  MoveRequestDto moveRequestDto) {
+            MoveRequest existingMoveRequest = moveRequestRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        Mapper.updateMoveRequest(existingMoveRequest, moveRequestDto);
+
         try{
-            validateMoveRequest(moveRequest);
-            return moveRequestRepository.save(moveRequest);
-        }catch(Exception e){
-            return null;
+            validateMoveRequest(existingMoveRequest);
+            moveRequestRepository.save(existingMoveRequest);
+        }catch(Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Move Request: " + e.getMessage());
         }
     }
 
@@ -64,7 +71,14 @@ public class MoveRequestService {
 
     public List<MoveRequest> findByClientId(Long clientId)
     {
+
         List<MoveRequest> moveRequests = moveRequestRepository.findByClientId(clientId);
+
+//        // Add Move Offers to All Move Requests
+//        for(MoveRequest mr : moveRequests){
+//            addMoveOffers(mr);
+//        }
+
         return moveRequests;
     }
 
@@ -81,19 +95,6 @@ public class MoveRequestService {
                 .toList();
 
         return moveRequests;
-    }
-    // Add MoveOffers to MoveRequest
-    public void addMoveOffers(MoveRequest moveRequest) {
-        if(moveRequest != null){
-            moveRequest.setMoveOffers(driverClient.getMoveOffersByMoveRequestId(moveRequest.getId()));
-        }
-    }
-
-    // Add LuggageEntries to MoveRequest
-    public void addLuggageEntries(MoveRequest moveRequest) {
-        if(moveRequest != null){
-            moveRequest.setLuggageEntries(luggageEntryRepository.findByMoveRequestId(moveRequest.getId()));
-        }
     }
 
     // Get Currently Logged in User
@@ -112,7 +113,7 @@ public class MoveRequestService {
             errors.append("Move Date is null.");
         }
         // Move date cannot be in the past
-        if(moveRequest.getMoveDate() != null && moveRequest.getMoveDate().isBefore(LocalDate.now())){
+        if(moveRequest.getMoveDate() != null && moveRequest.getMoveDate().isBefore(LocalDateTime.now())){
             errors.append("Move Date cannot be in the past.");
         }
 
@@ -137,5 +138,14 @@ public class MoveRequestService {
         }
         return true;
     }
+
+    public MoveRequest getMoveRequestById(Long id) {
+        MoveRequest moveRequest = moveRequestRepository.findById(id).orElse(null);
+        if(moveRequest == null){
+            System.out.println("MoveRequestRepository returned a null.");
+        }
+        return moveRequest;
+    }
+
 
 }
