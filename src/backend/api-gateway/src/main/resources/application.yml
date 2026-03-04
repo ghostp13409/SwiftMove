@@ -8,7 +8,7 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: false
+          enabled: true
       routes:
         - id: auth-service
           uri: lb://auth-service
@@ -29,7 +29,7 @@ spring:
         - id: client-service
           uri: lb://client-service
           predicates:
-            - Path=/client/**,/move-request/**,/api/luggage-types/**,/api/vehicle-types/**
+            - Path=/clients/**,/move-requests/**,/api/luggage-types/**,/api/vehicle-types/**
         - id: driver-service
           uri: lb://driver-service
           predicates:

@@ -1,101 +1,151 @@
 package com.swiftmove.clientservice.service;
 
-import com.swiftmove.clientservice.dto.LuggageEntryDto;
-import com.swiftmove.clientservice.dto.MoveReqPostDto;
-import com.swiftmove.clientservice.dto.MoveRequestDTO;
-import com.swiftmove.clientservice.mapper.MoveRequestMapper;
-import com.swiftmove.clientservice.model.LuggageEntry;
-import com.swiftmove.clientservice.model.LuggageType;
+import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
+import com.swiftmove.clientservice.mapper.Mapper;
 import com.swiftmove.clientservice.model.MoveRequest;
-import com.swiftmove.clientservice.repo.LuggageEntryRepository;
-import com.swiftmove.clientservice.repo.LuggageTypeRepository;
-import com.swiftmove.clientservice.repo.MoveRequestRepo;
+import com.swiftmove.clientservice.repository.LuggageEntryRepository;
+import com.swiftmove.clientservice.repository.MoveRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
 public class MoveRequestService {
-    private final MoveRequestRepo moveRequestRepo;
+    private final MoveRequestRepository moveRequestRepository;
     private final LuggageEntryRepository luggageEntryRepository;
-    private final LuggageTypeRepository luggageTypeRepository;
 
-    public List<MoveRequestDTO> getAllMoveRequest() {
-        return moveRequestRepo.findAll().stream().map(MoveRequestMapper::toDTO).toList();
+
+//    CRUD
+    public List<MoveRequest> findAll() {
+        return moveRequestRepository.findAll();
     }
 
-    public MoveRequestDTO getMoveRequestById(Long id) {
-        MoveRequest moveRequest = moveRequestRepo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException((HttpStatus.NOT_FOUND)));
-        return MoveRequestMapper.toDTO(moveRequest);
+    public MoveRequest findById(Long moveRequestId) {
+        MoveRequest moveRequest = moveRequestRepository.findById(moveRequestId).orElse(null);
+        if(moveRequest == null){
+            System.out.println("MoveRequestRepository returned a null.");
+        }
+        return moveRequestRepository.findById(moveRequestId).orElse(null);
     }
+    public void update(Long id,  MoveRequestDto moveRequestDto) {
+            MoveRequest existingMoveRequest = moveRequestRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-    public void addMoveRequest(MoveReqPostDto dto) {
-        MoveRequest moveRequest = MoveRequestMapper.toMoveRequest(dto);
-        moveRequest.setCreatedAt(LocalDate.now());
-        moveRequest.setUpdatedAt(LocalDate.now());
-        moveRequest = moveRequestRepo.save(moveRequest);
+        Mapper.updateMoveRequest(existingMoveRequest, moveRequestDto);
 
-        // Handle luggage entries
-        if (dto.getLuggageEntries() != null) {
-            for (LuggageEntryDto leDto : dto.getLuggageEntries()) {
-                LuggageEntry le = new LuggageEntry();
-                le.setQuantity(leDto.getQuantity());
-                le.setMoveRequest(moveRequest);
-                LuggageType luggageType = luggageTypeRepository.findById(leDto.getLuggageTypeId())
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid luggage type"));
-                le.setLuggageType(luggageType);
-                le.setCreatedAt(java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-                le.setUpdatedAt(java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-                luggageEntryRepository.save(le);
-            }
+        try{
+            validateMoveRequest(existingMoveRequest);
+            moveRequestRepository.save(existingMoveRequest);
+        }catch(Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Move Request: " + e.getMessage());
         }
     }
 
-    public void deleteMoveRequest(Long id) {
-        moveRequestRepo.deleteById(id);
+    public MoveRequest add(MoveRequest moveRequest) {
+        try{
+            validateMoveRequest(moveRequest);
+            return moveRequestRepository.save(moveRequest);
+        }catch(Exception e){
+            return null;
+        }
     }
 
-    public MoveRequestDTO updateMoveRequest(Long id, MoveReqPostDto dto) {
-        MoveRequest moveRequest = moveRequestRepo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException((HttpStatus.NOT_FOUND)));
-
-        // Update fields
-        moveRequest.setMoveDate(dto.getMoveDate());
-        moveRequest.setMaxBudget(dto.getMaxBudget());
-        moveRequest.setClientId(dto.getClientId());
-        moveRequest.setFromAddressId(dto.getFromAddressId());
-        moveRequest.setToAddressId(dto.getToAddressId());
-        moveRequest.setStatus(dto.getStatus());
-        moveRequest.setUpdatedAt(LocalDate.now());
-
-        // Handle luggage entries - for simplicity, delete old and add new
-        if (moveRequest.getLuggageEntries() != null) {
-            luggageEntryRepository.deleteAll(moveRequest.getLuggageEntries());
-        }
-        if (dto.getLuggageEntries() != null) {
-            for (LuggageEntryDto leDto : dto.getLuggageEntries()) {
-                LuggageEntry le = new LuggageEntry();
-                le.setQuantity(leDto.getQuantity());
-                le.setMoveRequest(moveRequest);
-                LuggageType luggageType = luggageTypeRepository.findById(leDto.getLuggageTypeId())
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid luggage type"));
-                le.setLuggageType(luggageType);
-                le.setCreatedAt(java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-                le.setUpdatedAt(java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-                luggageEntryRepository.save(le);
-            }
-        }
-
-        moveRequestRepo.save(moveRequest);
-        return MoveRequestMapper.toDTO(moveRequest);
-
+    public void remove(Long moveRequestId) {
+        if(moveRequestId != null)
+        moveRequestRepository.deleteById(moveRequestId);
     }
+
+    public MoveRequest getRandom(){
+
+        Long randomLong = ThreadLocalRandom.current().nextLong(1, 77);
+        MoveRequest moveRequest = moveRequestRepository.findById(randomLong).orElse(null);
+        return moveRequest;
+    }
+
+    public List<MoveRequest> findByClientId(Long clientId)
+    {
+
+        List<MoveRequest> moveRequests = moveRequestRepository.findByClientId(clientId);
+
+//        // Add Move Offers to All Move Requests
+//        for(MoveRequest mr : moveRequests){
+//            addMoveOffers(mr);
+//        }
+
+        return moveRequests;
+    }
+
+    //Get all active move request for the client
+    public List<MoveRequest> findActiveByClientId(Long clientId)
+    {
+        String [] activeStatuses = {"PENDING", "OFFER_AVAILABLE", "CREATED"};
+
+        List<MoveRequest> moveRequests = moveRequestRepository.findByClientId(clientId);
+
+        // Filter move requests by active statuses
+        moveRequests = moveRequests.stream()
+                .filter(mr -> Arrays.asList(activeStatuses).contains(mr.getStatus()))
+                .toList();
+
+        return moveRequests;
+    }
+
+    // Get Currently Logged in User
+
+    private boolean validateMoveRequest(MoveRequest moveRequest) {
+
+//        FIXME: Implement Proper Validation
+        StringBuilder errors = new StringBuilder();
+        // Id
+        if(moveRequest.getId() == null){
+           errors.append("Id is null.");
+        }
+
+        // Move Date
+        if(moveRequest.getMoveDate() == null){
+            errors.append("Move Date is null.");
+        }
+        // Move date cannot be in the past
+        if(moveRequest.getMoveDate() != null && moveRequest.getMoveDate().isBefore(LocalDateTime.now())){
+            errors.append("Move Date cannot be in the past.");
+        }
+
+        // Max Budget
+        if(moveRequest.getMaxBudget() == null){
+            errors.append("Max Budget is null.");
+        }
+        if(moveRequest.getMaxBudget() < 0){
+            errors.append("Max budget cannot be negative.");
+        }
+        if(moveRequest.getClientId() == null){
+            errors.append("Client Id is null.");
+        }
+        if(moveRequest.getFromAddressId() == null){
+            errors.append("From Address Id is null.");
+        }
+        if(moveRequest.getToAddressId() == null){
+            errors.append("To Address Id is null.");
+        }
+        if(errors.length() > 0){
+            throw new IllegalArgumentException(errors.toString());
+        }
+        return true;
+    }
+
+    public MoveRequest getMoveRequestById(Long id) {
+        MoveRequest moveRequest = moveRequestRepository.findById(id).orElse(null);
+        if(moveRequest == null){
+            System.out.println("MoveRequestRepository returned a null.");
+        }
+        return moveRequest;
+    }
+
 
 }

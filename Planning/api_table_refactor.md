@@ -137,7 +137,7 @@
 | Method | Path                   | Description              | Auth | Roles         |
 | ------ | ---------------------- | ------------------------ | ---- | ------------- |
 | GET    | /trips/allTrips        | Get all trips            | Yes  | Admin         |
-| GET    | /trips/me [NA]         | Get current user's trips | Yes  | User, Admin   |
+| GET    | /trips/user            | Get trips by userId      | Yes  | User, Admin   |
 | GET    | /trips/{id}            | Get trip details         | Yes  | User, Admin   |
 | PATCH  | /trips/{id}/status[NA] | Update trip status       | Yes  | Driver, Admin |
 

@@ -1,51 +1,213 @@
 package com.swiftmove.clientservice.controller;
 
+import com.swiftmove.clientservice.client.AuthClient;
+import com.swiftmove.clientservice.dto.*;
+import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
+import com.swiftmove.clientservice.model.LuggageEntry;
+import com.swiftmove.clientservice.model.MoveRequest;
+import com.swiftmove.clientservice.service.ClientService;
+import com.swiftmove.clientservice.service.LuggageService;
+import com.swiftmove.clientservice.service.MoveRequestService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.swiftmove.clientservice.dto.MoveReqPostDto;
-import com.swiftmove.clientservice.dto.MoveRequestDTO;
-import com.swiftmove.clientservice.dto.UserResponseDTO;
-import com.swiftmove.clientservice.service.ClientService;
-
-import lombok.RequiredArgsConstructor;
-
 @RestController
+@RequestMapping("/clients")
 @RequiredArgsConstructor
-@RequestMapping("/client")
 public class ClientController {
 
     private final ClientService clientService;
+    private final MoveRequestService moveRequestService;
+    private final LuggageService luggageService;
+    private final AuthClient authClient;
 
-    @GetMapping("/allClients")
-    public ResponseEntity<List<UserResponseDTO>> getAllClients(){
-        List<UserResponseDTO> allClients=clientService.getAllClients();
-        return ResponseEntity.ok(allClients);
+    @GetMapping("/test")
+    public Object test(@RequestHeader (value = "Authorization", required = false) String authHeader) {
+        Object authUser =  authClient.getCurrentUser(authHeader);
+        return authUser;
     }
-    @GetMapping("/getClient/{id}")
-    public ResponseEntity<UserResponseDTO> getClient(@PathVariable Long id){
-        System.out.println(clientService.getClientById(id));
-        return ResponseEntity.ok(clientService.getClientById(id));
-    }
-    @GetMapping("/{id}/move-requests/history")
-    public ResponseEntity<List<MoveRequestDTO>>getHistory(@PathVariable Long id){
-        return ResponseEntity.ok(clientService.getAllMovesClient(id));
+//    Client Endpoints
+    @GetMapping
+    public ResponseEntity<List<UserResponseDto>> getAllClients(){
+        List<UserResponseDto> clients = clientService.getAllClients();
+        return ResponseEntity.ok(clients);
     }
 
-    @GetMapping("/{id}/move-requests/active")
-    public ResponseEntity<List<MoveRequestDTO>> getActiveMoves(@PathVariable Long id){
-        return ResponseEntity.ok(clientService.getAllActiveMovesClient(id));
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentClient(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            return ResponseEntity.ok(clientService.getCurrentClient(authHeader));
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body("Failed to retrieve current client: " + ex.getMessage());
+        }
     }
-    @PostMapping("/{id}/addMoveRequest")
-    public ResponseEntity<MoveRequestDTO> addMoveRequest(@PathVariable Long id,@RequestBody MoveReqPostDto moveRequestDTO){
-        return ResponseEntity.ok(clientService.addMoveRequest(id,moveRequestDTO));
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDto> getClientById(@PathVariable Long id) {
+        UserResponseDto client = clientService.getClientById(id);
+        if (client == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(client);
     }
+
+//    MoveRequest Endpoints
+
+//     Get All Move Requests for the current client
+    @GetMapping("/move-requests")
+    public ResponseEntity<List<MoveRequest>> getMoveRequestsForCurrentClient(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            AuthUserResponseDto authUser =
+                    (AuthUserResponseDto) authClient.getCurrentUser(authHeader).getBody();
+
+            List<MoveRequest> moveRequests = moveRequestService.findByClientId(authUser.getId());
+            return ResponseEntity.ok(moveRequests);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+//    Get All Move Requests (for Admin)
+    @GetMapping("/move-requests/all")
+    public ResponseEntity<List<MoveRequest>> getAllMoveRequests() {
+        try {
+            List<MoveRequest> moveRequests = moveRequestService.findAll();
+            return ResponseEntity.ok(moveRequests);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+//  Get MoveRequest by Id
+    @GetMapping("/move-requests/{id}")
+    public ResponseEntity<MoveRequest> getMoveRequestById(@PathVariable Long id) {
+        MoveRequest moveRequest = moveRequestService.findById(id);
+        if (moveRequest == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(moveRequest);
+    }
+
+    @GetMapping("/move-requests/active")
+    public ResponseEntity<List<MoveRequest>> getActiveMoveRequestsForCurrentClient(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            AuthUserResponseDto authUser =
+                    (AuthUserResponseDto) authClient.getCurrentUser(authHeader).getBody();
+
+            List<MoveRequest> moveRequests = moveRequestService.findActiveByClientId(authUser.getId());
+            return ResponseEntity.ok(moveRequests);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+//    Create a new MoveRequest for the current client
+//    FIXME: Change MoveRequest to MoveRequestDto and implement validation
+    @PostMapping("/move-requests")
+    public ResponseEntity<MoveRequest> createMoveRequest(@RequestBody MoveRequest moveRequest,
+                                                         @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            AuthUserResponseDto authUser =
+                    (AuthUserResponseDto) authClient.getCurrentUser(authHeader).getBody();
+            moveRequest.setClientId(authUser.getId());
+            MoveRequest createdMoveRequest = moveRequestService.add(moveRequest);
+            if (createdMoveRequest == null) {
+                // BAD Request
+                return ResponseEntity.status(400).build();
+            }
+            return ResponseEntity.ok(createdMoveRequest);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+//    Edit MoveRequest
+    @PutMapping("/move-requests/{id}")
+    public ResponseEntity<MoveRequest> updateMoveRequest(@PathVariable Long id, @RequestBody MoveRequestDto moveRequestDto) {
+        try {
+            moveRequestService.update(id, moveRequestDto);
+            MoveRequest updatedMoveRequest = moveRequestService.findById(id);
+            if (updatedMoveRequest == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(updatedMoveRequest);
+        } catch (Exception ex) {
+            System.out.println("Error updating MoveRequest: " + ex.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+//    Delete MoveRequest
+    @DeleteMapping("/move-requests/{id}")
+    public ResponseEntity<Void> deleteMoveRequest(@PathVariable Long id) {
+        try {
+            moveRequestService.remove(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+//    Luggage
+
+
+    @GetMapping("/move-requests/luggage")
+    public ResponseEntity<List<LuggageEntry>> getLuggageForMoveRequest(@RequestParam Long moveRequestId) {
+        try {
+            List<LuggageEntry> luggageItems = luggageService.getLuggageEntriesByMoveRequestId(moveRequestId);
+            return ResponseEntity.ok(luggageItems);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @PostMapping("/move-requests/luggage")
+    public ResponseEntity<LuggageEntry> addLuggageToMoveRequest(@RequestParam Long moveRequestId, @RequestBody AddLuggageEntryDto luggageEntryDto) {
+        try {
+            LuggageEntry createdLuggageEntry = luggageService.addLuggageEntry(moveRequestId, luggageEntryDto);
+            if (createdLuggageEntry == null) {
+                return ResponseEntity.status(400).build();
+            }
+            return ResponseEntity.ok(createdLuggageEntry);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @PutMapping("/move-requests/luggage/{id}")
+    public ResponseEntity<LuggageEntry> updateLuggageEntry(@PathVariable Long id, @RequestBody UpdateLuggageEntryDto luggageEntryDto) {
+        try {
+            LuggageEntry updatedLuggageEntry = luggageService.updateLuggageEntry(id, luggageEntryDto);
+            if (updatedLuggageEntry == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(updatedLuggageEntry);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @DeleteMapping("/move-requests/luggage/{id}")
+    public ResponseEntity<Void> deleteLuggageEntry(@PathVariable Long id) {
+        try {
+            luggageService.deleteLuggageEntry(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @DeleteMapping("/move-requests/luggage/empty")
+    public ResponseEntity<Void> emptyLuggageForMoveRequest(@RequestParam Long moveRequestId) {
+        try {
+            luggageService.deleteAllLuggageEntries(moveRequestId);
+            return ResponseEntity.ok().build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
 }

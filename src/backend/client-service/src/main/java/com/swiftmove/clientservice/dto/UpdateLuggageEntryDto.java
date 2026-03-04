@@ -5,11 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LuggageEntryDto {
-    private Integer quantity;
-    private Long luggageTypeId;
+@Getter
+@Setter
+public class UpdateLuggageEntryDto {
+    private int quantity;
 }

@@ -4,7 +4,7 @@ package com.swiftmove.locationservice.service;
 import com.swiftmove.locationservice.dto.AddressDTO;
 import com.swiftmove.locationservice.mapper.AddressMapper;
 import com.swiftmove.locationservice.model.Address;
-import com.swiftmove.locationservice.repo.AddressRepository;
+import com.swiftmove.locationservice.repository.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
