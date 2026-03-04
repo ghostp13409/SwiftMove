@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Timestamp;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -20,6 +18,6 @@ public class VehicleDto {
     private Long pricePerKm;
     private Boolean isActive;
     private Boolean canCarryFurniture;
-    private Long driverInfoId;
+    private Long driverId;
     private Long vehicleTypeId;
 }

@@ -1,10 +1,10 @@
-package com.swiftmove.locationservice.service;
+package com.swiftMove.locationservice.service;
 
 
-import com.swiftmove.locationservice.dto.AddressDTO;
-import com.swiftmove.locationservice.mapper.AddressMapper;
-import com.swiftmove.locationservice.model.Address;
-import com.swiftmove.locationservice.repository.AddressRepository;
+import com.swiftMove.locationservice.mapper.AddressMapper;
+import com.swiftMove.locationservice.dto.AddressDTO;
+import com.swiftMove.locationservice.model.Address;
+import com.swiftMove.locationservice.repository.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

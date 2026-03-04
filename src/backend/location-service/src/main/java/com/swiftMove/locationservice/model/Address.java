@@ -1,4 +1,4 @@
-package com.swiftmove.locationservice.model;
+package com.swiftMove.locationservice.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

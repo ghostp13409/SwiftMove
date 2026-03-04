@@ -1,4 +1,4 @@
-package com.swiftmove.locationservice.controller;
+package com.swiftMove.locationservice.controller;
 
 
 import java.util.List;
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.swiftmove.locationservice.dto.AddressDTO;
-import com.swiftmove.locationservice.service.AddressService;
+import com.swiftMove.locationservice.dto.AddressDTO;
+import com.swiftMove.locationservice.service.AddressService;
 
 import lombok.RequiredArgsConstructor;
 

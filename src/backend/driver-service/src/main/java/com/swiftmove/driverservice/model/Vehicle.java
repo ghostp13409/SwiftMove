@@ -42,7 +42,7 @@ public class Vehicle {
     private Boolean canCarryFurniture;
 
     @Column(name = "driver_id", nullable = false)
-    private Long driverInfoId;
+    private Long driverId;
 
     @Column(name = "vehicle_type_id", nullable = false)
     private Long vehicleTypeId;

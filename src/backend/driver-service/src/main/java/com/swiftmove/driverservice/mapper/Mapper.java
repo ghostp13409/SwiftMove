@@ -42,7 +42,7 @@ public class Mapper {
         dto.setPricePerKm(vehicle.getPricePerKm());
         dto.setIsActive(vehicle.getIsActive());
         dto.setCanCarryFurniture(vehicle.getCanCarryFurniture());
-        dto.setDriverInfoId(vehicle.getDriverInfoId());
+        dto.setDriverId(vehicle.getDriverId());
         dto.setVehicleTypeId(vehicle.getVehicleTypeId());
         return dto;
     }
@@ -58,7 +58,7 @@ public class Mapper {
         vehicle.setPricePerKm(vehicleDto.getPricePerKm());
         vehicle.setIsActive(vehicleDto.getIsActive());
         vehicle.setCanCarryFurniture(vehicleDto.getCanCarryFurniture());
-        vehicle.setDriverInfoId(vehicleDto.getDriverInfoId());
+        vehicle.setDriverId(vehicleDto.getDriverId());
         vehicle.setVehicleTypeId(vehicleDto.getVehicleTypeId());
         return vehicle;
     }
