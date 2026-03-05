@@ -105,4 +105,17 @@ public class Mapper {
         driverInfo.setRange(createDriverInfoDto.getRange());
         return driverInfo;
     }
+
+    public static MoveOffer toMoveOfferEntityFromCreateDto(CreateMoveOfferDto createMoveOfferDto) {
+        MoveOffer offer = new MoveOffer();
+
+        offer.setPrice(createMoveOfferDto.getPrice());
+        offer.setOfferedDate(createMoveOfferDto.getOfferedDate());
+        offer.setMoveRequestId(createMoveOfferDto.getMoveRequestId());
+        offer.setDriverId(createMoveOfferDto.getDriverId());
+        offer.setVehicleId(createMoveOfferDto.getVehicleId());
+        offer.setStatus(createMoveOfferDto.getStatus());
+
+        return offer;
+    }
 }

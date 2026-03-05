@@ -195,9 +195,9 @@ class DriverController {
 
 //    Create
     @PostMapping("/move-offers")
-    public ResponseEntity<MoveOfferDto> createMoveOffer(@RequestBody MoveOfferDto moveOfferDto) {
+    public ResponseEntity<MoveOfferDto> createMoveOffer(@RequestBody CreateMoveOfferDto createMoveOfferDto) {
         try{
-            MoveOfferDto newMoveOffer = moveOfferService.add(moveOfferDto);
+            MoveOfferDto newMoveOffer = moveOfferService.add(createMoveOfferDto);
             return ResponseEntity.ok(newMoveOffer);
         }
         catch (Exception ex){
