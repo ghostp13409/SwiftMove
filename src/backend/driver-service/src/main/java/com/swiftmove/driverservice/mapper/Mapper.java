@@ -118,4 +118,19 @@ public class Mapper {
 
         return offer;
     }
+    public  static Vehicle toVehicleEntityFromCreateDto(CreateVehicleDto createVehicleDto) {
+        Vehicle vehicle = new Vehicle();
+
+        vehicle.setModel(createVehicleDto.getModel());
+        vehicle.setMake(createVehicleDto.getMake());
+        vehicle.setYear(createVehicleDto.getYear());
+        vehicle.setColor(createVehicleDto.getColor());
+        vehicle.setPricePerKm(createVehicleDto.getPricePerKm());
+        vehicle.setIsActive(createVehicleDto.getIsActive());
+        vehicle.setCanCarryFurniture(createVehicleDto.getCanCarryFurniture());
+        vehicle.setDriverId(createVehicleDto.getDriverId());
+        vehicle.setVehicleTypeId(createVehicleDto.getVehicleTypeId());
+
+        return vehicle;
+    }
 }
