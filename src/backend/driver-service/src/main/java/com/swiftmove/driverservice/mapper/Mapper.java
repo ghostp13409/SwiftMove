@@ -1,9 +1,6 @@
 package com.swiftmove.driverservice.mapper;
 
-import com.swiftmove.driverservice.dto.DriverInfoDto;
-import com.swiftmove.driverservice.dto.VehicleDto;
-import com.swiftmove.driverservice.dto.MoveOfferDto;
-import com.swiftmove.driverservice.dto.VehicleTypeDto;
+import com.swiftmove.driverservice.dto.*;
 import com.swiftmove.driverservice.model.DriverInfo;
 import com.swiftmove.driverservice.model.Vehicle;
 import com.swiftmove.driverservice.model.MoveOffer;
@@ -98,5 +95,14 @@ public class Mapper {
         dto.setMaxWeight(vehicleType.getMaxWeight());
         dto.setCapacity(vehicleType.getCapacity());
         return dto;
+    }
+
+    public static DriverInfo toDriverInfoEntityFromCreateDto(CreateDriverInfoDto createDriverInfoDto) {
+        DriverInfo driverInfo = new DriverInfo();
+        driverInfo.setUserId(createDriverInfoDto.getUserId());
+        driverInfo.setDrivingLicense(createDriverInfoDto.getDrivingLicense());
+        driverInfo.setDrivingExperience(createDriverInfoDto.getDrivingExperience());
+        driverInfo.setRange(createDriverInfoDto.getRange());
+        return driverInfo;
     }
 }
