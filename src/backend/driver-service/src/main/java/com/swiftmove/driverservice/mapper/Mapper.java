@@ -118,6 +118,7 @@ public class Mapper {
 
         return offer;
     }
+    
     public  static Vehicle toVehicleEntityFromCreateDto(CreateVehicleDto createVehicleDto) {
         Vehicle vehicle = new Vehicle();
 
