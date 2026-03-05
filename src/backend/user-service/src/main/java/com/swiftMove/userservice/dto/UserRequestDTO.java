@@ -1,10 +1,13 @@
 package com.swiftmove.userservice.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class UserRequestDTO {
     private String userName;
     private String password;

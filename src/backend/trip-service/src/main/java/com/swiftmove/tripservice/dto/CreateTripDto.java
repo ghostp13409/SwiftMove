@@ -1,17 +1,17 @@
 package com.swiftmove.tripservice.dto;
 
+
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class TripDTO {
-    private Long id;
+public class CreateTripDto {
     private Long moveRequestId;
     private Long moveOfferId;
     private String status;

@@ -2,9 +2,10 @@ package com.swiftMove.locationservice.mapper;
 
 
 import com.swiftMove.locationservice.dto.AddressDTO;
+import com.swiftMove.locationservice.dto.CreateAddressDto;
 import com.swiftMove.locationservice.model.Address;
 
-public class AddressMapper {
+public class Mapper {
     //Address -> addressDTO
     public static AddressDTO toDTO(Address address) {
         return new AddressDTO(
@@ -27,6 +28,17 @@ public class AddressMapper {
         address.setStateOrProvince(addressDTO.getStateOrProvince());
         address.setPostalOrZipCode(addressDTO.getPostalOrZipCode());
         address.setCountry(addressDTO.getCountry());
+        return address;
+    }
+
+    public static Address createAddressDto(CreateAddressDto createAddressDto) {
+        Address address = new Address();
+        address.setLine1(createAddressDto.getLine1());
+        address.setLine2(createAddressDto.getLine2());
+        address.setCity(createAddressDto.getCity());
+        address.setStateOrProvince(createAddressDto.getStateOrProvince());
+        address.setPostalOrZipCode(createAddressDto.getPostalOrZipCode());
+        address.setCountry(createAddressDto.getCountry());
         return address;
     }
 }

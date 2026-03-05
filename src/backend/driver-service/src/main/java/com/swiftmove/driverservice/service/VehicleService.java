@@ -3,7 +3,6 @@ package com.swiftmove.driverservice.service;
 import com.swiftmove.driverservice.dto.CreateVehicleDto;
 import com.swiftmove.driverservice.dto.VehicleDto;
 import com.swiftmove.driverservice.mapper.Mapper;
-import com.swiftmove.driverservice.model.MoveOffer;
 import com.swiftmove.driverservice.model.Vehicle;
 import com.swiftmove.driverservice.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +49,7 @@ public class VehicleService {
     public VehicleDto add(CreateVehicleDto vehicleDto){
         try{
             validateNewVehicle(vehicleDto);
-            Vehicle newVehicle = Mapper.toVehicleEntityFromCreateDto(vehicleDto);
+            Vehicle newVehicle = Mapper.createVehicleEntity(vehicleDto);
             newVehicle = vehicleRepository.save(newVehicle);
             return Mapper.toVehicleDto(newVehicle);
         }
