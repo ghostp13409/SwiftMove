@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.swiftmove.clientservice.dto.AddLuggageEntryDto;
+import com.swiftmove.clientservice.dto.CreateMoveRequestDto;
+import com.swiftmove.clientservice.dto.LuggageEntryDto;
 import com.swiftmove.clientservice.dto.UserResponseDto;
 import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.model.Client;
@@ -26,7 +28,6 @@ public class Mapper {
         client.setDob(userResponseDTO.getDob());
         client.setRating(userResponseDTO.getRating());
         client.setAddressId(userResponseDTO.getAddressId());
-        client.setMoveRequests(moveRequestService.findByClientId(userResponseDTO.getId()));
 
         return client;
 
@@ -46,6 +47,7 @@ public class Mapper {
         return moveRequest;
     }
 
+//    Move Request
     public static MoveRequestDto toMoveRequestDto(MoveRequest moveRequest) {
         MoveRequestDto moveRequestDto = new MoveRequestDto();
         moveRequestDto.setId(moveRequest.getId());
@@ -56,6 +58,18 @@ public class Mapper {
         moveRequestDto.setMoveDate(moveRequest.getMoveDate());
         moveRequestDto.setStatus(moveRequest.getStatus());
         return moveRequestDto;
+    }
+
+    public static MoveRequest createMoveRequestEntity(CreateMoveRequestDto createMoveRequestDto) {
+        MoveRequest moveRequest = new MoveRequest();
+            moveRequest.setClientId(createMoveRequestDto.getClientId());
+            moveRequest.setFromAddressId(createMoveRequestDto.getFromAddressId());
+            moveRequest.setToAddressId(createMoveRequestDto.getToAddressId());
+            moveRequest.setMaxBudget(createMoveRequestDto.getMaxBudget());
+            moveRequest.setMoveDate(createMoveRequestDto.getMoveDate());
+            moveRequest.setStatus(createMoveRequestDto.getStatus());
+
+            return moveRequest;
     }
 
     public static void updateMoveRequest(MoveRequest moveRequest, MoveRequestDto moveRequestDto) {
@@ -70,9 +84,25 @@ public class Mapper {
 
 //    LuggageEntry
 
+    public static LuggageEntryDto toLuggageEntryDto(LuggageEntry luggageEntry) {
+        LuggageEntryDto luggageEntryDto = new LuggageEntryDto();
+        luggageEntryDto.setId(luggageEntry.getId());
+        luggageEntryDto.setQuantity(luggageEntry.getQuantity());
+        luggageEntryDto.setMoveRequestId(luggageEntry.getMoveRequestId());
+        luggageEntryDto.setLuggageTypeId(luggageEntry.getLuggageTypeId());
+        return luggageEntryDto;
+    }
+
+    public static LuggageEntry toLuggageEntryEntity(LuggageEntryDto luggageEntryDto) {
+        LuggageEntry luggageEntry = new LuggageEntry();
+        luggageEntry.setId(luggageEntryDto.getId());
+        luggageEntry.setQuantity(luggageEntryDto.getQuantity());
+        luggageEntry.setMoveRequestId(luggageEntryDto.getId());
+        luggageEntry.setLuggageTypeId(luggageEntryDto.getLuggageTypeId());
+        return luggageEntry;
+    }
     public static LuggageEntry toLuggageEntryEntity(AddLuggageEntryDto luggageEntryDto) {
         LuggageEntry luggageEntry = new LuggageEntry();
-
         luggageEntry.setId(luggageEntryDto.getId());
         luggageEntry.setQuantity(luggageEntryDto.getQuantity());
         return luggageEntry;

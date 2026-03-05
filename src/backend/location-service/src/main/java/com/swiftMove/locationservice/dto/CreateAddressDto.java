@@ -1,4 +1,4 @@
-package com.swiftmove.clientservice.dto;
+package com.swiftMove.locationservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AddressResponseDto {
+public class CreateAddressDto {
+    private Long id;
     private String line1;
     private String line2;
     private String city;

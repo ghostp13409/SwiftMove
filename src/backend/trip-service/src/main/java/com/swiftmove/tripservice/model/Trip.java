@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 
@@ -25,8 +27,10 @@ public class Trip {
     private Long moveOfferId;
     @Column(name = "status")
     private String status;
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdAt;
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 }

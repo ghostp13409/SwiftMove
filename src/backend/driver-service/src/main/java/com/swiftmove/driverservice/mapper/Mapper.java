@@ -106,7 +106,7 @@ public class Mapper {
         return driverInfo;
     }
 
-    public static MoveOffer toMoveOfferEntityFromCreateDto(CreateMoveOfferDto createMoveOfferDto) {
+    public static MoveOffer createMoveOfferEntity(CreateMoveOfferDto createMoveOfferDto) {
         MoveOffer offer = new MoveOffer();
 
         offer.setPrice(createMoveOfferDto.getPrice());
@@ -118,7 +118,7 @@ public class Mapper {
 
         return offer;
     }
-    public  static Vehicle toVehicleEntityFromCreateDto(CreateVehicleDto createVehicleDto) {
+    public  static Vehicle createVehicleEntity(CreateVehicleDto createVehicleDto) {
         Vehicle vehicle = new Vehicle();
 
         vehicle.setModel(createVehicleDto.getModel());

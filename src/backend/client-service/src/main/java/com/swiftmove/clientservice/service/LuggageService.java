@@ -2,6 +2,7 @@ package com.swiftmove.clientservice.service;
 
 import com.swiftmove.clientservice.dto.AddLuggageEntryDto;
 import com.swiftmove.clientservice.dto.UpdateLuggageEntryDto;
+import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.mapper.Mapper;
 import com.swiftmove.clientservice.model.LuggageEntry;
 import com.swiftmove.clientservice.model.LuggageType;
@@ -44,10 +45,9 @@ public class LuggageService {
             return luggageEntryRepository.save(entry);
         }
         else {
-            MoveRequest moveRequest = moveRequestService.findById(moverequestId);
+            MoveRequestDto moveRequest = moveRequestService.findById(moverequestId);
             LuggageEntry newLuggageEntry = Mapper.toLuggageEntryEntity(luggageEntryDto);
-            newLuggageEntry.setMoveRequest(moveRequest);
-            newLuggageEntry.setLuggageType(luggageTypeRepository.findLuggageTypeByType(luggageEntryDto.getLuggageType()));
+            MoveRequest moveRequestEntity = Mapper.toMoveRequestEntity(moveRequest);
             return luggageEntryRepository.save(newLuggageEntry);
         }
     }

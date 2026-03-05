@@ -1,6 +1,7 @@
 package com.swiftmove.tripservice.mapper;
 
 
+import com.swiftmove.tripservice.dto.CreateTripDto;
 import com.swiftmove.tripservice.dto.TripDTO;
 import com.swiftmove.tripservice.model.Trip;
 
@@ -12,9 +13,7 @@ public class TripMapper {
                 trip.getId(),
                 trip.getMoveRequestId(),
                 trip.getMoveOfferId(),
-                trip.getStatus(),
-                trip.getCreatedAt(),
-                trip.getUpdatedAt()
+                trip.getStatus()
         );
 
     }
@@ -25,8 +24,14 @@ public class TripMapper {
         trip.setMoveRequestId(tripDTO.getMoveRequestId());
         trip.setMoveOfferId(tripDTO.getMoveOfferId());
         trip.setStatus(tripDTO.getStatus());
-        trip.setCreatedAt(tripDTO.getCreatedAt());
-        trip.setUpdatedAt(tripDTO.getUpdatedAt());
+        return trip;
+    }
+
+    public static Trip createTripEntity(CreateTripDto createTripDto) {
+        Trip trip = new Trip();
+        trip.setMoveRequestId(createTripDto.getMoveRequestId());
+        trip.setMoveOfferId(createTripDto.getMoveOfferId());
+        trip.setStatus(createTripDto.getStatus());
         return trip;
     }
 }

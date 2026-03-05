@@ -4,11 +4,9 @@ import com.swiftmove.driverservice.client.AuthClient;
 import com.swiftmove.driverservice.dto.CreateMoveOfferDto;
 import com.swiftmove.driverservice.dto.MoveOfferDto;
 import com.swiftmove.driverservice.mapper.Mapper;
-import com.swiftmove.driverservice.model.DriverInfo;
 import com.swiftmove.driverservice.model.MoveOffer;
 import com.swiftmove.driverservice.repository.MoveOfferRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -60,7 +58,7 @@ public class MoveOfferService {
 //    Add
     public MoveOfferDto add(CreateMoveOfferDto newMoveOfferDto){
         try{
-            MoveOffer newMoveOffer = Mapper.toMoveOfferEntityFromCreateDto(newMoveOfferDto);
+            MoveOffer newMoveOffer = Mapper.createMoveOfferEntity(newMoveOfferDto);
             newMoveOffer = moveOfferRepository.save(newMoveOffer);
             return Mapper.toMoveOfferDto(newMoveOffer);
         }
