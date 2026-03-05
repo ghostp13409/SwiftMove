@@ -275,7 +275,7 @@ class DriverController {
 
 //    Add
     @PostMapping("/vehicles")
-    public ResponseEntity<VehicleDto> addVehicle(@RequestBody VehicleDto vehicleDto) {
+    public ResponseEntity<VehicleDto> addVehicle(@RequestBody CreateVehicleDto vehicleDto) {
         try{
             VehicleDto newVehicle = vehicleService.add(vehicleDto);
             return ResponseEntity.ok(newVehicle);
