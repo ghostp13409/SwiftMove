@@ -1,11 +1,14 @@
 package com.swiftmove.driverservice.service;
 
 import com.swiftmove.driverservice.client.AuthClient;
+import com.swiftmove.driverservice.dto.CreateMoveOfferDto;
 import com.swiftmove.driverservice.dto.MoveOfferDto;
 import com.swiftmove.driverservice.mapper.Mapper;
+import com.swiftmove.driverservice.model.DriverInfo;
 import com.swiftmove.driverservice.model.MoveOffer;
 import com.swiftmove.driverservice.repository.MoveOfferRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,9 +58,16 @@ public class MoveOfferService {
     }
 
 //    Add
-    public MoveOfferDto add(MoveOfferDto moveOfferDto){
-        validateMoveOffer(moveOfferDto);
-        return Mapper.toMoveOfferDto(moveOfferRepository.save(Mapper.toMoveOfferEntity(moveOfferDto)));
+    public MoveOfferDto add(CreateMoveOfferDto newMoveOfferDto){
+        try{
+            MoveOffer newMoveOffer = Mapper.toMoveOfferEntityFromCreateDto(newMoveOfferDto);
+            newMoveOffer = moveOfferRepository.save(newMoveOffer);
+            return Mapper.toMoveOfferDto(newMoveOffer);
+        }
+        catch (Exception ex){
+            throw new RuntimeException("Failed to create MoveOffer: " + ex.getMessage(), ex);
+        }
+
     }
 
 //    Edit
@@ -93,6 +103,40 @@ public class MoveOfferService {
     }
 
     private boolean validateMoveOffer(MoveOfferDto moveOfferDto) {
+        // Add validation logic here
+        StringBuilder errorMessage = new StringBuilder();
+
+        if (moveOfferDto == null) {
+            errorMessage.append("Move offer cannot be null.");
+        }
+
+        if(moveOfferDto.getPrice() == null || moveOfferDto.getPrice() <= 0) {
+            errorMessage.append("Price must be a positive value.");
+        }
+
+        if(moveOfferDto.getMoveRequestId() == null) {
+            errorMessage.append("Move request ID cannot be null.");
+        }
+
+        if(moveOfferDto.getDriverId() == null) {
+            errorMessage.append("Driver ID cannot be null.");
+        }
+
+        if(moveOfferDto.getVehicleId() == null) {
+            errorMessage.append("Vehicle ID cannot be null.");
+        }
+
+        if(moveOfferDto.getStatus() == null || moveOfferDto.getStatus().trim().isEmpty()) {
+            errorMessage.append("Status cannot be null or empty.");
+        }
+
+        if(errorMessage.length() > 0) {
+            throw new IllegalArgumentException(errorMessage.toString());
+        }
+
+        return true;
+    }
+    private boolean validateCreateMoveOffer(CreateMoveOfferDto moveOfferDto) {
         // Add validation logic here
         StringBuilder errorMessage = new StringBuilder();
 
