@@ -34,7 +34,7 @@ class DriverController {
 
 //    Get by Id
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getDriverById(Long id) {
+    public ResponseEntity<UserResponseDto> getDriverById(@PathVariable  Long id) {
         UserResponseDto driver = driverService.getDriverById(id);
         if (driver == null) {
             return ResponseEntity.notFound().build();
