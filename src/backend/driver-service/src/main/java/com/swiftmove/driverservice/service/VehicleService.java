@@ -1,7 +1,10 @@
 package com.swiftmove.driverservice.service;
 
+import com.swiftmove.driverservice.dto.CreateVehicleDto;
 import com.swiftmove.driverservice.dto.VehicleDto;
 import com.swiftmove.driverservice.mapper.Mapper;
+import com.swiftmove.driverservice.model.MoveOffer;
+import com.swiftmove.driverservice.model.Vehicle;
 import com.swiftmove.driverservice.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,13 +47,15 @@ public class VehicleService {
     }
 
 //    Add
-    public VehicleDto add(VehicleDto vehicleDto){
+    public VehicleDto add(CreateVehicleDto vehicleDto){
         try{
-            validateVehicle(vehicleDto);
-            return Mapper.toVehicleDto(vehicleRepository.save(Mapper.toVehicleEntity(vehicleDto)));
+            validateNewVehicle(vehicleDto);
+            Vehicle newVehicle = Mapper.toVehicleEntityFromCreateDto(vehicleDto);
+            newVehicle = vehicleRepository.save(newVehicle);
+            return Mapper.toVehicleDto(newVehicle);
         }
         catch (Exception ex){
-            throw new RuntimeException("Failed to add vehicle: " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to create MoveOffer: " + ex.getMessage(), ex);
         }
     }
 //    Edit
@@ -91,6 +96,40 @@ public class VehicleService {
     // Validate Vehicle Dto
 
     private void validateVehicle(VehicleDto vehicleDto) {
+        // Add validation logic here
+        StringBuilder errorMessages = new StringBuilder();
+
+        if(vehicleDto == null) {
+            errorMessages.append("Vehicle cannot be null.");
+        }
+
+        if(vehicleDto.getMake() == null || vehicleDto.getMake().trim().isEmpty()) {
+            errorMessages.append("Make cannot be null or empty.");
+        }
+
+        if(vehicleDto.getModel() == null || vehicleDto.getModel().trim().isEmpty()) {
+            errorMessages.append("Model cannot be null or empty.");
+        }
+
+        if(vehicleDto.getYear() == null || vehicleDto.getYear() <= 0) {
+            errorMessages.append("Year must be a positive value.");
+        }
+
+        if(vehicleDto.getColor() == null || vehicleDto.getColor().trim().isEmpty()) {
+            errorMessages.append("Color cannot be null or empty.");
+        }
+
+        if(vehicleDto.getDriverId() == null || driverInfoService.getById(vehicleDto.getDriverId()) == null) {
+            errorMessages.append("Driver Info ID must be valid and exist.");
+        }
+
+        if(errorMessages.length() > 0) {
+            throw new IllegalArgumentException(errorMessages.toString());
+        }
+
+    }
+
+    private void validateNewVehicle(CreateVehicleDto vehicleDto) {
         // Add validation logic here
         StringBuilder errorMessages = new StringBuilder();
 

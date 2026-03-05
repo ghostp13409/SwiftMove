@@ -120,12 +120,13 @@ class DriverController {
 
 //    Add
     @PostMapping("/info")
-    public ResponseEntity<DriverInfoDto> addDriverInfo(@RequestBody DriverInfoDto driverInfoDto) {
+    public ResponseEntity<DriverInfoDto> addDriverInfo(@RequestBody CreateDriverInfoDto driverInfoDto) {
         try {
             DriverInfoDto newDriverInfo = driverInfoService.add(driverInfoDto);
             return ResponseEntity.ok(newDriverInfo);
         }
         catch (Exception ex){
+
             return ResponseEntity.status(500).body(null);
         }
     }
@@ -194,9 +195,9 @@ class DriverController {
 
 //    Create
     @PostMapping("/move-offers")
-    public ResponseEntity<MoveOfferDto> createMoveOffer(@RequestBody MoveOfferDto moveOfferDto) {
+    public ResponseEntity<MoveOfferDto> createMoveOffer(@RequestBody CreateMoveOfferDto createMoveOfferDto) {
         try{
-            MoveOfferDto newMoveOffer = moveOfferService.add(moveOfferDto);
+            MoveOfferDto newMoveOffer = moveOfferService.add(createMoveOfferDto);
             return ResponseEntity.ok(newMoveOffer);
         }
         catch (Exception ex){
@@ -274,7 +275,7 @@ class DriverController {
 
 //    Add
     @PostMapping("/vehicles")
-    public ResponseEntity<VehicleDto> addVehicle(@RequestBody VehicleDto vehicleDto) {
+    public ResponseEntity<VehicleDto> addVehicle(@RequestBody CreateVehicleDto vehicleDto) {
         try{
             VehicleDto newVehicle = vehicleService.add(vehicleDto);
             return ResponseEntity.ok(newVehicle);
