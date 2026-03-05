@@ -1,6 +1,7 @@
 package com.swiftmove.driverservice.service;
 
 import com.swiftmove.driverservice.client.AuthClient;
+import com.swiftmove.driverservice.dto.CreateDriverInfoDto;
 import com.swiftmove.driverservice.dto.DriverInfoDto;
 import com.swiftmove.driverservice.mapper.Mapper;
 import com.swiftmove.driverservice.model.DriverInfo;
@@ -55,9 +56,9 @@ public class DriverInfoService {
         }
     }
 
-    public DriverInfoDto add(DriverInfoDto driverInfoDto) {
+    public DriverInfoDto add(CreateDriverInfoDto driverInfoDto) {
         try{
-            DriverInfo newDriverInfo = Mapper.toDriverInfoEntity(driverInfoDto);
+            DriverInfo newDriverInfo = Mapper.toDriverInfoEntityFromCreateDto(driverInfoDto);
                 newDriverInfo = driverInfoRepository.save(newDriverInfo);
             return Mapper.toDriverInfoDto(newDriverInfo);
         }

@@ -120,12 +120,13 @@ class DriverController {
 
 //    Add
     @PostMapping("/info")
-    public ResponseEntity<DriverInfoDto> addDriverInfo(@RequestBody DriverInfoDto driverInfoDto) {
+    public ResponseEntity<DriverInfoDto> addDriverInfo(@RequestBody CreateDriverInfoDto driverInfoDto) {
         try {
             DriverInfoDto newDriverInfo = driverInfoService.add(driverInfoDto);
             return ResponseEntity.ok(newDriverInfo);
         }
         catch (Exception ex){
+
             return ResponseEntity.status(500).body(null);
         }
     }
