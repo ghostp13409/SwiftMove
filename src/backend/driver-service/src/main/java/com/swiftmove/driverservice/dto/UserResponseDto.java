@@ -22,6 +22,4 @@ public class UserResponseDto {
     private Float rating;
     private String role;
     private Long addressId;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
 }

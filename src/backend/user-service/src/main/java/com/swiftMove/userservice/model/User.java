@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 
@@ -46,9 +48,11 @@ public class User {
     @JoinColumn(name = "address_id", nullable = true)
     private Long addressId;
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 }

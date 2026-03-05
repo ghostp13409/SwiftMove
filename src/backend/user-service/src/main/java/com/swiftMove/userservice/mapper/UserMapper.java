@@ -19,9 +19,7 @@ public class UserMapper {
                 user.getDob(),
                 user.getRating(),
                 user.getRole(),
-                user.getAddressId(),
-                user.getCreatedAt(),
-                user.getUpdatedAt()
+                user.getAddressId()
         );
     }
 
