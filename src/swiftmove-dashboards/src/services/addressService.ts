@@ -1,7 +1,7 @@
-import apiClient from './apiClient';
-import { Address, AddressFormData } from '../types';
+import { Address, AddressForm } from "@/types";
+import apiClient from "./apiClient";
 
-const API_BASE = '/addresses';
+const API_BASE = "/addresses";
 
 export const addressService = {
   // Get all addresses
@@ -10,7 +10,7 @@ export const addressService = {
       const response = await apiClient.get(`${API_BASE}`);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error fetching addresses:', error);
+      console.error("Error fetching addresses:", error);
       throw error;
     }
   },
@@ -21,29 +21,32 @@ export const addressService = {
       const response = await apiClient.get(`${API_BASE}/${id}`);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error fetching address:', error);
+      console.error("Error fetching address:", error);
       throw error;
     }
   },
 
   // Create new address
-  createAddress: async (data: AddressFormData): Promise<Address> => {
+  createAddress: async (data: AddressForm): Promise<Address> => {
     try {
       const response = await apiClient.post(`${API_BASE}`, data);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error creating address:', error);
+      console.error("Error creating address:", error);
       throw error;
     }
   },
 
   // Update address
-  updateAddress: async (id: string | number, data: AddressFormData): Promise<Address> => {
+  updateAddress: async (
+    id: string | number,
+    data: AddressForm,
+  ): Promise<Address> => {
     try {
       const response = await apiClient.put(`${API_BASE}/${id}`, data);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error updating address:', error);
+      console.error("Error updating address:", error);
       throw error;
     }
   },
@@ -53,7 +56,7 @@ export const addressService = {
     try {
       await apiClient.delete(`${API_BASE}/${id}`);
     } catch (error) {
-      console.error('Error deleting address:', error);
+      console.error("Error deleting address:", error);
       throw error;
     }
   },

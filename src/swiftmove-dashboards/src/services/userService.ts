@@ -1,18 +1,16 @@
-import apiClient from './apiClient';
-import { User, UserUpdateData, UserProfile } from '../types';
+import apiClient from "./apiClient";
+import { Address, User, UserForm } from "@/types";
 
-const API_BASE = '/users';
+const API_BASE = "/users";
 
 export const userService = {
-
-
   // Get all users (alt endpoint)
   getAllUsers: async (): Promise<User[]> => {
     try {
       const response = await apiClient.get(`${API_BASE}`);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
       throw error;
     }
   },
@@ -22,42 +20,44 @@ export const userService = {
     try {
       const response = await apiClient.get(`${API_BASE}/${id}`);
       return response.data.data || response.data;
-    }
-    catch (error) {
-      console.error('Error fetching user by ID:', error);
+    } catch (error) {
+      console.error("Error fetching user by ID:", error);
       throw error;
     }
   },
 
   // Create new user
-  createUser: async (userData: any): Promise<User> => {
+  createUser: async (userData: UserForm): Promise<User> => {
     try {
       const response = await apiClient.post(`${API_BASE}`, userData);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error("Error creating user:", error);
       throw error;
     }
   },
 
   // Update user profile
-  updateUserProfile: async (id: string | number, data: UserUpdateData): Promise<User> => {
+  updateUserProfile: async (
+    id: string | number,
+    data: UserForm,
+  ): Promise<User> => {
     try {
       const response = await apiClient.put(`${API_BASE}/${id}`, data);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error updating user profile:', error);
+      console.error("Error updating user profile:", error);
       throw error;
     }
   },
 
   // Get user's address
-  getUserAddress: async (id: string | number): Promise<any> => {
+  getUserAddress: async (id: string | number): Promise<Address> => {
     try {
       const response = await apiClient.get(`${API_BASE}/${id}`);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error fetching user address:', error);
+      console.error("Error fetching user address:", error);
       throw error;
     }
   },
@@ -67,7 +67,7 @@ export const userService = {
     try {
       await apiClient.delete(`${API_BASE}/${id}`);
     } catch (error) {
-      console.error('Error deleting user:', error);
+      console.error("Error deleting user:", error);
       throw error;
     }
   },
@@ -78,7 +78,7 @@ export const userService = {
       const response = await apiClient.get(`${API_BASE}/seed`);
       return response.data;
     } catch (error) {
-      console.error('Error seeding data:', error);
+      console.error("Error seeding data:", error);
       throw error;
     }
   },
