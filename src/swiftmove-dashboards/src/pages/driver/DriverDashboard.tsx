@@ -21,12 +21,12 @@ import type {
   MoveOffer,
   MoveTrip,
   Vehicle,
-  Driver,
+  DriverWithInfo,
 } from "@/types";
 
 const DriverDashboard = () => {
   const { userId, name } = useAuth();
-  const [driver, setDriver] = useState<Driver | null>(null);
+  const [driver, setDriver] = useState<DriverWithInfo | null>(null);
   const [pendingRequests, setPendingRequests] = useState<MoveRequest[]>([]);
   const [myOffers, setMyOffers] = useState<MoveOffer[]>([]);
   const [myTrips, setMyTrips] = useState<MoveTrip[]>([]);
@@ -58,12 +58,14 @@ const DriverDashboard = () => {
           allTripsRes.status === "fulfilled" ? allTripsRes.value : [];
 
         if (driverData) {
-          // Get driver-specific data
+          // Use driverInfo.id as the driverInfoId for vehicle/offer/trip lookups
+          const driverInfoId = driverData.driverInfo.id;
+
           const [offersRes, driverTripsRes, vehiclesRes] =
             await Promise.allSettled([
-              moveOfferService.getOffersByDriver(driverData.id),
-              tripService.getTripsByDriver(driverData.id),
-              vehicleService.getVehiclesByDriver(driverData.id),
+              moveOfferService.getOffersByDriver(driverInfoId),
+              tripService.getTripsByDriver(driverInfoId),
+              vehicleService.getVehiclesByDriver(driverInfoId),
             ]);
 
           const offersData =
@@ -89,7 +91,7 @@ const DriverDashboard = () => {
     fetchData();
   }, [userId]);
 
-  const getCity = (addr: any) => addr?.city || "—";
+  const getCity = (addr: MoveTrip["fromAddress"]) => addr?.city || "—";
   const formatDate = (dt: string | undefined) => (dt ? dt.split("T")[0] : "—");
 
   if (isLoading) {
@@ -103,7 +105,7 @@ const DriverDashboard = () => {
   const activeTrips = myTrips.filter((t) => t.status === "SCHEDULED");
   const earnings = myTrips
     .filter((t) => t.status === "COMPLETED")
-    .reduce((s, t) => s + (t.price || 0), 0);
+    .reduce((s, t) => s + (t.price ?? 0), 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -125,7 +127,7 @@ const DriverDashboard = () => {
           title="My Offers"
           value={myOffers.length}
           icon={<HandCoins className="w-4 h-4" />}
-          description={`${myOffers.filter((o) => o.status === "PENDING").length} pending`}
+          description={`${myOffers.filter((o) => o.status === "OFFER_SENT").length} pending`}
         />
         <StatsCard
           title="Active Trips"

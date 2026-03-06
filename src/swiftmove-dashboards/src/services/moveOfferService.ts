@@ -34,6 +34,12 @@ export const moveOfferService = {
     return response.data.data || response.data;
   },
 
+  // Accept a move offer (client action)
+  acceptOffer: async (offerId: string | number): Promise<MoveOffer> => {
+    const response = await apiClient.patch(`${API_BASE}/${offerId}/accept`);
+    return response.data.data || response.data;
+  },
+
   // Update move offer
   updateMoveOffer: async (
     id: string | number,

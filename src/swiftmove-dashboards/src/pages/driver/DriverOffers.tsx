@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { moveOfferService } from "@/services/moveOfferService";
 import { driverService } from "@/services/driverService";
-import { MoveOffer, Driver } from "@/types/index";
+import type { MoveOffer, DriverWithInfo } from "@/types";
 
 const DriverOffers = () => {
   const [myOffers, setMyOffers] = useState<MoveOffer[]>([]);
@@ -16,8 +16,11 @@ const DriverOffers = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const driver: Driver = await driverService.getCurrentDriver();
-        const offers = await moveOfferService.getOffersByDriver(driver.id);
+        const driver: DriverWithInfo = await driverService.getCurrentDriver();
+        // Use driverInfo.id (driverInfoId) for offer lookups
+        const offers = await moveOfferService.getOffersByDriver(
+          driver.driverInfo.id,
+        );
         setMyOffers(offers);
       } catch (err: any) {
         setError(
@@ -88,11 +91,11 @@ const DriverOffers = () => {
                       <StatusBadge status={offer.status} />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {offer.vehicleInfo ? `${offer.vehicleInfo} · ` : ""}
-                      Offered:{" "}
-                      {offer.offeredTime
-                        ? offer.offeredTime.split("T")[0]
-                        : "—"}
+                      {offer.vehicleInfo
+                        ? `${offer.vehicleInfo} · `
+                        : `Vehicle #${offer.vehicleId} · `}
+                      Offer date:{" "}
+                      {offer.offerDate ? offer.offerDate.split("T")[0] : "—"}
                     </p>
                   </div>
                   <div className="text-right">
@@ -103,7 +106,7 @@ const DriverOffers = () => {
                       </p>
                     )}
                   </div>
-                  {offer.status === "PENDING" && (
+                  {offer.status === "OFFER_SENT" && (
                     <div className="ml-4 flex gap-2">
                       <Button
                         size="sm"

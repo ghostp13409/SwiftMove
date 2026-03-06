@@ -24,16 +24,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { vehicleService } from "@/services/vehicleService";
 import { driverService } from "@/services/driverService";
-import { VEHICLE_TYPES } from "@/data/mockData";
-import type { Vehicle, Driver, VehicleType } from "@/types";
+import type { Vehicle, DriverWithInfo, VehicleType } from "@/types";
 
 const Vehicles = () => {
   const { userId } = useAuth();
   const { toast } = useToast();
   const [myVehicles, setMyVehicles] = useState<Vehicle[]>([]);
-  const [driver, setDriver] = useState<Driver | null>(null);
-  const [vehicleTypes, setVehicleTypes] =
-    useState<VehicleType[]>(VEHICLE_TYPES);
+  const [driver, setDriver] = useState<DriverWithInfo | null>(null);
+  const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -43,7 +41,6 @@ const Vehicles = () => {
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
   const [color, setColor] = useState("");
-  const [licensePlate, setLicensePlate] = useState("");
   const [pricePerKm, setPricePerKm] = useState("");
   const [vehicleTypeId, setVehicleTypeId] = useState("");
   const [canCarryFurniture, setCanCarryFurniture] = useState(false);
@@ -59,8 +56,9 @@ const Vehicles = () => {
         if (driverRes.status === "fulfilled") {
           const driverData = driverRes.value;
           setDriver(driverData);
+          // Use driverInfo.id (driverInfoId) for vehicle lookups
           const vehicles = await vehicleService.getVehiclesByDriver(
-            driverData.id,
+            driverData.driverInfo.id,
           );
           setMyVehicles(Array.isArray(vehicles) ? vehicles : []);
         }
@@ -110,8 +108,8 @@ const Vehicles = () => {
         pricePerKm: parseFloat(pricePerKm),
         isActive: true,
         canCarryFurniture,
-        driverInfoId: driver.id,
-        licensePlate,
+        // driverId in VehicleForm maps to driverInfo.id
+        driverId: driver!.driverInfo.id,
       });
       toast({
         title: "Vehicle Added",
@@ -123,12 +121,13 @@ const Vehicles = () => {
       setModel("");
       setYear("");
       setColor("");
-      setLicensePlate("");
       setPricePerKm("");
       setVehicleTypeId("");
       setCanCarryFurniture(false);
       // Refresh vehicles
-      const vehicles = await vehicleService.getVehiclesByDriver(driver.id);
+      const vehicles = await vehicleService.getVehiclesByDriver(
+        driver!.driverInfo.id,
+      );
       setMyVehicles(Array.isArray(vehicles) ? vehicles : []);
     } catch (err) {
       toast({
@@ -235,31 +234,22 @@ const Vehicles = () => {
                         key={vt.id ?? idx}
                         value={String(vt.id ?? idx + 1)}
                       >
-                        {vt.type} (Max: {vt.maxWeight} lbs, {vt.volume} cu ft)
+                        {vt.type} (Max: {vt.maxWeight} kg, {vt.maxCapacity} cu
+                        ft)
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>License Plate</Label>
-                  <Input
-                    placeholder="ABC-1234"
-                    value={licensePlate}
-                    onChange={(e) => setLicensePlate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Price/km ($) *</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    placeholder="2.50"
-                    value={pricePerKm}
-                    onChange={(e) => setPricePerKm(e.target.value)}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>Price/km ($) *</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  placeholder="2.50"
+                  value={pricePerKm}
+                  onChange={(e) => setPricePerKm(e.target.value)}
+                />
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -314,7 +304,8 @@ const Vehicles = () => {
                   {vehicle.year} {vehicle.make} {vehicle.model}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {vehicle.vehicleType || "—"} · {vehicle.color}
+                  {vehicle.vehicleType || `Type #${vehicle.vehicleTypeId}`} ·{" "}
+                  {vehicle.color}
                 </p>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t">
                   <span className="text-xs text-muted-foreground">

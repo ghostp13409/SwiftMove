@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Address } from "./address";
 
 export const MoveTripSchema = z.object({
   id: z.string(),
@@ -14,7 +15,21 @@ export const MoveTripFormSchema = z.object({
   status: z.enum(["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
 });
 
-export type MoveTrip = z.infer<typeof MoveTripSchema>;
+export type MoveTrip = z.infer<typeof MoveTripSchema> & {
+  // Optional enriched fields returned by some API endpoints
+  clientName?: string;
+  driverName?: string;
+  fromAddress?: Address;
+  toAddress?: Address;
+  /** ISO date-time string for when the trip starts */
+  startTime?: string;
+  /** Final price for the trip */
+  price?: number;
+  /** Nested move request (if returned by endpoint) */
+  moveRequest?: {
+    clientId?: number;
+  };
+};
 
 export type MoveTripForm = z.infer<typeof MoveTripFormSchema>;
 

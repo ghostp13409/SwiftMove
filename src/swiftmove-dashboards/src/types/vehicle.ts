@@ -40,7 +40,13 @@ export const VehicleTypeSchema = z.object({
     .positive({ message: "Max capacity must be a positive number" }),
 });
 
-export type Vehicle = z.infer<typeof VehicleSchema>;
+export type Vehicle = z.infer<typeof VehicleSchema> & {
+  // Optional enriched fields returned by some API endpoints
+  /** Human-readable vehicle type label (e.g. "VAN") returned by some endpoints */
+  vehicleType?: string;
+  /** License plate – returned by some endpoints but not in the core schema */
+  licensePlate?: string;
+};
 
 export type VehicleForm = z.infer<typeof VehicleFormSchema>;
 

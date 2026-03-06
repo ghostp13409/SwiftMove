@@ -1,34 +1,32 @@
 import apiClient from "./apiClient";
-import { Driver, DriverInfo, DriverWithInfo, User, Vehicle } from "@/types";
+import { DriverInfo, DriverWithInfo, User, Vehicle } from "@/types";
 import { userService } from "./userService";
 
-// NOTE: Current Implementation Takes Driver info, gets user and vehicles from that and sets into Driver Manually
+// NOTE: Current Implementation Takes Driver info, gets user and vehicles from that and sets into DriverWithInfo Manually
 const API_BASE = "/drivers/info";
 
 export const driverService = {
-  // Get current driver profile (by JWT token)
-  getCurrentDriver: async (): Promise<DriverInfo> => {
+  // Get current driver profile (by JWT token) — returns DriverWithInfo
+  getCurrentDriver: async (): Promise<DriverWithInfo> => {
     const response = await apiClient.get(`${API_BASE}/me`);
-    // Convert to Driver
-    const driverInfo = response.data.data || response.data;
-    const driver = await makeDriverWithInfo(driverInfo);
-    return driver;
+    const driverInfo: DriverInfo = response.data.data || response.data;
+    return makeDriverWithInfo(driverInfo);
   },
 
-  // Get driver by userId
-  getDriverByUserId: async (userId: string | number): Promise<DriverInfo> => {
+  // Get driver by userId — returns DriverWithInfo
+  getDriverByUserId: async (
+    userId: string | number,
+  ): Promise<DriverWithInfo> => {
     const response = await apiClient.get(`${API_BASE}/${userId}`);
-    const driverInfo = response.data.data || response.data;
-    const driver = await makeDriverWithInfo(driverInfo);
-    return driver;
+    const driverInfo: DriverInfo = response.data.data || response.data;
+    return makeDriverWithInfo(driverInfo);
   },
 
   // Create driver profile
-  createDriverProfile: async (driverData: any): Promise<DriverInfo> => {
+  createDriverProfile: async (driverData: any): Promise<DriverWithInfo> => {
     const response = await apiClient.post(`${API_BASE}/`, driverData);
-    const driverInfo = response.data.data || response.data;
-    const driver = await makeDriverWithInfo(driverInfo);
-    return driver;
+    const driverInfo: DriverInfo = response.data.data || response.data;
+    return makeDriverWithInfo(driverInfo);
   },
 
   // Delete driver
@@ -36,11 +34,10 @@ export const driverService = {
     await apiClient.delete(`${API_BASE}/${id}`);
   },
 
-  // Get all drivers (admin)
+  // Get all drivers (admin) — returns raw DriverInfo list
   getAllDrivers: async (): Promise<DriverInfo[]> => {
     const response = await apiClient.get(`${API_BASE}`);
-    const driverInfos = response.data.data || response.data || [];
-    return driverInfos;
+    return response.data.data || response.data || [];
   },
 };
 
@@ -48,16 +45,18 @@ const makeDriverWithInfo = async (
   driverInfo: DriverInfo,
 ): Promise<DriverWithInfo> => {
   const user: User = await userService.getUserById(driverInfo.userId);
-  const DriverWithInfo: DriverWithInfo = {
+  const driverWithInfo: DriverWithInfo = {
     id: user.id,
+    username: user.username,
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
     passwordHash: user.passwordHash,
     addressId: user.addressId,
     dob: user.dob,
+    rating: user.rating,
     role: "DRIVER",
     driverInfo: driverInfo,
   };
-  return DriverWithInfo;
+  return driverWithInfo;
 };

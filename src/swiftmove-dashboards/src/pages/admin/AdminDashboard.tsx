@@ -7,7 +7,6 @@ import {
   DollarSign,
   TrendingUp,
   Activity,
-  HandCoins,
 } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,20 +46,20 @@ const AdminDashboard = () => {
         const vehiclesData =
           vehicles.status === "fulfilled" ? vehicles.value : [];
 
-        const drivers = usersData.filter(
-          (u) => u.userType === "DRIVER" || u.role === "Driver",
-        );
-        const clients = usersData.filter(
-          (u) => u.userType === "CLIENT" || u.role === "Client",
-        );
+        // Use the `role` field from User type (not userType)
+        const drivers = usersData.filter((u) => u.role === "DRIVER");
+        const clients = usersData.filter((u) => u.role === "CLIENT");
+
         const activeTrips = tripsData.filter(
           (t) => t.status === "SCHEDULED" || t.status === "IN_PROGRESS",
         );
         const completedTrips = tripsData.filter(
           (t) => t.status === "COMPLETED",
         );
+        // price is an enriched optional field on MoveTrip; skip revenue calculation
+        // as the endpoint may not return it
         const revenue = completedTrips.reduce(
-          (sum, t) => sum + (t.price || 0),
+          (sum, t) => sum + (t.price ?? 0),
           0,
         );
 

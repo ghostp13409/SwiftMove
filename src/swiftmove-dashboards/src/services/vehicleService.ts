@@ -1,7 +1,7 @@
-import apiClient from './apiClient';
-import { Vehicle, VehicleFormData, VehicleType } from '../types';
+import apiClient from "./apiClient";
+import { Vehicle, VehicleForm, VehicleType } from "../types";
 
-const API_BASE = 'drivers/vehicles';
+const API_BASE = "drivers/vehicles";
 
 export const vehicleService = {
   // Get all vehicles (admin)
@@ -11,13 +11,17 @@ export const vehicleService = {
   },
 
   // Get vehicles for a specific driver (by driverInfoId)
-  getVehiclesByDriver: async (driverInfoId: string | number): Promise<Vehicle[]> => {
-    const response = await apiClient.get(`${API_BASE}?driverId=${driverInfoId}`);
+  getVehiclesByDriver: async (
+    driverInfoId: string | number,
+  ): Promise<Vehicle[]> => {
+    const response = await apiClient.get(
+      `${API_BASE}?driverId=${driverInfoId}`,
+    );
     return response.data.data || response.data || [];
   },
 
   // Create new vehicle
-  createVehicle: async (data: VehicleFormData): Promise<Vehicle> => {
+  createVehicle: async (data: VehicleForm): Promise<Vehicle> => {
     const response = await apiClient.post(`${API_BASE}/`, data);
     return response.data.data || response.data;
   },
@@ -35,7 +39,7 @@ export const vehicleService = {
 
   // Get all vehicle types
   getVehicleTypes: async (): Promise<VehicleType[]> => {
-    const response = await apiClient.get('/drivers/vehicle-types');
+    const response = await apiClient.get("/drivers/vehicle-types");
     return response.data.data || response.data || [];
   },
 };

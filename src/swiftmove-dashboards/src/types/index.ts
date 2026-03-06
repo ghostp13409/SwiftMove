@@ -8,3 +8,4 @@ export * from "./driver";
 export * from "./client";
 export * from "./auth";
 export * from "./trip";
+export * from "./frontend";

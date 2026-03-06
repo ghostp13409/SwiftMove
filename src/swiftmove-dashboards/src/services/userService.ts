@@ -37,10 +37,10 @@ export const userService = {
     }
   },
 
-  // Update user profile
+  // Update user profile (accepts partial data for partial updates)
   updateUserProfile: async (
     id: string | number,
-    data: UserForm,
+    data: Partial<UserForm>,
   ): Promise<User> => {
     try {
       const response = await apiClient.put(`${API_BASE}/${id}`, data);
