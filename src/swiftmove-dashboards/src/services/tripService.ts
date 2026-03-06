@@ -1,7 +1,7 @@
-import apiClient from './apiClient';
-import { MoveTrip } from '../types';
+import apiClient from "./apiClient";
+import { MoveTrip } from "@/types";
 
-const API_BASE = '/trips';
+const API_BASE = "/trips";
 
 export const tripService = {
   // Get all trips (admin)

@@ -7,7 +7,8 @@ export const MoveOfferSchema = z.object({
   moveRequestId: z.number(),
   driverId: z.number(),
   vehicleId: z.number(),
-  status: z.enum(["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+  // "OFFER_SENT" | "ACCEPTED" | "REJECTED";
+  status: z.enum(["OFFER_SENT", "ACCEPTED", "REJECTED"]),
 });
 
 export const MoveOfferFormSchema = z.object({
@@ -22,7 +23,7 @@ export const MoveOfferFormSchema = z.object({
   moveRequestId: z.number(),
   driverId: z.number(),
   vehicleId: z.number(),
-  status: z.enum(["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+  status: z.enum(["OFFER_SENT", "ACCEPTED", "REJECTED"]),
 });
 
 export type MoveOffer = z.infer<typeof MoveOfferSchema>;
