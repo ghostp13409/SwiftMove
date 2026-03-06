@@ -30,7 +30,7 @@ const ClientTrips = () => {
   const activeTrip = myTrips.find(
     (t) => t.status === "SCHEDULED" || t.status === "IN_PROGRESS",
   );
-  const getCity = (addr: any) => addr?.city || "—";
+  const getCity = (addr: MoveTrip["fromAddress"]) => addr?.city || "—";
   const formatDate = (dt: string | undefined) => (dt ? dt.split("T")[0] : "—");
 
   if (isLoading) {

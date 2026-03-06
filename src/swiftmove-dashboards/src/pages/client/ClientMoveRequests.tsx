@@ -135,7 +135,6 @@ const ClientMoveRequests = () => {
         moveDate,
         maxBudget: parseFloat(maxBudget),
         status: "PENDING",
-        luggageEntries: [],
       });
 
       toast({
@@ -247,7 +246,7 @@ const ClientMoveRequests = () => {
                 <div className="space-y-2">
                   <Label>Move Date</Label>
                   <Input
-                    type="date"
+                    type="datetime-local"
                     value={moveDate}
                     onChange={(e) => setMoveDate(e.target.value)}
                   />
@@ -424,7 +423,7 @@ const ClientMoveRequests = () => {
                               <p className="text-sm font-medium">
                                 {offer.driverName ||
                                   `Driver #${offer.driverId}`}
-                                {offer.driverRating && (
+                                {offer.driverRating != null && (
                                   <span className="text-xs text-muted-foreground">
                                     {" "}
                                     ⭐ {offer.driverRating}
@@ -441,7 +440,7 @@ const ClientMoveRequests = () => {
                                 ${offer.price}
                               </span>
                               <StatusBadge status={offer.status} />
-                              {offer.status === "PENDING" &&
+                              {offer.status === "OFFER_SENT" &&
                                 selected.status === "PENDING" && (
                                   <Button
                                     size="sm"

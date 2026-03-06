@@ -81,11 +81,11 @@ const AdminVehicles = () => {
                         {v.year} {v.make} {v.model}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        #{v.driverId || v.driverInfoId || "—"}
+                        #{v.driverId}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
-                          {v.vehicleType || "—"}
+                          {v.vehicleType || `Type #${v.vehicleTypeId}`}
                         </Badge>
                       </TableCell>
                       <TableCell>${v.pricePerKm}/km</TableCell>

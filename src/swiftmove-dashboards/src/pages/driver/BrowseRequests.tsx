@@ -25,7 +25,7 @@ import { moveOfferService } from "@/services/moveOfferService";
 import { driverService } from "@/services/driverService";
 import { vehicleService } from "@/services/vehicleService";
 import { useToast } from "@/hooks/use-toast";
-import type { MoveRequest, Vehicle, Driver } from "@/types";
+import type { MoveRequest, Vehicle, DriverWithInfo } from "@/types";
 
 const BrowseRequests = () => {
   const { userId } = useAuth();
@@ -33,7 +33,7 @@ const BrowseRequests = () => {
   const [selected, setSelected] = useState<MoveRequest | null>(null);
   const [pendingRequests, setPendingRequests] = useState<MoveRequest[]>([]);
   const [driverVehicles, setDriverVehicles] = useState<Vehicle[]>([]);
-  const [driver, setDriver] = useState<Driver | null>(null);
+  const [driver, setDriver] = useState<DriverWithInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [offerDialogOpen, setOfferDialogOpen] = useState(false);
@@ -62,8 +62,9 @@ const BrowseRequests = () => {
         if (driverRes.status === "fulfilled") {
           const driverData = driverRes.value;
           setDriver(driverData);
+          // Use driverInfo.id (driverInfoId) for vehicle lookups
           const vehicles = await vehicleService.getVehiclesByDriver(
-            driverData.id,
+            driverData.driverInfo.id,
           );
           setDriverVehicles((vehicles as Vehicle[]).filter((v) => v.isActive));
         }
@@ -96,11 +97,11 @@ const BrowseRequests = () => {
     try {
       await moveOfferService.createMoveOffer({
         moveRequestId: selected.id as number,
-        driverId: driver.id,
+        driverId: driver.driverInfo.id,
         vehicleId: parseInt(selectedVehicleId),
         price: parseFloat(offerPrice),
-        offeredDate: offeredDateTime.replace("T", " ") + ":00",
-        statusId: 1,
+        offerDate: offeredDateTime,
+        status: "OFFER_SENT",
       });
       toast({
         title: "Offer Submitted",
@@ -121,7 +122,7 @@ const BrowseRequests = () => {
     }
   };
 
-  const getCity = (addr: any) => addr?.city || "—";
+  const getCity = (addr: MoveRequest["fromAddress"]) => addr?.city || "—";
 
   if (isLoading) {
     return (
@@ -286,7 +287,7 @@ const BrowseRequests = () => {
                             {driverVehicles.map((v) => (
                               <SelectItem key={v.id} value={String(v.id)}>
                                 {v.year} {v.make} {v.model} (
-                                {v.vehicleType || "—"})
+                                {v.vehicleType || `Type #${v.vehicleTypeId}`})
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -302,7 +303,7 @@ const BrowseRequests = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Offered Date & Time</Label>
+                        <Label>Offer Date & Time</Label>
                         <Input
                           type="datetime-local"
                           value={offeredDateTime}

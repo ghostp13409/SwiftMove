@@ -60,11 +60,12 @@ const ClientDashboard = () => {
   const pendingRequests = myRequests.filter(
     (r) => r.status === "PENDING",
   ).length;
-  const activeOffers = myOffers.filter((o) => o.status === "PENDING").length;
+  // MoveOffer status is OFFER_SENT (not PENDING)
+  const activeOffers = myOffers.filter((o) => o.status === "OFFER_SENT").length;
   const scheduledTrips = myTrips.filter((t) => t.status === "SCHEDULED").length;
   const totalSpent = myTrips
     .filter((t) => t.status === "COMPLETED")
-    .reduce((s, t) => s + (t.price || 0), 0);
+    .reduce((s, t) => s + (t.price ?? 0), 0);
 
   if (isLoading) {
     return (

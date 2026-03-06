@@ -3,7 +3,7 @@ import StatusBadge from "@/components/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tripService } from "@/services/tripService";
 import { driverService } from "@/services/driverService";
-import { MoveTrip, Driver } from "@/types/index";
+import type { MoveTrip, DriverWithInfo } from "@/types";
 
 const DriverTrips = () => {
   const [myTrips, setMyTrips] = useState<MoveTrip[]>([]);
@@ -15,8 +15,9 @@ const DriverTrips = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const driver: Driver = await driverService.getCurrentDriver();
-        const trips = await tripService.getTripsByDriver(driver.id);
+        const driver: DriverWithInfo = await driverService.getCurrentDriver();
+        // Use driverInfo.id (driverInfoId) for trip lookups
+        const trips = await tripService.getTripsByDriver(driver.driverInfo.id);
         setMyTrips(trips);
       } catch (err: any) {
         setError(
@@ -34,6 +35,9 @@ const DriverTrips = () => {
   const activeTrip = myTrips.find(
     (t) => t.status === "SCHEDULED" || t.status === "IN_PROGRESS",
   );
+
+  const getCity = (addr: MoveTrip["fromAddress"]) => addr?.city ?? "—";
+  const formatDate = (dt: string | undefined) => (dt ? dt.split("T")[0] : "—");
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -70,11 +74,11 @@ const DriverTrips = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground text-xs">From</p>
-                    <p>{activeTrip.fromAddress?.city ?? "—"}</p>
+                    <p>{getCity(activeTrip.fromAddress)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">To</p>
-                    <p>{activeTrip.toAddress?.city ?? "—"}</p>
+                    <p>{getCity(activeTrip.toAddress)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Client</p>
@@ -82,7 +86,9 @@ const DriverTrips = () => {
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Price</p>
-                    <p className="font-semibold">${activeTrip.price}</p>
+                    <p className="font-semibold">
+                      {activeTrip.price != null ? `$${activeTrip.price}` : "—"}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -103,18 +109,20 @@ const DriverTrips = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">
-                          {trip.fromAddress?.city ?? "?"} →{" "}
-                          {trip.toAddress?.city ?? "?"}
+                          {getCity(trip.fromAddress)} →{" "}
+                          {getCity(trip.toAddress)}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {trip.clientName
                             ? `Client: ${trip.clientName} · `
                             : ""}
-                          {trip.startTime ? trip.startTime.split("T")[0] : "—"}
+                          {formatDate(trip.startTime)}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="font-semibold">${trip.price}</span>
+                        <span className="font-semibold">
+                          {trip.price != null ? `$${trip.price}` : "—"}
+                        </span>
                         <StatusBadge status={trip.status} />
                       </div>
                     </div>

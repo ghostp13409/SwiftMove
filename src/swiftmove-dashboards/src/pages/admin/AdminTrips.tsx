@@ -34,7 +34,7 @@ const AdminTrips = () => {
     fetchTrips();
   }, []);
 
-  const getCity = (addr: any) => addr?.city || "—";
+  const getCity = (addr: MoveTrip["fromAddress"]) => addr?.city || "—";
   const formatDate = (dt: string | undefined) => (dt ? dt.split("T")[0] : "—");
 
   return (
@@ -85,9 +85,13 @@ const AdminTrips = () => {
                       <TableCell className="font-medium">#{trip.id}</TableCell>
                       <TableCell>
                         {trip.clientName ||
-                          `Client #${trip.moveRequest?.clientId || "—"}`}
+                          (trip.moveRequest?.clientId
+                            ? `Client #${trip.moveRequest.clientId}`
+                            : `Request #${trip.moveRequestId}`)}
                       </TableCell>
-                      <TableCell>{trip.driverName || "—"}</TableCell>
+                      <TableCell>
+                        {trip.driverName || `Offer #${trip.moveOfferId}`}
+                      </TableCell>
                       <TableCell>
                         {getCity(trip.fromAddress)} → {getCity(trip.toAddress)}
                       </TableCell>
