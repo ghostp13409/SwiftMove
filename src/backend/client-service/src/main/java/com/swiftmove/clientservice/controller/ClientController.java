@@ -215,9 +215,9 @@ public class ClientController {
 
 //    Get All Luggage Types
     @GetMapping("/move-requests/luggage/types")
-    public ResponseEntity<List<LuggageType>> getAllLuggageTypes() {
+    public ResponseEntity<List<LuggageTypeDto>> getAllLuggageTypes() {
         try {
-            List<LuggageType> luggageTypes = luggageService.getAllTypes();
+            List<LuggageTypeDto> luggageTypes = luggageService.getAllTypes();
             return ResponseEntity.ok(luggageTypes);
         } catch (Exception ex) {
             return ResponseEntity.status(500).body(null);

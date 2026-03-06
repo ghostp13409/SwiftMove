@@ -1,6 +1,7 @@
 package com.swiftmove.clientservice.service;
 
 import com.swiftmove.clientservice.dto.AddLuggageEntryDto;
+import com.swiftmove.clientservice.dto.LuggageTypeDto;
 import com.swiftmove.clientservice.dto.UpdateLuggageEntryDto;
 import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.mapper.Mapper;
@@ -69,9 +70,11 @@ public class LuggageService {
         List<LuggageEntry> luggageEntries = luggageEntryRepository.findByMoveRequestId(moveRequestId);
         luggageEntryRepository.deleteAll(luggageEntries);
     }
-    public List<LuggageType> getAllTypes(){
-        return luggageTypeRepository.findAll();
-    }
+    public List<LuggageTypeDto> getAllTypes(){
+List<LuggageType> luggageTypes =luggageTypeRepository.findAll();
+        return luggageTypes.stream()
+                .map(Mapper::toL)
+                .toList();  }
     private LuggageType getLuggageTypeByEnum(LuggageTypeEnum luggageTypeEnum){
         return luggageTypeRepository.findLuggageTypeByType(luggageTypeEnum);
     }

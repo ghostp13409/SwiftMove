@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import { vehicleService } from "@/services/vehicleService";
-import type { Vehicle } from "@/types";
-
+import { Vehicle } from "@/types";
 const AdminVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);

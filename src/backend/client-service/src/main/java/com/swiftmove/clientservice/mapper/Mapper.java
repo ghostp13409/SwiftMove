@@ -3,13 +3,11 @@ package com.swiftmove.clientservice.mapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.swiftmove.clientservice.dto.AddLuggageEntryDto;
-import com.swiftmove.clientservice.dto.CreateMoveRequestDto;
-import com.swiftmove.clientservice.dto.LuggageEntryDto;
-import com.swiftmove.clientservice.dto.UserResponseDto;
+import com.swiftmove.clientservice.dto.*;
 import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.model.Client;
 import com.swiftmove.clientservice.model.LuggageEntry;
+import com.swiftmove.clientservice.model.LuggageType;
 import com.swiftmove.clientservice.model.MoveRequest;
 import com.swiftmove.clientservice.service.MoveRequestService;
 
@@ -107,6 +105,15 @@ public class Mapper {
         luggageEntry.setQuantity(luggageEntryDto.getQuantity());
         return luggageEntry;
 
+    }
+
+    public static LuggageTypeDto toLuggageTypeDto(LuggageType luggageType) {
+        LuggageTypeDto luggageTypeDto = new LuggageTypeDto();
+        luggageTypeDto.setType(luggageType.getType());
+        luggageTypeDto.setName(luggageType.getName());
+        luggageTypeDto.setVolume(luggageType.getVolume());
+        luggageTypeDto.setWeight(luggageType.getWeight());
+        return luggageTypeDto;
     }
 
 }

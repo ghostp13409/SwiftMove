@@ -5,7 +5,9 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { authService, GoogleUser } from "../services/authService";
+import { authService } from "../services/authService";
+import { GoogleUser } from "@/types";
+import { z } from "zod";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -19,7 +21,8 @@ interface AuthContextType {
     password: string,
     firstName: string,
     lastName: string,
-    role?: string,
+    dob: Date,
+    role?: "CLIENT" | "DRIVER" | "ADMIN",
   ) => Promise<void>;
   loginWithGoogle: () => void; // Google OAuth login
   loginAsTestUser: (userType: "client" | "admin" | "driver") => void; // Test user login
@@ -154,13 +157,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     password: string,
     firstName: string,
     lastName: string,
-    role?: string,
+    dob: Date,
+    role?: "CLIENT" | "DRIVER" | "ADMIN",
   ) => {
     const response = await authService.register({
       email,
       password,
       firstName,
       lastName,
+      dob,
       role,
     });
     authService.setAuthData(

@@ -1,3 +1,9 @@
-
-export * from './user';
-export * from './address';
+export * from "./user";
+export * from "./address";
+export * from "./luggage";
+export * from "./vehicle";
+export * from "./move-request";
+export * from "./move-offer";
+export * from "./driver";
+export * from "./client";
+export * from "./auth";
