@@ -1,7 +1,9 @@
 package com.swiftmove.clientservice.model;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,7 +30,7 @@ public class MoveRequest {
     @Column(name = "id")
     private Long id;
     @Column(name = "move_date")
-    private LocalDateTime moveDate;
+    private Instant moveDate;
     @Column(name = "max_budget")
     private Long maxBudget;
     @Column(name = "client_id")
@@ -41,10 +43,10 @@ public class MoveRequest {
     private String status;
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 //    @Transient
 //    private List<MoveOfferDto> moveOffers;
     // @Transient

@@ -29,5 +29,4 @@ public class MoveOfferDto {
 //    MoveOffer Status
     private String status;
     private Long moveRequestId;
-
 }

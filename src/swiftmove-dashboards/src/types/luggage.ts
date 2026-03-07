@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MoveRequestSchema } from "./move-request";
 
 export const LuggageEntrySchema = z.object({
   id: z.number(),
@@ -13,11 +14,6 @@ export const LuggageEntryFormSchema = z.object({
   moveRequestId: z.number(),
   luggageTypeId: z.number(),
 });
-
-export type LuggageEntry = z.infer<typeof LuggageEntrySchema>;
-
-export type LuggageEntryForm = z.infer<typeof LuggageEntryFormSchema>;
-
 export const LuggageTypeSchema = z.object({
   id: z.number(),
   type: z.string(),
@@ -33,4 +29,12 @@ export const LuggageTypeSchema = z.object({
   weight: z.number(),
 });
 
+export const LuggageEntryPopulatedSchema = LuggageEntrySchema.extend({
+  luggageType: LuggageTypeSchema,
+});
+
+export type LuggageEntry = z.infer<typeof LuggageEntrySchema>;
+
+export type LuggageEntryForm = z.infer<typeof LuggageEntryFormSchema>;
 export type LuggageType = z.infer<typeof LuggageTypeSchema>;
+export type LuggageEntryPopulated = z.infer<typeof LuggageEntryPopulatedSchema>;

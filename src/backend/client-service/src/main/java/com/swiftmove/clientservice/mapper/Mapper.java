@@ -40,8 +40,6 @@ public class Mapper {
         moveRequest.setMaxBudget(moveRequestDto.getMaxBudget());
         moveRequest.setMoveDate(moveRequestDto.getMoveDate());
         moveRequest.setStatus(moveRequestDto.getStatus());
-        moveRequest.setCreatedAt(LocalDateTime.now());
-        moveRequest.setUpdatedAt(LocalDateTime.now());
         return moveRequest;
     }
 
@@ -77,7 +75,6 @@ public class Mapper {
         moveRequest.setMaxBudget(moveRequestDto.getMaxBudget());
         moveRequest.setMoveDate(moveRequestDto.getMoveDate());
         moveRequest.setStatus(moveRequestDto.getStatus());
-        moveRequest.setUpdatedAt(LocalDateTime.now());
     }
 
 //    LuggageEntry

@@ -10,6 +10,12 @@ export const moveOfferService = {
     return response.data.data || response.data || [];
   },
 
+  // Get specific move offer by id
+  getMoveOfferById: async (id: string | number): Promise<MoveOffer> => {
+    const response = await apiClient.get(`${API_BASE}/${id}`);
+    return response.data.data || response.data;
+  },
+
   // Get offers for a specific move request
   getOffersByMoveRequest: async (
     moveRequestId: string | number,

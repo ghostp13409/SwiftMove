@@ -15,6 +15,17 @@ export const luggageService = {
     }
   },
 
+  // Get specific luggage type by id
+  getLuggageTypeById: async (id: string | number): Promise<LuggageType> => {
+    try {
+      const response = await apiClient.get(`${API_BASE}/types/${id}`);
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error("Error fetching luggage type:", error);
+      throw error;
+    }
+  },
+
   // Get Luggage Entries By MoveRequestId
   getLuggageEntriesByMoveRequest: async (
     moveRequestId: number,

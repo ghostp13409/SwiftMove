@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { Address } from "./address";
-import { LuggageEntry } from "./luggage";
+import { AddressSchema } from "./address";
+import { ClientSchema } from "./client";
+import { LuggageEntrySchema } from "./luggage";
 
 export const MoveRequestSchema = z.object({
   id: z.number(),
-  moveDate: z.string().datetime(),
+  moveDate: z.string().datetime().pipe(z.coerce.date()),
   maxBudget: z.number(),
   clientId: z.number(),
   fromAddressId: z.number(),
@@ -13,7 +14,7 @@ export const MoveRequestSchema = z.object({
 });
 
 export const MoveRequestFormSchema = z.object({
-  moveDate: z.string().datetime(),
+  moveDate: z.string().datetime().pipe(z.coerce.date()),
   maxBudget: z.number(),
   clientId: z.number(),
   fromAddressId: z.number(),
@@ -21,16 +22,13 @@ export const MoveRequestFormSchema = z.object({
   status: z.enum(["PENDING", "ACCEPTED", "OFFER_AVAILABLE", "CANCELLED"]),
 });
 
-export type MoveRequest = z.infer<typeof MoveRequestSchema> & {
-  // Optional enriched fields returned by some API endpoints
-  fromAddress?: Address;
-  toAddress?: Address;
-  clientName?: string;
-  luggageEntries?: (LuggageEntry & { luggageType?: string })[];
-  hasFurniture?: boolean;
-  notes?: string;
-};
+export const MoveRequestPopulatedSchema = MoveRequestSchema.extend({
+  client: ClientSchema,
+  fromAddress: AddressSchema,
+  toAddress: AddressSchema,
+  luggageEntries: z.array(LuggageEntrySchema),
+});
 
+export type MoveRequest = z.infer<typeof MoveRequestSchema>;
 export type MoveRequestForm = z.infer<typeof MoveRequestFormSchema>;
-
-export type MoveRequestStatus = z.infer<typeof MoveRequestSchema.shape.status>;
+export type MoveRequestPopulated = z.infer<typeof MoveRequestPopulatedSchema>;

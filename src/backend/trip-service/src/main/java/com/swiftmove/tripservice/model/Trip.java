@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Getter
@@ -29,8 +30,8 @@ public class Trip {
     private String status;
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDate createdAt;
+    private Instant createdAt;
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDate updatedAt;
+    private Instant updatedAt;
 }

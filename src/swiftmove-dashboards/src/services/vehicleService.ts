@@ -10,6 +10,12 @@ export const vehicleService = {
     return response.data.data || response.data || [];
   },
 
+  // Get specific vehicle by id
+  getVehicleById: async (id: string | number): Promise<Vehicle> => {
+    const response = await apiClient.get(`${API_BASE}/${id}`);
+    return response.data.data || response.data;
+  },
+
   // Get vehicles for a specific driver (by driverInfoId)
   getVehiclesByDriver: async (
     driverInfoId: string | number,

@@ -23,6 +23,7 @@ interface AuthContextType {
     lastName: string,
     dob: Date,
     role?: "CLIENT" | "DRIVER" | "ADMIN",
+    username?: string,
   ) => Promise<void>;
   loginWithGoogle: () => void; // Google OAuth login
   loginAsTestUser: (userType: "client" | "admin" | "driver") => void; // Test user login
@@ -52,6 +53,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userId, setUserId] = useState<number | null>(null);
   const [name, setName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [dob, setDob] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check authentication status on app load
@@ -159,6 +161,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     lastName: string,
     dob: Date,
     role?: "CLIENT" | "DRIVER" | "ADMIN",
+    username?: string,
   ) => {
     const response = await authService.register({
       email,
@@ -167,6 +170,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       lastName,
       dob,
       role,
+      username,
     });
     authService.setAuthData(
       response.token,

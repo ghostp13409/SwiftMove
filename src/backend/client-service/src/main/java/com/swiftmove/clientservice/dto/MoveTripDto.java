@@ -20,6 +20,4 @@ public class MoveTripDto {
     private Long moveRequestId;
     private Long moveOfferId;
     private String status;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
 }

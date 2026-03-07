@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.swing.*;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -27,7 +28,7 @@ public class MoveOffer {
     private Long price;
 
     @Column(name = "offered_date", nullable = false)
-    private LocalDateTime offeredDate;
+    private Instant offeredDate;
 
     @Column(name = "move_request_id", nullable = false)
     private Long moveRequestId;
@@ -43,9 +44,9 @@ public class MoveOffer {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Timestamp createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private Timestamp updatedAt;
+    private Instant updatedAt;
 }

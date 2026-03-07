@@ -3,6 +3,7 @@ package com.swiftmove.driverservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -23,7 +24,7 @@ public class DriverInfo {
     @Column(name = "user_id")
     private Long userId;
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 }

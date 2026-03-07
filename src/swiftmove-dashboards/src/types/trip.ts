@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { Address } from "./address";
+import { MoveRequestPopulatedSchema, MoveRequestSchema } from "./move-request";
+import { MoveOfferSchema } from "./move-offer";
 
 export const MoveTripSchema = z.object({
   id: z.string(),
@@ -15,22 +17,22 @@ export const MoveTripFormSchema = z.object({
   status: z.enum(["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
 });
 
-export type MoveTrip = z.infer<typeof MoveTripSchema> & {
-  // Optional enriched fields returned by some API endpoints
-  clientName?: string;
-  driverName?: string;
-  fromAddress?: Address;
-  toAddress?: Address;
-  /** ISO date-time string for when the trip starts */
-  startTime?: string;
-  /** Final price for the trip */
-  price?: number;
-  /** Nested move request (if returned by endpoint) */
-  moveRequest?: {
-    clientId?: number;
-  };
-};
+export const MoveTripPopulatedSchema = MoveTripSchema.extend({
+  moveRequest: MoveRequestSchema,
+  moveOffer: MoveOfferSchema,
+});
+
+export const MoveTripDetailedSchema = MoveTripSchema.extend({
+  moveRequestPopulated: MoveRequestPopulatedSchema,
+  moveOfferPopulated: MoveOfferSchema,
+});
+
+export type MoveTrip = z.infer<typeof MoveTripSchema>;
 
 export type MoveTripForm = z.infer<typeof MoveTripFormSchema>;
 
 export type MoveTripStatus = z.infer<typeof MoveTripSchema.shape.status>;
+
+export type MoveTripPopulated = z.infer<typeof MoveTripPopulatedSchema>;
+
+export type MoveTripDetailed = z.infer<typeof MoveTripDetailedSchema>;

@@ -73,9 +73,14 @@ public class LuggageService {
     public List<LuggageTypeDto> getAllTypes(){
 List<LuggageType> luggageTypes =luggageTypeRepository.findAll();
         return luggageTypes.stream()
-                .map(Mapper::toL)
+                .map(Mapper::toLuggageTypeDto)
                 .toList();  }
     private LuggageType getLuggageTypeByEnum(LuggageTypeEnum luggageTypeEnum){
         return luggageTypeRepository.findLuggageTypeByType(luggageTypeEnum);
+    }
+
+    public LuggageTypeDto getTypeById(Long id) {
+        Optional<LuggageType> luggageType = luggageTypeRepository.findById(id);
+        return luggageType.map(Mapper::toLuggageTypeDto).orElse(null);
     }
 }
