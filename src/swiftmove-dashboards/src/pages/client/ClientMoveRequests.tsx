@@ -15,18 +15,26 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import { clientService } from "@/services/clientService";
 import { moveOfferService } from "@/services/moveOfferService";
 import { moveRequestService } from "@/services/moveRequestService";
 import { addressService } from "@/services/addressService";
-import type { MoveRequest, MoveOffer } from "@/types";
+import type {
+  MoveRequest,
+  MoveOffer,
+  MoveRequestPopulated,
+  MoveOfferPopulated,
+} from "@/types";
+import { populationFactory } from "@/services/populationFactory";
+import { getVehicleString } from "@/utils";
 
 const ClientMoveRequests = () => {
   const { userId } = useAuth();
   const { toast } = useToast();
-  const [selected, setSelected] = useState<MoveRequest | null>(null);
-  const [myRequests, setMyRequests] = useState<MoveRequest[]>([]);
-  const [offersForRequest, setOffersForRequest] = useState<MoveOffer[]>([]);
+  const [selected, setSelected] = useState<MoveRequestPopulated | null>(null);
+  const [myRequests, setMyRequests] = useState<MoveRequestPopulated[]>([]);
+  const [offersForRequest, setOffersForRequest] = useState<
+    MoveOfferPopulated[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -53,8 +61,14 @@ const ClientMoveRequests = () => {
     if (!userId) return;
     setIsLoading(true);
     try {
-      const data = await clientService.getActiveRequests(userId);
-      setMyRequests(Array.isArray(data) ? (data as MoveRequest[]) : []);
+      const data = await moveRequestService.getActiveRequests();
+      const populatedMoveRequests =
+        data.map((req) => populationFactory.populateMoveRequest(req)) || [];
+      setMyRequests(
+        Array.isArray(populatedMoveRequests)
+          ? (populatedMoveRequests as MoveRequestPopulated[])
+          : [],
+      );
     } catch (err) {
       console.error("Failed to load move requests:", err);
     } finally {
@@ -63,11 +77,17 @@ const ClientMoveRequests = () => {
   };
 
   const handleSelectRequest = async (req: MoveRequest) => {
-    req = await clientService.attachAddressesToMoveRequest(req);
-    setSelected(req);
+    const popultedMoveRequest =
+      await populationFactory.populateMoveRequest(req);
+    setSelected(popultedMoveRequest);
     try {
       const offers = await moveOfferService.getOffersByMoveRequest(req.id);
-      setOffersForRequest(Array.isArray(offers) ? offers : []);
+      const populatedOffers = await Promise.all(
+        offers.map((offer) => populationFactory.populateMoveOffer(offer)),
+      );
+      setOffersForRequest(
+        Array.isArray(populatedOffers) ? populatedOffers : [],
+      );
     } catch {
       setOffersForRequest([]);
     }
@@ -129,12 +149,12 @@ const ClientMoveRequests = () => {
         }),
       ]);
 
-      await clientService.addMoveRequest(userId, {
+      await moveRequestService.createMoveRequest({
         clientId: userId,
         fromAddressId: fromAddr.id,
         toAddressId: toAddr.id,
         //  Convert to ISO string if not already in that format
-        moveDate: new Date(moveDate).toISOString(),
+        moveDate: new Date(moveDate),
         maxBudget: parseFloat(maxBudget),
         status: "PENDING",
       });
@@ -318,7 +338,7 @@ const ClientMoveRequests = () => {
                       <StatusBadge status={req.status} />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {req.moveDate} · ${req.maxBudget} budget
+                      {req.moveDate.getDate()} · ${req.maxBudget} budget
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {(req.luggageEntries ?? []).reduce(
@@ -364,7 +384,7 @@ const ClientMoveRequests = () => {
                     </div>
                     <div>
                       <p className="text-muted-foreground text-xs">Move Date</p>
-                      <p>{selected.moveDate}</p>
+                      <p>{selected.moveDate.getDate()}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground text-xs">
@@ -386,24 +406,24 @@ const ClientMoveRequests = () => {
                             className="text-xs px-2 py-1 rounded-md bg-secondary"
                           >
                             {l.quantity}x{" "}
-                            {l.luggageType || `Type #${l.luggageTypeId}`}
+                            {l.luggageType?.name || `Type #${l.luggageTypeId}`}
                           </span>
                         ))}
-                        {selected.hasFurniture && (
+                        {/* {selected.hasFurniture && (
                           <span className="text-xs px-2 py-1 rounded-md bg-warning/10 text-warning">
                             🛋 Furniture
                           </span>
-                        )}
+                        )} */}
                       </div>
                     </div>
                   )}
 
-                  {selected.notes && (
+                  {/* {selected.notes && (
                     <div>
                       <p className="text-muted-foreground text-xs">Notes</p>
                       <p className="text-sm">{selected.notes}</p>
                     </div>
-                  )}
+                  )} */}
 
                   {/* Offers */}
                   <div>
@@ -423,17 +443,17 @@ const ClientMoveRequests = () => {
                           >
                             <div>
                               <p className="text-sm font-medium">
-                                {offer.driverName ||
+                                {offer.driver.user.firstName ||
                                   `Driver #${offer.driverId}`}
-                                {offer.driverRating != null && (
+                                {offer.driver.user.rating != null && (
                                   <span className="text-xs text-muted-foreground">
                                     {" "}
-                                    ⭐ {offer.driverRating}
+                                    ⭐ {offer.driver.user.rating}
                                   </span>
                                 )}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {offer.vehicleInfo ||
+                                {getVehicleString(offer.vehicle) ||
                                   `Vehicle #${offer.vehicleId}`}
                               </p>
                             </div>
