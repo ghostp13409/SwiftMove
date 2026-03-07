@@ -3,10 +3,11 @@ import StatusBadge from "@/components/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tripService } from "@/services/tripService";
 import { driverService } from "@/services/driverService";
-import type { MoveTrip, DriverWithInfo } from "@/types";
+import { populationFactory } from "@/services/populationFactory";
+import type { MoveTripDetailed, DriverInfo } from "@/types";
 
 const DriverTrips = () => {
-  const [myTrips, setMyTrips] = useState<MoveTrip[]>([]);
+  const [myTrips, setMyTrips] = useState<MoveTripDetailed[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,10 +16,12 @@ const DriverTrips = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const driver: DriverWithInfo = await driverService.getCurrentDriver();
-        // Use driverInfo.id (driverInfoId) for trip lookups
-        const trips = await tripService.getTripsByDriver(driver.driverInfo.id);
-        setMyTrips(trips);
+        const driver: DriverInfo = await driverService.getCurrentDriver();
+        const trips = await tripService.getTripsByDriver(driver.id);
+        const populatedTrips = await Promise.all(
+          trips.map((trip) => populationFactory.populateMoveTripDetailed(trip))
+        );
+        setMyTrips(populatedTrips);
       } catch (err: any) {
         setError(
           err?.response?.data?.message ??
@@ -35,9 +38,6 @@ const DriverTrips = () => {
   const activeTrip = myTrips.find(
     (t) => t.status === "SCHEDULED" || t.status === "IN_PROGRESS",
   );
-
-  const getCity = (addr: MoveTrip["fromAddress"]) => addr?.city ?? "—";
-  const formatDate = (dt: string | undefined) => (dt ? dt.split("T")[0] : "—");
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -74,20 +74,20 @@ const DriverTrips = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground text-xs">From</p>
-                    <p>{getCity(activeTrip.fromAddress)}</p>
+                    <p>{activeTrip.moveRequestPopulated.fromAddress.city}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">To</p>
-                    <p>{getCity(activeTrip.toAddress)}</p>
+                    <p>{activeTrip.moveRequestPopulated.toAddress.city}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Client</p>
-                    <p>{activeTrip.clientName ?? "—"}</p>
+                    <p>{activeTrip.moveRequestPopulated.client.firstName} {activeTrip.moveRequestPopulated.client.lastName}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Price</p>
                     <p className="font-semibold">
-                      {activeTrip.price != null ? `$${activeTrip.price}` : "—"}
+                      ${activeTrip.moveOfferPopulated.price}
                     </p>
                   </div>
                 </div>
@@ -109,19 +109,17 @@ const DriverTrips = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">
-                          {getCity(trip.fromAddress)} →{" "}
-                          {getCity(trip.toAddress)}
+                          {trip.moveRequestPopulated.fromAddress.city} →{" "}
+                          {trip.moveRequestPopulated.toAddress.city}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {trip.clientName
-                            ? `Client: ${trip.clientName} · `
-                            : ""}
-                          {formatDate(trip.startTime)}
+                          Client: {trip.moveRequestPopulated.client.firstName} {trip.moveRequestPopulated.client.lastName} · 
+                          Date: {trip.moveRequestPopulated.moveDate.toLocaleDateString()}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="font-semibold">
-                          {trip.price != null ? `$${trip.price}` : "—"}
+                          ${trip.moveOfferPopulated.price}
                         </span>
                         <StatusBadge status={trip.status} />
                       </div>

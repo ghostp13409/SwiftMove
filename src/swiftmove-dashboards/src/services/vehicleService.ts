@@ -6,7 +6,7 @@ const API_BASE = "drivers/vehicles";
 export const vehicleService = {
   // Get all vehicles (admin)
   getVehicles: async (): Promise<Vehicle[]> => {
-    const response = await apiClient.get(`${API_BASE}/`);
+    const response = await apiClient.get(`${API_BASE}`);
     return response.data.data || response.data || [];
   },
 
@@ -28,7 +28,7 @@ export const vehicleService = {
 
   // Create new vehicle
   createVehicle: async (data: VehicleForm): Promise<Vehicle> => {
-    const response = await apiClient.post(`${API_BASE}/`, data);
+    const response = await apiClient.post(`${API_BASE}`, data);
     return response.data.data || response.data;
   },
 

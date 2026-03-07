@@ -123,11 +123,15 @@ export const populationFactory = {
       const moveRequest = await moveRequestService.getMoveRequestById(
         offer.moveRequestId,
       );
+      const populatedMoveRequest =
+        await populationFactory.populateMoveRequest(moveRequest);
+      
       const populatedOffer: MoveOfferPopulated = {
         ...offer,
+        offerDate: offer.offerDate instanceof Date ? offer.offerDate : new Date(offer.offerDate),
         driver: populatedDriverInfo,
         vehicle,
-        moveRequest,
+        moveRequest: populatedMoveRequest,
       };
       return populatedOffer;
     } catch (error) {
@@ -156,6 +160,7 @@ export const populationFactory = {
 
       const populatedMoveRequest: MoveRequestPopulated = {
         ...moveRequest,
+        moveDate: moveRequest.moveDate instanceof Date ? moveRequest.moveDate : new Date(moveRequest.moveDate),
         fromAddress,
         toAddress,
         luggageEntries: populatedLuggageEntries,
