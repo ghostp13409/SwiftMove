@@ -8,12 +8,21 @@ import { useAuth } from "@/context/AuthContext";
 import { clientService } from "@/services/clientService";
 import { moveOfferService } from "@/services/moveOfferService";
 import { tripService } from "@/services/tripService";
-import type { MoveRequest, MoveOffer, MoveTrip } from "@/types";
+import type {
+  MoveRequest,
+  MoveOffer,
+  MoveTrip,
+  MoveRequestPopulated,
+  MoveOfferPopulated,
+} from "@/types";
+import { moveRequestService } from "@/services/moveRequestService";
+import { populationFactory } from "@/services/populationFactory";
+import { getVehicleString } from "@/utils";
 
 const ClientDashboard = () => {
   const { userId, name } = useAuth();
-  const [myRequests, setMyRequests] = useState<MoveRequest[]>([]);
-  const [myOffers, setMyOffers] = useState<MoveOffer[]>([]);
+  const [myRequests, setMyRequests] = useState<MoveRequestPopulated[]>([]);
+  const [myOffers, setMyOffers] = useState<MoveOfferPopulated[]>([]);
   const [myTrips, setMyTrips] = useState<MoveTrip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -23,19 +32,16 @@ const ClientDashboard = () => {
     if (!userId) return;
     const fetchData = async () => {
       try {
-        const [activeReqs, allTrips] = await Promise.allSettled([
-          clientService.getActiveRequests(userId),
+        // Fetch client's move requests and trips in parallel
+        const [reqData, tripData] = await Promise.all([
+          moveRequestService.getActiveRequests(),
           tripService.getTripsByClient(userId),
         ]);
 
-        const reqData: MoveRequest[] =
-          activeReqs.status === "fulfilled"
-            ? (activeReqs.value as MoveRequest[])
-            : [];
-        const tripData: MoveTrip[] =
-          allTrips.status === "fulfilled" ? allTrips.value : [];
-
-        setMyRequests(reqData);
+        const populatedReqData = await Promise.all(
+          reqData.map((req) => populationFactory.populateMoveRequest(req)),
+        );
+        setMyRequests(populatedReqData);
         setMyTrips(tripData);
 
         // Fetch offers for each request
@@ -45,7 +51,9 @@ const ClientDashboard = () => {
           );
           const allOffers = offersResults
             .filter((r) => r.status === "fulfilled")
-            .flatMap((r) => (r as PromiseFulfilledResult<MoveOffer[]>).value);
+            .flatMap(
+              (r) => (r as PromiseFulfilledResult<MoveOfferPopulated[]>).value,
+            );
           setMyOffers(allOffers);
         }
       } catch (err) {
@@ -63,9 +71,9 @@ const ClientDashboard = () => {
   // MoveOffer status is OFFER_SENT (not PENDING)
   const activeOffers = myOffers.filter((o) => o.status === "OFFER_SENT").length;
   const scheduledTrips = myTrips.filter((t) => t.status === "SCHEDULED").length;
-  const totalSpent = myTrips
-    .filter((t) => t.status === "COMPLETED")
-    .reduce((s, t) => s + (t.price ?? 0), 0);
+  // const totalSpent = myTrips
+  //   .filter((t) => t.status === "COMPLETED")
+  //   .reduce((s, t) => s + (t.price ?? 0), 0);
 
   if (isLoading) {
     return (
@@ -74,7 +82,6 @@ const ClientDashboard = () => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -103,12 +110,12 @@ const ClientDashboard = () => {
           icon={<Route className="w-4 h-4" />}
           description="Scheduled moves"
         />
-        <StatsCard
+        {/* <StatsCard
           title="Total Spent"
           value={`$${totalSpent.toLocaleString()}`}
           icon={<DollarSign className="w-4 h-4" />}
           description="Completed trips"
-        />
+        /> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -132,9 +139,10 @@ const ClientDashboard = () => {
                       {req.fromAddress?.city || "—"} →{" "}
                       {req.toAddress?.city || "—"}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {req.moveDate} · Budget: ${req.maxBudget}
-                    </p>
+                    {/* <p className="text-xs text-muted-foreground">
+                      {req.moveDate?.toLocaleDateString()} · Budget: $
+                      {req.maxBudget}
+                    </p> */}
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusBadge status={req.status} />
@@ -160,11 +168,13 @@ const ClientDashboard = () => {
                 >
                   <div>
                     <p className="text-sm font-medium">
-                      {offer.driverName || `Driver #${offer.driverId}`}
+                      {offer.driver.user.firstName ||
+                        `Driver #${offer.driverId}`}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {offer.vehicleInfo || `Vehicle #${offer.vehicleId}`} · $
-                      {offer.price}
+                      {getVehicleString(offer.vehicle) ||
+                        `Vehicle #${offer.vehicleId}`}{" "}
+                      · ${offer.price}
                     </p>
                   </div>
                   <StatusBadge status={offer.status} />

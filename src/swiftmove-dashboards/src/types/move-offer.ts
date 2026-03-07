@@ -25,7 +25,7 @@ export const MoveOfferFormSchema = z.object({
   status: z.enum(["OFFER_SENT", "ACCEPTED", "REJECTED"]),
 });
 
-export const MoveOfferPopulatedSchema = MoveOfferFormSchema.extend({
+export const MoveOfferPopulatedSchema = MoveOfferSchema.extend({
   driver: DriverInfoPopulatedSchema,
   moveRequest: MoveRequestSchema,
   vehicle: VehicleSchema,

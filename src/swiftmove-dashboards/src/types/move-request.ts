@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { AddressSchema } from "./address";
 import { ClientSchema } from "./client";
-import { LuggageEntrySchema } from "./luggage";
+import { LuggageEntryPopulatedSchema, LuggageEntrySchema } from "./luggage";
 
 export const MoveRequestSchema = z.object({
   id: z.number(),
@@ -26,7 +26,7 @@ export const MoveRequestPopulatedSchema = MoveRequestSchema.extend({
   client: ClientSchema,
   fromAddress: AddressSchema,
   toAddress: AddressSchema,
-  luggageEntries: z.array(LuggageEntrySchema),
+  luggageEntries: z.array(LuggageEntryPopulatedSchema),
 });
 
 export type MoveRequest = z.infer<typeof MoveRequestSchema>;

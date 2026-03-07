@@ -32,9 +32,9 @@ export const moveRequestService = {
   },
 
   // Get client's active move requests
-  getActiveRequests: async (id: string | number): Promise<MoveRequest[]> => {
+  getActiveRequests: async (): Promise<MoveRequest[]> => {
     try {
-      const response = await apiClient.get(`${API_BASE}/move-requests/active`);
+      const response = await apiClient.get(`${API_BASE}/active`);
       // attach addresses to each move request
       const moveRequests: MoveRequest[] =
         response.data.data || response.data || [];
