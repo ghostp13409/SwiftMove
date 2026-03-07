@@ -1,6 +1,7 @@
 package com.swiftmove.userservice.controller;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,21 +26,25 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> getById(@PathVariable Long id) {
-        UserResponseDTO userResponseDTO = userService.findById(id);
-        if (userResponseDTO == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(userResponseDTO);
+    public CompletableFuture<ResponseEntity<UserResponseDTO>> getById(@PathVariable Long id) {
+        return userService.findById(id)
+                .thenApply(userResponseDTO -> {
+                    if (userResponseDTO == null) {
+                        return ResponseEntity.notFound().build();
+                    }
+                    return ResponseEntity.ok(userResponseDTO);
+                });
     }
 
     @GetMapping("/byEmail")
-    public ResponseEntity<UserResponseDTO> getByEmail(@RequestParam String email) {
-        UserResponseDTO userResponseDTO = userService.findByEmail(email);
-        if (userResponseDTO == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(userResponseDTO);
+    public CompletableFuture<ResponseEntity<UserResponseDTO>> getByEmail(@RequestParam String email) {
+        return userService.findByEmail(email)
+                .thenApply(userResponseDTO -> {
+                    if (userResponseDTO == null) {
+                        return ResponseEntity.notFound().build();
+                    }
+                    return ResponseEntity.ok(userResponseDTO);
+                });
     }
 
     @PostMapping

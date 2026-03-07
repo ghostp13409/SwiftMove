@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -112,7 +113,7 @@ public class MoveRequestService {
             errors.append("Move Date is null.");
         }
         // Move date cannot be in the past
-        if(moveRequest.getMoveDate() != null && moveRequest.getMoveDate().isBefore(LocalDateTime.now())){
+        if(moveRequest.getMoveDate() != null && moveRequest.getMoveDate().isBefore(Instant.now())){
             errors.append("Move Date cannot be in the past.");
         }
 

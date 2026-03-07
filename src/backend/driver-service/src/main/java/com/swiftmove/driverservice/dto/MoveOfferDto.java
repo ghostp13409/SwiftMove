@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 public class MoveOfferDto {
     private Long id;
     private Long price;
-    private LocalDateTime offeredDate;
+    private Instant offeredDate;
     private Long moveRequestId;
     private Long driverId;
     private Long vehicleId;

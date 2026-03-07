@@ -23,11 +23,8 @@ public class ClientService {
     public UserResponseDto getCurrentClient(String authHeader) {
 
         try{
-            AuthUserResponseDto authUser =
+            UserResponseDto user =
                      authClient.getCurrentUser(authHeader).getBody();
-
-            UserResponseDto user = userClient.getById(authUser.getId()).getBody();
-
             return user;
         }
         catch (Exception ex){

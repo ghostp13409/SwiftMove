@@ -10,8 +10,11 @@ import com.swiftmove.userservice.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.concurrent.CompletableFuture;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -37,8 +40,6 @@ public class UserService {
 
         // Use role from request, default to CLIENT if not provided
         user.setRole(dto.getRole() != null && !dto.getRole().isBlank() ? dto.getRole().toUpperCase() : "CLIENT");
-        user.setCreatedAt(LocalDate.now());
-        user.setUpdatedAt(LocalDate.now());
 
         User savedUser = userRepo.save(user);
         return UserMapper.userToResponseDto(savedUser);
@@ -59,19 +60,21 @@ public class UserService {
     }
 
     // GetByID
-    public UserResponseDTO findById(long id) {
+    @Async
+    public CompletableFuture<UserResponseDTO> findById(long id) {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        return UserMapper.userToResponseDto(user);
+        return CompletableFuture.completedFuture(UserMapper.userToResponseDto(user));
     }
 
     // GetByEmail
-    public UserResponseDTO findByEmail(String email) {
+    @Async
+    public CompletableFuture<UserResponseDTO> findByEmail(String email) {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with email: " + email));
 
-        return UserMapper.userToResponseDto(user);
+        return CompletableFuture.completedFuture(UserMapper.userToResponseDto(user));
     }
 
     // Update user
@@ -85,7 +88,6 @@ public class UserService {
         if (dto.getPassword() != null && !dto.getPassword().isBlank())
             existingUser.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
 
-        existingUser.setUpdatedAt(LocalDate.now());
         User savedUser = userRepo.save(existingUser);
         return UserMapper.userToResponseDto(savedUser);
 
@@ -102,11 +104,12 @@ public class UserService {
         userRepo.deleteById(id);
     }
 
-    public AddressDTO getUserAddress(long id) {
+    @Async
+    public CompletableFuture<AddressDTO> getUserAddress(long id) {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        return addressClient.getAddress(user.getAddressId());
-
+        AddressDTO dto = addressClient.getAddress(user.getAddressId());
+        return CompletableFuture.completedFuture(dto);
     }
 }

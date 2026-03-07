@@ -1,4 +1,9 @@
+import { Move } from "lucide-react";
 import { z } from "zod";
+import { MoveRequestSchema } from "./move-request";
+import { VehicleSchema } from "./vehicle";
+import { DriverInfoPopulatedSchema, DriverSchema } from "./driver";
+import { UserSchema } from "./user";
 
 export const MoveOfferSchema = z.object({
   id: z.number(),
@@ -20,14 +25,16 @@ export const MoveOfferFormSchema = z.object({
   status: z.enum(["OFFER_SENT", "ACCEPTED", "REJECTED"]),
 });
 
-export type MoveOffer = z.infer<typeof MoveOfferSchema> & {
-  // Optional enriched fields returned by some API endpoints
-  driverName?: string;
-  vehicleInfo?: string;
-  driverRating?: number;
-  createdAt?: string;
-};
+export const MoveOfferPopulatedSchema = MoveOfferFormSchema.extend({
+  driver: DriverInfoPopulatedSchema,
+  moveRequest: MoveRequestSchema,
+  vehicle: VehicleSchema,
+});
+
+export type MoveOffer = z.infer<typeof MoveOfferSchema>;
 
 export type MoveOfferForm = z.infer<typeof MoveOfferFormSchema>;
 
 export type MoveOfferStatus = z.infer<typeof MoveOfferSchema.shape.status>;
+
+export type MoveOfferPopulated = z.infer<typeof MoveOfferPopulatedSchema>;

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { User, UserSchema } from "./user";
-import { Vehicle } from "./vehicle";
-import { MoveOffer } from "./move-offer";
+import { UserSchema, UserWithAddressSchema } from "./user";
+import { Vehicle, VehiclePopulatedSchema, VehicleSchema } from "./vehicle";
+import { MoveOfferSchema } from "./move-offer";
 
 export const DriverInfoSchema = z.object({
   id: z.number(),
@@ -20,26 +20,30 @@ export const DriverInfoFormSchema = z.object({
   range: z.number().min(0, { message: "Range must be at least 0 km" }),
 });
 
-// Driver extends User with driverInfo and vehicles
+export const DriverInfoPopulatedSchema = DriverInfoSchema.extend({
+  user: UserSchema.extend({
+    role: z.literal("DRIVER"),
+  }),
+});
+
+export const DriverInfoDetailedSchema = DriverInfoSchema.extend({
+  user: UserWithAddressSchema.extend({
+    role: z.literal("DRIVER"),
+  }),
+  vehicles: z.array(VehiclePopulatedSchema),
+  moveOffers: z.array(MoveOfferSchema),
+});
+
+export const DriverSchema = UserSchema.extend({
+  role: z.literal("DRIVER"),
+});
+
+export type Driver = z.infer<typeof DriverSchema>;
 
 export type DriverInfo = z.infer<typeof DriverInfoSchema>;
 
 export type DriverInfoForm = z.infer<typeof DriverInfoFormSchema>;
 
-export type DriverWithInfo = Driver & {
-  driverInfo: DriverInfo;
-};
+export type DriverInfoPopulated = z.infer<typeof DriverInfoPopulatedSchema>;
 
-export type DriverWithVehicles = Driver & {
-  vehicles: Vehicle[];
-};
-
-export type DriverWithMoveOffers = Driver & {
-  moveOffers: MoveOffer[];
-};
-
-export const Driver = UserSchema.extend({
-  role: z.literal("DRIVER"),
-});
-
-export type Driver = z.infer<typeof Driver>;
+export type DriverInfoDetailed = z.infer<typeof DriverInfoDetailedSchema>;

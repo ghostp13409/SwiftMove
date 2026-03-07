@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DriverInfoSchema } from "./driver";
 
 export const VehicleSchema = z.object({
   id: z.number(),
@@ -40,14 +41,15 @@ export const VehicleTypeSchema = z.object({
     .positive({ message: "Max capacity must be a positive number" }),
 });
 
-export type Vehicle = z.infer<typeof VehicleSchema> & {
-  // Optional enriched fields returned by some API endpoints
-  /** Human-readable vehicle type label (e.g. "VAN") returned by some endpoints */
-  vehicleType?: string;
-  /** License plate – returned by some endpoints but not in the core schema */
-  licensePlate?: string;
-};
+export const VehiclePopulatedSchema = VehicleSchema.extend({
+  driver: DriverInfoSchema,
+  vehicleType: VehicleTypeSchema,
+});
+
+export type Vehicle = z.infer<typeof VehicleSchema>;
 
 export type VehicleForm = z.infer<typeof VehicleFormSchema>;
 
 export type VehicleType = z.infer<typeof VehicleTypeSchema>;
+
+export type VehiclePopulated = z.infer<typeof VehiclePopulatedSchema>;

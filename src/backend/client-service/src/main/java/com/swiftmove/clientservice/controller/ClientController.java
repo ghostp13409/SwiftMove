@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/clients")
@@ -61,16 +62,26 @@ public class ClientController {
     @GetMapping("/move-requests")
     public ResponseEntity<List<MoveRequestDto>> getMoveRequestsForCurrentClient(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
-            AuthUserResponseDto authUser =
-                    (AuthUserResponseDto) authClient.getCurrentUser(authHeader).getBody();
-
-            List<MoveRequestDto> moveRequests = moveRequestService.findByClientId(authUser.getId());
+            UserResponseDto user =
+                    (UserResponseDto) authClient.getCurrentUser(authHeader).getBody();
+            List<MoveRequestDto> moveRequests;
+            assert user != null;
+            if(Objects.equals(user.getRole(), "ADMIN")){
+                moveRequests = moveRequestService.findAll();
+            }
+            else if(Objects.equals(user.getRole(), "CLIENT")){
+                moveRequests = moveRequestService.findByClientId(user.getId());
+            }
+            else{
+                throw new Exception("Unauthorized role: " + user.getRole());
+            }
             return ResponseEntity.ok(moveRequests);
         } catch (Exception ex) {
             return ResponseEntity.status(500).body(null);
         }
     }
 
+//    TODO: Needs to be deprecated and replaced with the above endpoint with role-based access control
 //    Get All Move Requests (for Admin)
     @GetMapping("/move-requests/all")
     public ResponseEntity<List<MoveRequestDto>> getAllMoveRequests() {
@@ -94,8 +105,8 @@ public class ClientController {
     @GetMapping("/move-requests/active")
     public ResponseEntity<List<MoveRequestDto>> getActiveMoveRequestsForCurrentClient(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
-            AuthUserResponseDto authUser =
-                    (AuthUserResponseDto) authClient.getCurrentUser(authHeader).getBody();
+            UserResponseDto authUser =
+                    (UserResponseDto) authClient.getCurrentUser(authHeader).getBody();
 
             List<MoveRequestDto> moveRequests = moveRequestService.findActiveByClientId(authUser.getId());
             return ResponseEntity.ok(moveRequests);
@@ -110,8 +121,8 @@ public class ClientController {
     public ResponseEntity<MoveRequestDto> createMoveRequest(@RequestBody CreateMoveRequestDto createMoveRequestDto,
                                                          @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
-            AuthUserResponseDto authUser =
-                    (AuthUserResponseDto) authClient.getCurrentUser(authHeader).getBody();
+            UserResponseDto authUser =
+                    (UserResponseDto) authClient.getCurrentUser(authHeader).getBody();
             createMoveRequestDto.setClientId(authUser.getId());
             MoveRequestDto createdMoveRequest = moveRequestService.add(createMoveRequestDto);
             if (createdMoveRequest == null) {
@@ -219,6 +230,20 @@ public class ClientController {
         try {
             List<LuggageTypeDto> luggageTypes = luggageService.getAllTypes();
             return ResponseEntity.ok(luggageTypes);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+//    Get LuggageType by Id
+    @GetMapping("/move-requests/luggage/types/{id}")
+    public ResponseEntity<LuggageTypeDto> getLuggageTypeById(@PathVariable Long id) {
+        try {
+            LuggageTypeDto luggageType = luggageService.getTypeById(id);
+            if (luggageType == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(luggageType);
         } catch (Exception ex) {
             return ResponseEntity.status(500).body(null);
         }

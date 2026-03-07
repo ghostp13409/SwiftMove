@@ -63,6 +63,7 @@ const ClientMoveRequests = () => {
   };
 
   const handleSelectRequest = async (req: MoveRequest) => {
+    req = await clientService.attachAddressesToMoveRequest(req);
     setSelected(req);
     try {
       const offers = await moveOfferService.getOffersByMoveRequest(req.id);
@@ -132,7 +133,8 @@ const ClientMoveRequests = () => {
         clientId: userId,
         fromAddressId: fromAddr.id,
         toAddressId: toAddr.id,
-        moveDate,
+        //  Convert to ISO string if not already in that format
+        moveDate: new Date(moveDate).toISOString(),
         maxBudget: parseFloat(maxBudget),
         status: "PENDING",
       });

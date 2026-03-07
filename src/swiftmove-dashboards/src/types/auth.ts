@@ -22,8 +22,14 @@ export const RegisterRequestSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   role: z.enum(["CLIENT", "DRIVER", "ADMIN"]),
   dob: z
-    .date()
-    .max(new Date(), { message: "Date of birth cannot be in the future" }),
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, {
+      message: "Date of birth must be YYYY-MM-DD",
+    })
+    .pipe(z.coerce.date())
+    .refine((d) => d <= new Date(), {
+      message: "Date of birth cannot be in the future",
+    }),
 });
 
 export type RegisterRequest = z.infer<typeof RegisterRequestSchema>;
@@ -46,23 +52,3 @@ export const GoogleUserSchema = z.object({
 });
 
 export type GoogleUser = z.infer<typeof GoogleUserSchema>;
-
-// Utility function to convert role string to expected format
-export const normalizeRole = (role: string): string => {
-  const upperRole = role.toUpperCase();
-  if (upperRole === "CLIENT") return "CLIENT";
-  if (upperRole === "DRIVER") return "DRIVER";
-  if (upperRole === "ADMIN") return "ADMIN";
-  // If it's already one of the expected forms just return as-is
-  return role;
-};
-
-// Utility function to convert role string to expected format for Google OAuth
-export const normalizeGoogleRole = (role: string): string => {
-  const lowerRole = role.toLowerCase();
-  if (lowerRole === "client") return "CLIENT";
-  if (lowerRole === "driver") return "DRIVER";
-  if (lowerRole === "admin") return "ADMIN";
-  // If it's already one of the expected forms just return as-is
-  return role;
-};

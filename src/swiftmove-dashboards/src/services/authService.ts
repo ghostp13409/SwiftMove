@@ -5,43 +5,12 @@ import {
   LoginRequest,
   LoginResponse,
   RegisterRequest,
+  User,
 } from "@/types";
-
-// Normalize roles to a consistent capitalized format used throughout the app
-const normalizeRole = (role: string | null): string | null => {
-  if (!role) return null;
-  const lower = role.toLowerCase();
-  if (lower === "client") return "Client";
-  if (lower === "driver") return "Driver";
-  if (lower === "admin") return "Admin";
-  // if it's already one of the expected forms just return as-is
-  return role;
-};
+import { normalizeRole } from "@/utils";
 
 // Auth API Base
 const AUTH_API_BASE = `${API_BASE_URL}/auth`;
-
-// Hardcoded test users for development
-const HARDCODED_USERS = {
-  client: {
-    id: "1",
-    email: "client@example.com",
-    name: "John Client",
-    role: "Client",
-  },
-  admin: {
-    id: "2",
-    email: "admin@example.com",
-    name: "Jane Admin",
-    role: "Admin",
-  },
-  driver: {
-    id: "3",
-    email: "driver@example.com",
-    name: "Bob Driver",
-    role: "Driver",
-  },
-};
 
 export const authService = {
   // Email/Password Login
@@ -62,9 +31,17 @@ export const authService = {
   // Email/Password Register
   register: async (credentials: RegisterRequest): Promise<LoginResponse> => {
     try {
+      // Convert dob to YYYY-MM-DD string if it's a Date object
+      const formattedCredentials = {
+        ...credentials,
+        dob:
+          credentials.dob instanceof Date
+            ? credentials.dob.toISOString().split("T")[0]
+            : credentials.dob,
+      };
       const response = await axios.post(
         `${AUTH_API_BASE}/register`,
-        credentials,
+        formattedCredentials,
       );
       const data: LoginResponse = response.data;
       data.role = normalizeRole(data.role) || data.role;
@@ -82,6 +59,37 @@ export const authService = {
     window.location.href = `${AUTH_API_BASE}/google-login`;
   },
 
+  // Return a mock user for testing purposes (client/admin/driver)
+  loginAsTestUser: (
+    userType: "client" | "admin" | "driver",
+  ): { id: string; role: string; name: string; email: string } => {
+    // This is purely front-end convenience for development.
+    switch (userType) {
+      case "admin":
+        return {
+          id: "1",
+          role: "Admin",
+          name: "Test Admin",
+          email: "admin@example.com",
+        };
+      case "driver":
+        return {
+          id: "2",
+          role: "Driver",
+          name: "Test Driver",
+          email: "driver@example.com",
+        };
+      case "client":
+      default:
+        return {
+          id: "3",
+          role: "Client",
+          name: "Test Client",
+          email: "client@example.com",
+        };
+    }
+  },
+
   // Check Auth
   checkAuth: async (): Promise<{
     isAuthenticated: boolean;
@@ -90,16 +98,8 @@ export const authService = {
     try {
       const token = authService.getToken();
       if (!token) {
-        // Check for hardcoded test user
-        const userType = localStorage.getItem("userType") as
-          | keyof typeof HARDCODED_USERS
-          | null;
-        if (userType && userType in HARDCODED_USERS) {
-          return { isAuthenticated: true, user: HARDCODED_USERS[userType] };
-        }
         return { isAuthenticated: false };
       }
-
       const response = await axios.get(`${AUTH_API_BASE}/check`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -115,25 +115,40 @@ export const authService = {
       return result;
     } catch (error) {
       console.error("Failed to check auth:", error);
-      // Check for hardcoded test user
-      const userType = localStorage.getItem("userType") as
-        | keyof typeof HARDCODED_USERS
-        | null;
-      if (userType && userType in HARDCODED_USERS) {
-        return { isAuthenticated: true, user: HARDCODED_USERS[userType] };
-      }
       return { isAuthenticated: false };
     }
   },
 
   // Get current user info
-  getCurrentUser: async (): Promise<GoogleUser | null> => {
+  getCurrentUser: async (): Promise<User | null> => {
     try {
       const token = authService.getToken();
       if (!token) {
         return null;
       }
+      const response = await axios.get(`${AUTH_API_BASE}/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.dob && typeof response.data.dob === "string") {
+        response.data.dob = new Date(response.data.dob);
+      }
+      const user: User = response.data;
+      return user;
+    } catch (error) {
+      console.error("Failed to get current user:", error);
+      return null;
+    }
+  },
 
+  // Get current user info
+  getCurrentGoogleUser: async (): Promise<GoogleUser | null> => {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        return null;
+      }
       const response = await axios.get(`${AUTH_API_BASE}/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -225,21 +240,4 @@ export const authService = {
   isAdmin: (): boolean => {
     return authService.getRole() === "Admin";
   },
-
-  // Login with hardcoded test user
-  loginAsTestUser: (userType: "client" | "admin" | "driver"): GoogleUser => {
-    const user = HARDCODED_USERS[userType];
-    authService.setAuthData(
-      "test-token-" + userType,
-      user.role,
-      parseInt(user.id),
-      user.name,
-      user.email,
-    );
-    localStorage.setItem("userType", userType);
-    return user;
-  },
-
-  // Get hardcoded test users (for UI purposes)
-  getTestUsers: () => HARDCODED_USERS,
 };

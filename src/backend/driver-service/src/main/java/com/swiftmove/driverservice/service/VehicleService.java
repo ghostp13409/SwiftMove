@@ -19,14 +19,14 @@ public class VehicleService {
 //    All
     public List<VehicleDto> getAll(){
         return vehicleRepository.findAll().stream()
-                .map(vehicle -> Mapper.toVehicleDto(vehicle))
+                .map(Mapper::toVehicleDto)
                 .toList();
     }
 
 //    Get by Driver Info ID
     public List<VehicleDto> getByDriverInfoId(Long driverInfoId){
         return vehicleRepository.findByDriverId(driverInfoId).stream()
-                .map(vehicle -> Mapper.toVehicleDto(vehicle))
+                .map(Mapper::toVehicleDto)
                 .toList();
     }
 
@@ -102,6 +102,7 @@ public class VehicleService {
             errorMessages.append("Vehicle cannot be null.");
         }
 
+        assert vehicleDto != null;
         if(vehicleDto.getMake() == null || vehicleDto.getMake().trim().isEmpty()) {
             errorMessages.append("Make cannot be null or empty.");
         }
@@ -122,7 +123,7 @@ public class VehicleService {
             errorMessages.append("Driver Info ID must be valid and exist.");
         }
 
-        if(errorMessages.length() > 0) {
+        if(!errorMessages.isEmpty()) {
             throw new IllegalArgumentException(errorMessages.toString());
         }
 
@@ -156,7 +157,7 @@ public class VehicleService {
             errorMessages.append("Driver Info ID must be valid and exist.");
         }
 
-        if(errorMessages.length() > 0) {
+        if(!errorMessages.isEmpty()) {
             throw new IllegalArgumentException(errorMessages.toString());
         }
 
