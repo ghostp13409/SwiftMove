@@ -1,14 +1,12 @@
-import { Move } from "lucide-react";
 import { z } from "zod";
-import { MoveRequestSchema } from "./move-request";
+import { MoveRequestPopulatedSchema } from "./move-request";
 import { VehicleSchema } from "./vehicle";
-import { DriverInfoPopulatedSchema, DriverSchema } from "./driver";
-import { UserSchema } from "./user";
+import { DriverInfoPopulatedSchema } from "./driver";
 
 export const MoveOfferSchema = z.object({
   id: z.number(),
   price: z.number(),
-  offerDate: z.string(),
+  offerDate: z.string().datetime().pipe(z.coerce.date()),
   moveRequestId: z.number(),
   driverId: z.number(),
   vehicleId: z.number(),
@@ -18,7 +16,7 @@ export const MoveOfferSchema = z.object({
 
 export const MoveOfferFormSchema = z.object({
   price: z.number().positive({ message: "Price must be a positive number" }),
-  offerDate: z.string(),
+  offerDate: z.string().datetime().pipe(z.coerce.date()),
   moveRequestId: z.number(),
   driverId: z.number(),
   vehicleId: z.number(),
@@ -27,7 +25,7 @@ export const MoveOfferFormSchema = z.object({
 
 export const MoveOfferPopulatedSchema = MoveOfferSchema.extend({
   driver: DriverInfoPopulatedSchema,
-  moveRequest: MoveRequestSchema,
+  moveRequest: MoveRequestPopulatedSchema,
   vehicle: VehicleSchema,
 });
 

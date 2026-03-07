@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Address } from "./address";
 import { MoveRequestPopulatedSchema, MoveRequestSchema } from "./move-request";
-import { MoveOfferSchema } from "./move-offer";
+import { MoveOfferPopulatedSchema, MoveOfferSchema } from "./move-offer";
 
 export const MoveTripSchema = z.object({
   id: z.string(),
@@ -24,7 +24,7 @@ export const MoveTripPopulatedSchema = MoveTripSchema.extend({
 
 export const MoveTripDetailedSchema = MoveTripSchema.extend({
   moveRequestPopulated: MoveRequestPopulatedSchema,
-  moveOfferPopulated: MoveOfferSchema,
+  moveOfferPopulated: MoveOfferPopulatedSchema,
 });
 
 export type MoveTrip = z.infer<typeof MoveTripSchema>;

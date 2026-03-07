@@ -7,13 +7,21 @@ export const moveOfferService = {
   // Get all move offers (admin - uses test endpoint)
   getAllMoveOffers: async (): Promise<MoveOffer[]> => {
     const response = await apiClient.get(`${API_BASE}`);
-    return response.data.data || response.data || [];
+    const data = response.data.data || response.data || [];
+    return data.map((offer: any) => ({
+      ...offer,
+      offerDate: new Date(offer.offerDate)
+    }));
   },
 
   // Get specific move offer by id
   getMoveOfferById: async (id: string | number): Promise<MoveOffer> => {
     const response = await apiClient.get(`${API_BASE}/${id}`);
-    return response.data.data || response.data;
+    const data = response.data.data || response.data;
+    return {
+      ...data,
+      offerDate: new Date(data.offerDate)
+    };
   },
 
   // Get offers for a specific move request
@@ -23,7 +31,11 @@ export const moveOfferService = {
     const response = await apiClient.get(
       `${API_BASE}?moveRequestId=${moveRequestId}`,
     );
-    return response.data.data || response.data || [];
+    const data = response.data.data || response.data || [];
+    return data.map((offer: any) => ({
+      ...offer,
+      offerDate: new Date(offer.offerDate)
+    }));
   },
 
   // Get offers by driver
@@ -31,7 +43,11 @@ export const moveOfferService = {
     driverId: string | number,
   ): Promise<MoveOffer[]> => {
     const response = await apiClient.get(`${API_BASE}?driverId=${driverId}`);
-    return response.data.data || response.data || [];
+    const data = response.data.data || response.data || [];
+    return data.map((offer: any) => ({
+      ...offer,
+      offerDate: new Date(offer.offerDate)
+    }));
   },
 
   // Create move offer

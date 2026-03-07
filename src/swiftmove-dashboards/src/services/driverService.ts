@@ -21,7 +21,15 @@ export const driverService = {
 
   // Get driver by userId — returns DriverWithInfo
   getDriverByUserId: async (userId: string | number): Promise<DriverInfo> => {
-    const response = await apiClient.get(`${API_BASE}/${userId}`);
+    const response = await apiClient.get(
+      `${API_BASE}/by-driver?driverId=${userId}`,
+    );
+    const driverInfo: DriverInfo = response.data.data || response.data;
+    return driverInfo;
+  },
+
+  getDriverById: async (id: string | number): Promise<DriverInfo> => {
+    const response = await apiClient.get(`${API_BASE}/${id}`);
     const driverInfo: DriverInfo = response.data.data || response.data;
     return driverInfo;
   },

@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import { tripService } from "@/services/tripService";
-import type { MoveTrip } from "@/types";
+import { populationFactory } from "@/services/populationFactory";
+import type { MoveTripDetailed } from "@/types";
 
 const AdminTrips = () => {
-  const [trips, setTrips] = useState<MoveTrip[]>([]);
+  const [trips, setTrips] = useState<MoveTripDetailed[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +24,10 @@ const AdminTrips = () => {
     const fetchTrips = async () => {
       try {
         const data = await tripService.getAllTrips();
-        setTrips(Array.isArray(data) ? data : []);
+        const populatedData = await Promise.all(
+          data.map((trip) => populationFactory.populateMoveTripDetailed(trip)),
+        );
+        setTrips(populatedData);
       } catch (err) {
         console.error("Failed to load trips:", err);
         setError("Failed to load trips.");
@@ -33,9 +37,6 @@ const AdminTrips = () => {
     };
     fetchTrips();
   }, []);
-
-  const getCity = (addr: MoveTrip["fromAddress"]) => addr?.city || "—";
-  const formatDate = (dt: string | undefined) => (dt ? dt.split("T")[0] : "—");
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -84,22 +85,22 @@ const AdminTrips = () => {
                     <TableRow key={trip.id}>
                       <TableCell className="font-medium">#{trip.id}</TableCell>
                       <TableCell>
-                        {trip.clientName ||
-                          (trip.moveRequest?.clientId
-                            ? `Client #${trip.moveRequest.clientId}`
-                            : `Request #${trip.moveRequestId}`)}
+                        {trip.moveRequestPopulated.client.firstName}{" "}
+                        {trip.moveRequestPopulated.client.lastName}
                       </TableCell>
                       <TableCell>
-                        {trip.driverName || `Offer #${trip.moveOfferId}`}
+                        {trip.moveOfferPopulated.driver.user.firstName}{" "}
+                        {trip.moveOfferPopulated.driver.user.lastName}
                       </TableCell>
                       <TableCell>
-                        {getCity(trip.fromAddress)} → {getCity(trip.toAddress)}
+                        {trip.moveRequestPopulated.fromAddress.city} →{" "}
+                        {trip.moveRequestPopulated.toAddress.city}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {formatDate(trip.startTime)}
+                        {trip.moveRequestPopulated.moveDate.toLocaleDateString()}
                       </TableCell>
                       <TableCell className="font-semibold">
-                        {trip.price != null ? `$${trip.price}` : "—"}
+                        ${trip.moveOfferPopulated.price}
                       </TableCell>
                       <TableCell>
                         <StatusBadge status={trip.status} />

@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import { moveRequestService } from "@/services/moveRequestService";
-import type { MoveRequest } from "@/types";
+import { populationFactory } from "@/services/populationFactory";
+import type { MoveRequestPopulated } from "@/types";
 
 const AdminMoveRequests = () => {
-  const [requests, setRequests] = useState<MoveRequest[]>([]);
+  const [requests, setRequests] = useState<MoveRequestPopulated[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +24,10 @@ const AdminMoveRequests = () => {
     const fetchRequests = async () => {
       try {
         const data = await moveRequestService.getAllMoveRequests();
-        setRequests(Array.isArray(data) ? data : []);
+        const populatedData = await Promise.all(
+          data.map((req) => populationFactory.populateMoveRequest(req)),
+        );
+        setRequests(populatedData);
       } catch (err) {
         console.error("Failed to load move requests:", err);
         setError("Failed to load move requests.");
@@ -33,8 +37,6 @@ const AdminMoveRequests = () => {
     };
     fetchRequests();
   }, []);
-
-  const getCity = (addr: any) => addr?.city || "—";
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -82,13 +84,13 @@ const AdminMoveRequests = () => {
                     <TableRow key={req.id}>
                       <TableCell className="font-medium">#{req.id}</TableCell>
                       <TableCell>
-                        {req.clientName || `Client #${req.clientId}`}
+                        {req.client.firstName} {req.client.lastName}
                       </TableCell>
                       <TableCell>
-                        {getCity(req.fromAddress)} → {getCity(req.toAddress)}
+                        {req.fromAddress.city} → {req.toAddress.city}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {req.moveDate}
+                        {req.moveDate.toLocaleDateString()}
                       </TableCell>
                       <TableCell>${req.maxBudget}</TableCell>
                       <TableCell>

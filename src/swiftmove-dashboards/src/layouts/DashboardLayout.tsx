@@ -85,12 +85,11 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   // Redirect if user role doesn't match the required role for this layout
   useEffect(() => {
     if (!userRole) return;
-    const expectedRole =
-      role === "CLIENT" ? "Client" : role === "DRIVER" ? "Driver" : "Admin";
-    if (userRole !== expectedRole) {
-      if (userRole === "Client") navigate("/client", { replace: true });
-      else if (userRole === "Driver") navigate("/driver", { replace: true });
-      else if (userRole === "Admin") navigate("/admin", { replace: true });
+    const normalizedUserRole = userRole.toUpperCase();
+    if (normalizedUserRole !== role) {
+      if (normalizedUserRole === "CLIENT") navigate("/client", { replace: true });
+      else if (normalizedUserRole === "DRIVER") navigate("/driver", { replace: true });
+      else if (normalizedUserRole === "ADMIN") navigate("/admin", { replace: true });
       else navigate("/client", { replace: true });
     }
   }, [userRole, role, navigate]);

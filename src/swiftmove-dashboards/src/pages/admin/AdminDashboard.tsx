@@ -59,7 +59,7 @@ const AdminDashboard = () => {
         // price is an enriched optional field on MoveTrip; skip revenue calculation
         // as the endpoint may not return it
         const revenue = completedTrips.reduce(
-          (sum, t) => sum + (t.price ?? 0),
+          (sum, t) => sum + ((t as any).price ?? 0),
           0,
         );
 

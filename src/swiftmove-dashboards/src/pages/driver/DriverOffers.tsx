@@ -4,10 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { moveOfferService } from "@/services/moveOfferService";
 import { driverService } from "@/services/driverService";
-import type { MoveOffer, DriverWithInfo } from "@/types";
+import { populationFactory } from "@/services/populationFactory";
+import type { MoveOfferPopulated, DriverInfo } from "@/types";
+import { getVehicleString } from "@/utils";
 
 const DriverOffers = () => {
-  const [myOffers, setMyOffers] = useState<MoveOffer[]>([]);
+  const [myOffers, setMyOffers] = useState<MoveOfferPopulated[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,12 +18,12 @@ const DriverOffers = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const driver: DriverWithInfo = await driverService.getCurrentDriver();
-        // Use driverInfo.id (driverInfoId) for offer lookups
-        const offers = await moveOfferService.getOffersByDriver(
-          driver.driverInfo.id,
+        const driver: DriverInfo = await driverService.getCurrentDriver();
+        const offers = await moveOfferService.getOffersByDriver(driver.id);
+        const populatedOffers = await Promise.all(
+          offers.map((offer) => populationFactory.populateMoveOffer(offer))
         );
-        setMyOffers(offers);
+        setMyOffers(populatedOffers);
       } catch (err: any) {
         setError(
           err?.response?.data?.message ??
@@ -86,25 +88,20 @@ const DriverOffers = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
                       <p className="font-medium">
-                        Request #{offer.moveRequestId}
+                        Request #{offer.moveRequestId} ({offer.moveRequest.fromAddress.city} → {offer.moveRequest.toAddress.city})
                       </p>
                       <StatusBadge status={offer.status} />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {offer.vehicleInfo
-                        ? `${offer.vehicleInfo} · `
-                        : `Vehicle #${offer.vehicleId} · `}
-                      Offer date:{" "}
-                      {offer.offerDate ? offer.offerDate.split("T")[0] : "—"}
+                      {getVehicleString(offer.vehicle)} · 
+                      Offer date: {offer.offerDate.toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold">${offer.price}</p>
-                    {offer.createdAt && (
-                      <p className="text-xs text-muted-foreground">
-                        {offer.createdAt.split("T")[0]}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {offer.moveRequest.moveDate.toLocaleDateString()}
+                    </p>
                   </div>
                   {offer.status === "OFFER_SENT" && (
                     <div className="ml-4 flex gap-2">

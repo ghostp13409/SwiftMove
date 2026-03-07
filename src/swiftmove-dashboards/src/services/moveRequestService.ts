@@ -8,10 +8,11 @@ export const moveRequestService = {
   getAllMoveRequests: async (): Promise<MoveRequest[]> => {
     try {
       const response = await apiClient.get(`${API_BASE}`);
-      // attach addresses to each move request
-      const moveRequests: MoveRequest[] =
-        response.data.data || response.data || [];
-      return moveRequests;
+      const data = response.data.data || response.data || [];
+      return data.map((req: any) => ({
+        ...req,
+        moveDate: new Date(req.moveDate)
+      }));
     } catch (error) {
       console.error("Error fetching move requests:", error);
       throw error;
@@ -21,10 +22,11 @@ export const moveRequestService = {
   getCurrentClientAllMoveRequests: async (): Promise<MoveRequest[]> => {
     try {
       const response = await apiClient.get(`${API_BASE}`);
-      // atttach addresses
-      const moveRequests: MoveRequest[] =
-        response.data.data || response.data || [];
-      return moveRequests;
+      const data = response.data.data || response.data || [];
+      return data.map((req: any) => ({
+        ...req,
+        moveDate: new Date(req.moveDate)
+      }));
     } catch (error) {
       console.error("Error fetching move requests:", error);
       throw error;
@@ -35,10 +37,11 @@ export const moveRequestService = {
   getActiveRequests: async (): Promise<MoveRequest[]> => {
     try {
       const response = await apiClient.get(`${API_BASE}/active`);
-      // attach addresses to each move request
-      const moveRequests: MoveRequest[] =
-        response.data.data || response.data || [];
-      return moveRequests;
+      const data = response.data.data || response.data || [];
+      return data.map((req: any) => ({
+        ...req,
+        moveDate: new Date(req.moveDate)
+      }));
     } catch (error) {
       console.error("Error fetching active requests:", error);
       throw error;
@@ -51,10 +54,11 @@ export const moveRequestService = {
       const response = await apiClient.get(
         `${API_BASE}/move-requests?clientId=${id}`,
       );
-      // attach addresses to each move request
-      const moveRequests: MoveRequest[] =
-        response.data.data || response.data || [];
-      return moveRequests;
+      const data = response.data.data || response.data || [];
+      return data.map((req: any) => ({
+        ...req,
+        moveDate: new Date(req.moveDate)
+      }));
     } catch (error) {
       console.error("Error fetching request history:", error);
       throw error;
@@ -65,8 +69,11 @@ export const moveRequestService = {
   getMoveRequestById: async (id: string | number): Promise<MoveRequest> => {
     try {
       const response = await apiClient.get(`${API_BASE}/${id}`);
-      const moveRequest: MoveRequest = response.data.data || response.data;
-      return moveRequest;
+      const data = response.data.data || response.data;
+      return {
+        ...data,
+        moveDate: new Date(data.moveDate)
+      };
     } catch (error) {
       console.error("Error fetching move request:", error);
       throw error;

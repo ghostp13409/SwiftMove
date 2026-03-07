@@ -52,9 +52,12 @@ const ClientDashboard = () => {
           const allOffers = offersResults
             .filter((r) => r.status === "fulfilled")
             .flatMap(
-              (r) => (r as PromiseFulfilledResult<MoveOfferPopulated[]>).value,
+              (r) => (r as PromiseFulfilledResult<MoveOffer[]>).value,
             );
-          setMyOffers(allOffers);
+          const populatedOffers = await Promise.all(
+            allOffers.map((offer) => populationFactory.populateMoveOffer(offer)),
+          );
+          setMyOffers(populatedOffers);
         }
       } catch (err) {
         console.error("Failed to load client dashboard data:", err);

@@ -62,13 +62,10 @@ const ClientMoveRequests = () => {
     setIsLoading(true);
     try {
       const data = await moveRequestService.getActiveRequests();
-      const populatedMoveRequests =
-        data.map((req) => populationFactory.populateMoveRequest(req)) || [];
-      setMyRequests(
-        Array.isArray(populatedMoveRequests)
-          ? (populatedMoveRequests as MoveRequestPopulated[])
-          : [],
+      const populatedMoveRequests = await Promise.all(
+        data.map((req) => populationFactory.populateMoveRequest(req))
       );
+      setMyRequests(populatedMoveRequests);
     } catch (err) {
       console.error("Failed to load move requests:", err);
     } finally {
@@ -338,7 +335,7 @@ const ClientMoveRequests = () => {
                       <StatusBadge status={req.status} />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {req.moveDate.getDate()} · ${req.maxBudget} budget
+                      {req.moveDate.toLocaleDateString()} · ${req.maxBudget} budget
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {(req.luggageEntries ?? []).reduce(
@@ -384,7 +381,7 @@ const ClientMoveRequests = () => {
                     </div>
                     <div>
                       <p className="text-muted-foreground text-xs">Move Date</p>
-                      <p>{selected.moveDate.getDate()}</p>
+                      <p>{selected.moveDate.toLocaleDateString()}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground text-xs">
