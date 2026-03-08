@@ -1,9 +1,9 @@
-package com.swiftmove.userservice.mapper;
+package com.swiftMove.userservice.mapper;
 
 
-import com.swiftmove.userservice.dto.UserRequestDTO;
-import com.swiftmove.userservice.dto.UserResponseDTO;
-import com.swiftmove.userservice.model.User;
+import com.swiftMove.userservice.dto.UserRequestDTO;
+import com.swiftMove.userservice.dto.UserResponseDTO;
+import com.swiftMove.userservice.model.User;
 
 public class UserMapper {
 

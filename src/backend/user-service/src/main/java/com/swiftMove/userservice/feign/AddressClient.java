@@ -1,9 +1,10 @@
-package com.swiftmove.userservice.feign;
+package com.swiftMove.userservice.feign;
 
-import com.swiftmove.userservice.dto.AddressDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import com.swiftMove.userservice.dto.AddressDTO;
 
 @FeignClient(name ="address-service" )
 public interface AddressClient {

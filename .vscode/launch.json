@@ -8,7 +8,10 @@
       "mainClass": "com.swiftmove.backend.BackendApplication",
       "projectName": "backend",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      }
     },
     {
       "type": "java",
@@ -18,7 +21,11 @@
       "mainClass": "com.swiftmove.apigateway.ApiGatewayApplication",
       "projectName": "api-gateway",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      },
+      "vmArgs": " -Dcom.sun.management.jmxremote"
     },
     {
       "type": "java",
@@ -28,7 +35,11 @@
       "mainClass": "com.swiftmove.authservice.AuthServiceApplication",
       "projectName": "auth-service",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      },
+      "vmArgs": " -Dcom.sun.management.jmxremote"
     },
     {
       "type": "java",
@@ -38,17 +49,11 @@
       "mainClass": "com.swiftmove.clientservice.ClientServiceApplication",
       "projectName": "client-service",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
-    },
-    {
-      "type": "java",
-      "name": "Spring Boot-ClientManagementServiceApplication<clientManagement-service>",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/src/backend/clientManagement-service",
-      "mainClass": "com.swiftMove.clientManagement_service.ClientManagementServiceApplication",
-      "projectName": "clientManagement-service",
-      "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      },
+      "vmArgs": " -Dcom.sun.management.jmxremote"
     },
     {
       "type": "java",
@@ -58,7 +63,10 @@
       "mainClass": "com.swiftmove.config_service.ConfigServiceApplication",
       "projectName": "config-service",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      }
     },
     {
       "type": "java",
@@ -68,7 +76,11 @@
       "mainClass": "com.swiftmove.driverservice.DriverServiceApplication",
       "projectName": "driver-service",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      },
+      "vmArgs": " -Dcom.sun.management.jmxremote"
     },
     {
       "type": "java",
@@ -78,17 +90,24 @@
       "mainClass": "com.swiftmove.eurekaserver.EurekaServerApplication",
       "projectName": "eureka-server",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      }
     },
     {
       "type": "java",
       "name": "Spring Boot-LocationServiceApplication<location-service>",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/backend/location-service",
-      "mainClass": "com.swiftmove.locationservice.LocationServiceApplication",
+      "mainClass": "com.swiftMove.locationservice.LocationServiceApplication",
       "projectName": "location-service",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      },
+      "vmArgs": " -Dcom.sun.management.jmxremote"
     },
     {
       "type": "java",
@@ -98,25 +117,64 @@
       "mainClass": "com.swiftmove.testservice.TestServiceApplication",
       "projectName": "test-service",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      }
     },
     {
       "type": "java",
       "name": "Spring Boot-TripServiceApplication<trip-service>",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/backend/trip-service",
-      "mainClass": "com.swiftmove.tripservice.TripServiceApplication",
+      "mainClass": "com.swiftMove.tripservice.TripServiceApplication",
       "projectName": "trip-service",
       "args": "",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      }
     },
     {
       "type": "java",
       "name": "Spring Boot-UserServiceApplication<user-service>",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/backend/user-service",
+      "mainClass": "com.swiftMove.userservice.UserServiceApplication",
+      "projectName": "user-service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
+      }
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-UserServiceApplication<user-service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
       "mainClass": "com.swiftmove.userservice.UserServiceApplication",
       "projectName": "user-service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-LocationServiceApplication<location-service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.swiftmove.locationservice.LocationServiceApplication",
+      "projectName": "location-service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-TripServiceApplication<trip-service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.swiftmove.tripservice.TripServiceApplication",
+      "projectName": "trip-service",
       "args": "",
       "envFile": "${workspaceFolder}/.env"
     }

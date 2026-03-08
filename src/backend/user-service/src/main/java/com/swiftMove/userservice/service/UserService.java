@@ -1,23 +1,23 @@
-package com.swiftmove.userservice.service;
+package com.swiftMove.userservice.service;
 
-import com.swiftmove.userservice.dto.AddressDTO;
-import com.swiftmove.userservice.dto.UserRequestDTO;
-import com.swiftmove.userservice.dto.UserResponseDTO;
-import com.swiftmove.userservice.feign.AddressClient;
-import com.swiftmove.userservice.mapper.UserMapper;
-import com.swiftmove.userservice.model.User;
-import com.swiftmove.userservice.repo.UserRepo;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.concurrent.CompletableFuture;
+import com.swiftMove.userservice.dto.AddressDTO;
+import com.swiftMove.userservice.dto.UserRequestDTO;
+import com.swiftMove.userservice.dto.UserResponseDTO;
+import com.swiftMove.userservice.feign.AddressClient;
+import com.swiftMove.userservice.mapper.UserMapper;
+import com.swiftMove.userservice.model.User;
+import com.swiftMove.userservice.repo.UserRepo;
 
-import java.time.LocalDate;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
