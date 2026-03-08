@@ -9,6 +9,9 @@ WORKDIR /app
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 
+# Ensure the Maven wrapper script is executable on Unix hosts
+RUN chmod +x mvnw
+
 # Download dependencies (cached unless pom.xml changes)
 RUN ./mvnw dependency:go-offline -B
 
