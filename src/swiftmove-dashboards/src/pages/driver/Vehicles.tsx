@@ -35,6 +35,8 @@ const Vehicles = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentVehicleId, setCurrentVehicleId] = useState<number | null>(null);
 
   // Form state
   const [make, setMake] = useState("");
@@ -79,7 +81,20 @@ const Vehicles = () => {
     fetchData();
   }, [userId]);
 
-  const handleAddVehicle = async (e: React.FormEvent) => {
+  const handleEditVehicle = (v: Vehicle) => {
+    setIsEditing(true);
+    setCurrentVehicleId(v.id);
+    setMake(v.make);
+    setModel(v.model);
+    setYear(String(v.year));
+    setColor(v.color);
+    setPricePerKm(String(v.pricePerKm));
+    setVehicleTypeId(String(v.vehicleTypeId));
+    setCanCarryFurniture(v.canCarryFurniture);
+    setDialogOpen(true);
+  };
+
+  const handleSubmitVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: string[] = [];
     if (!driver)
@@ -99,7 +114,7 @@ const Vehicles = () => {
     }
     setIsSubmitting(true);
     try {
-      await vehicleService.createVehicle({
+      const vehicleData = {
         make,
         model,
         year: parseInt(year),
@@ -110,20 +125,20 @@ const Vehicles = () => {
         canCarryFurniture,
         // driverId in VehicleForm maps to driverInfo.id
         driverId: (driver as any).id,
-      });
+      };
+
+      if (isEditing && currentVehicleId) {
+        await vehicleService.updateVehicle(currentVehicleId, vehicleData);
+      } else {
+        await vehicleService.createVehicle(vehicleData);
+      }
+
       toast({
-        title: "Vehicle Added",
-        description: "Your vehicle has been registered.",
+        title: isEditing ? "Vehicle Updated" : "Vehicle Added",
+        description: isEditing ? "Your vehicle has been updated." : "Your vehicle has been registered.",
       });
       setDialogOpen(false);
-      // Reset form
-      setMake("");
-      setModel("");
-      setYear("");
-      setColor("");
-      setPricePerKm("");
-      setVehicleTypeId("");
-      setCanCarryFurniture(false);
+      resetForm();
       // Refresh vehicles
       const vehicles = await vehicleService.getVehiclesByDriver(
         (driver as any).id,
@@ -132,7 +147,7 @@ const Vehicles = () => {
     } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to add vehicle.",
+        description: `Failed to ${isEditing ? "update" : "add"} vehicle.`,
         variant: "destructive",
       });
     } finally {
@@ -174,7 +189,10 @@ const Vehicles = () => {
             Manage your registered vehicles
           </p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={(val) => {
+          setDialogOpen(val);
+          if (!val) resetForm();
+        }}>
           <DialogTrigger asChild>
             <Button className="gradient-brand text-primary-foreground border-0 gap-2">
               <Plus className="w-4 h-4" /> Add Vehicle
@@ -182,9 +200,9 @@ const Vehicles = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Vehicle</DialogTitle>
+              <DialogTitle>{isEditing ? "Edit Vehicle" : "Add New Vehicle"}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddVehicle} className="space-y-4">
+            <form onSubmit={handleSubmitVehicle} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>Make *</Label>
@@ -317,18 +335,28 @@ const Vehicles = () => {
                 </div>
                 {vehicle.canCarryFurniture && (
                   <p className="text-xs text-green-600 mt-2">
-                    🛋 Can carry furniture
+                     Couch Can carry furniture
                   </p>
                 )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full mt-3 text-xs"
-                  onClick={() => handleToggleActive(vehicle.id)}
-                >
-                  {vehicle.isActive ? "Deactivate" : "Activate"}
-                </Button>
-              </CardContent>
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() => handleEditVehicle(vehicle)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() => handleToggleActive(vehicle.id)}
+                  >
+                    {vehicle.isActive ? "Deactivate" : "Activate"}
+                  </Button>
+                </div>
+                </CardContent>
             </Card>
           ))}
         </div>

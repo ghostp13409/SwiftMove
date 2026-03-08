@@ -71,6 +71,13 @@ public class MoveRequestService {
         moveRequestRepository.deleteById(moveRequestId);
     }
 
+    public void cancel(Long id) {
+        MoveRequest moveRequest = moveRequestRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Move Request not found"));
+        moveRequest.setStatus("CANCELLED");
+        moveRequestRepository.save(moveRequest);
+    }
+
     public MoveRequest getRandom(){
 
         Long randomLong = ThreadLocalRandom.current().nextLong(1, 77);

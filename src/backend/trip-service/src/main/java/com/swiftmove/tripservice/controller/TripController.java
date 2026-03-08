@@ -64,4 +64,13 @@ class TripController {
     public ResponseEntity<List<MoveTripDto>> getAllTrips() {
         return ResponseEntity.ok(moveTripService.getAll());
     }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<MoveTripDto> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        try {
+            return ResponseEntity.ok(moveTripService.updateStatus(id, status));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }

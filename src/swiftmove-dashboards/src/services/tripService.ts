@@ -27,4 +27,10 @@ export const tripService = {
     const response = await apiClient.get(`${API_BASE}/driver/${driverId}`);
     return response.data.data || response.data || [];
   },
+
+  // Update trip status
+  updateTripStatus: async (id: string | number, status: string): Promise<MoveTrip> => {
+    const response = await apiClient.patch(`${API_BASE}/${id}/status?status=${status}`);
+    return response.data.data || response.data;
+  },
 };

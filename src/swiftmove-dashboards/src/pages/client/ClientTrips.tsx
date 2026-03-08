@@ -40,6 +40,30 @@ const ClientTrips = () => {
     (t) => t.status === "SCHEDULED" || t.status === "IN_PROGRESS",
   );
 
+  const handleCancelTrip = async (id: string) => {
+    if (!confirm("Are you sure you want to cancel this trip?")) return;
+    try {
+      await tripService.updateTripStatus(id, "CANCELLED");
+      toast({
+        title: "Trip Cancelled",
+        description: "Your trip has been cancelled successfully.",
+      });
+      // Refresh list
+      if (!userId) return;
+      const data = await tripService.getTripsByClient(userId);
+      const populated = await Promise.all(
+        data.map(t => populationFactory.populateMoveTripDetailed(t))
+      );
+      setMyTrips(populated.filter(t => t.moveRequestPopulated.clientId === userId));
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to cancel trip.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-48">
@@ -64,7 +88,12 @@ const ClientTrips = () => {
               <CardTitle className="text-base flex items-center gap-2">
                 <Route className="w-4 h-4 text-primary" /> Active Trip
               </CardTitle>
-              <StatusBadge status={activeTrip.status} />
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="destructive" onClick={() => handleCancelTrip(activeTrip.id)} className="h-7 px-3 text-xs">
+                  Cancel Trip
+                </Button>
+                <StatusBadge status={activeTrip.status} />
+              </div>
             </div>
           </CardHeader>
           <CardContent className="pt-4">

@@ -32,6 +32,12 @@ export const vehicleService = {
     return response.data.data || response.data;
   },
 
+  // Update vehicle
+  updateVehicle: async (id: string | number, data: VehicleForm): Promise<Vehicle> => {
+    const response = await apiClient.put(`${API_BASE}/${id}`, data);
+    return response.data.data || response.data;
+  },
+
   // Delete vehicle
   deleteVehicle: async (id: string | number): Promise<void> => {
     await apiClient.delete(`${API_BASE}/${id}`);

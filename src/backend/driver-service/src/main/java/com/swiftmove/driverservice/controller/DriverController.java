@@ -247,6 +247,16 @@ class DriverController {
         }
     }
 
+    @PatchMapping("/move-offers/{id}/cancel")
+    public ResponseEntity<MoveOfferDto> cancelMoveOffer(@PathVariable Long id) {
+        try {
+            MoveOfferDto cancelledOffer = moveOfferService.cancel(id);
+            return ResponseEntity.ok(cancelledOffer);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
 //    Vehicle Endpoints
 
 //    Get All, by Driver Id. DriverId = driverInfoId

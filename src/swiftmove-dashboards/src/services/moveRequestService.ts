@@ -102,13 +102,13 @@ export const moveRequestService = {
   // Update move request
   updateMoveRequest: async (
     id: string | number,
-    data: any,
+    data: MoveRequestForm,
   ): Promise<MoveRequest> => {
     try {
-      const formattedData = { ...data };
-      if (data.moveDate instanceof Date) {
-        formattedData.moveDate = data.moveDate.toISOString();
-      }
+      const formattedData = {
+        ...data,
+        moveDate: data.moveDate instanceof Date ? data.moveDate.toISOString() : data.moveDate,
+      };
       const response = await apiClient.put(`${API_BASE}/${id}`, formattedData);
       const moveRequest = response.data.data || response.data;
       return {
@@ -127,6 +127,16 @@ export const moveRequestService = {
       await apiClient.delete(`${API_BASE}/${id}`);
     } catch (error) {
       console.error("Error deleting move request:", error);
+      throw error;
+    }
+  },
+
+  // Cancel move request
+  cancelMoveRequest: async (id: string | number): Promise<void> => {
+    try {
+      await apiClient.patch(`${API_BASE}/${id}/cancel`);
+    } catch (error) {
+      console.error("Error cancelling move request:", error);
       throw error;
     }
   },

@@ -105,4 +105,9 @@ export const moveOfferService = {
   deleteMoveOffer: async (id: string | number): Promise<void> => {
     await apiClient.delete(`${API_BASE}/${id}`);
   },
+
+  // Cancel move offer
+  cancelMoveOffer: async (id: string | number): Promise<void> => {
+    await apiClient.patch(`${API_BASE}/${id}/cancel`);
+  },
 };
