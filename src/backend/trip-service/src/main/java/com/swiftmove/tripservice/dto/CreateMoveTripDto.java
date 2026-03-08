@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TripDTO {
-    private Long id;
-    private Long moveRequestId;
+@Getter
+@Setter
+public class CreateMoveTripDto {
+
+    private  Long moveRequestId;
     private Long moveOfferId;
     private String status;
 }
