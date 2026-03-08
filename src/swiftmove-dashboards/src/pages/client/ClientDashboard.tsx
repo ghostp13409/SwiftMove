@@ -69,7 +69,7 @@ const ClientDashboard = () => {
   }, [userId]);
 
   const pendingRequests = myRequests.filter(
-    (r) => r.status === "PENDING",
+    (r) => r.status === "CREATED",
   ).length;
   // MoveOffer status is OFFER_SENT (not PENDING)
   const activeOffers = myOffers.filter((o) => o.status === "OFFER_SENT").length;

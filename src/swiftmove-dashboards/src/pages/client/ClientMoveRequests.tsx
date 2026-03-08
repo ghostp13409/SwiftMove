@@ -99,11 +99,12 @@ const ClientMoveRequests = () => {
   const fetchLuggageTypes = async () => {
     try {
       const types = await luggageService.getAllLuggageTypes();
-      const sortedTypes = [...types].sort((a, b) => a.id - b.id).slice(0, 5);
+      const sortedTypes = [...types].sort((a, b) => (a.id || 0) - (b.id || 0)).slice(0, 5);
       setLuggageTypes(sortedTypes);
-      const initialQuantities: Record<number, number> = {};
+      const initialQuantities: Record<string, number> = {};
       sortedTypes.forEach(t => {
-        initialQuantities[t.id] = 0;
+        const key = String(t.id || t.type || t.luggageTypeEnum);
+        initialQuantities[key] = 0;
       });
       setLuggageQuantities(initialQuantities);
     } catch (err) {
@@ -146,10 +147,28 @@ const ClientMoveRequests = () => {
     }
   };
 
-  const updateLuggageQuantity = (id: number, delta: number) => {
+  const handleRejectOffer = async (offerId: number) => {
+    try {
+      await moveOfferService.rejectOffer(offerId);
+      toast({
+        title: "Offer Rejected",
+        description: "The move offer has been rejected.",
+      });
+      if (selected) handleSelectRequest(selected);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to reject offer.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateLuggageQuantity = (id: string | number, delta: number) => {
+    const key = String(id);
     setLuggageQuantities(prev => ({
       ...prev,
-      [id]: Math.max(0, (prev[id] || 0) + delta)
+      [key]: Math.max(0, (prev[key] || 0) + delta)
     }));
   };
 
@@ -195,21 +214,25 @@ const ClientMoveRequests = () => {
         toAddressId: toAddr.id,
         moveDate: new Date(moveDate),
         maxBudget: parseFloat(maxBudget),
-        status: "PENDING",
+        status: "CREATED",
       });
 
       const luggageEntriesToCreate = Object.entries(luggageQuantities)
         .filter(([_, qty]) => qty > 0)
-        .map(([typeId, qty]) => ({
-          id: 0,
-          luggageTypeId: parseInt(typeId),
-          quantity: qty,
-        }));
+        .map(([key, qty]) => {
+          const type = luggageTypes.find(t => String(t.id || t.type || t.luggageTypeEnum) === key);
+          return {
+            id: type?.id || 0,
+            luggageTypeId: type?.id || 0,
+            quantity: qty,
+            luggageType: type?.luggageTypeEnum || type?.type,
+          };
+        });
 
       if (luggageEntriesToCreate.length > 0) {
         await Promise.all(
           luggageEntriesToCreate.map(entry => 
-            luggageService.createLuggageEntry(newRequest.id, entry)
+            luggageService.createLuggageEntry(newRequest.id, entry as any)
           )
         );
       }
@@ -248,7 +271,12 @@ const ClientMoveRequests = () => {
     setMoveDate("");
     setMaxBudget("");
     setNotes("");
-    setLuggageQuantities(Object.fromEntries(luggageTypes.map(t => [t.id, 0])));
+    const emptyQuantities: Record<string, number> = {};
+    luggageTypes.forEach(t => {
+      const key = String(t.id || t.type || t.luggageTypeEnum);
+      emptyQuantities[key] = 0;
+    });
+    setLuggageQuantities(emptyQuantities);
     setStep(1);
   };
 
@@ -346,38 +374,41 @@ const ClientMoveRequests = () => {
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 gap-2">
-                    {luggageTypes.map((type) => (
-                      <div key={type.id} className="flex items-center justify-between p-3 rounded-2xl bg-secondary/40 border border-border/50 group hover:border-primary/30 transition-all">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold">{type.name}</span>
-                          <span className="text-[10px] text-muted-foreground uppercase">{(type.luggageTypeEnum || type.type || "").replace(/_/g, ' ')}</span>
+                    {luggageTypes.map((type) => {
+                      const itemKey = String(type.id || type.type || type.luggageTypeEnum);
+                      return (
+                        <div key={itemKey} className="flex items-center justify-between p-3 rounded-2xl bg-secondary/40 border border-border/50 group hover:border-primary/30 transition-all">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold">{type.name}</span>
+                            <span className="text-[10px] text-muted-foreground uppercase">{(type.luggageTypeEnum || type.type || "").replace(/_/g, ' ')}</span>
+                          </div>
+                          <div className="flex items-center gap-3 bg-background/80 rounded-xl p-1 border shadow-sm group-hover:bg-background transition-colors">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => updateLuggageQuantity(itemKey, -1)}
+                              disabled={!luggageQuantities[itemKey]}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="text-sm font-bold w-6 text-center">
+                              {luggageQuantities[itemKey] || 0}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
+                              onClick={() => updateLuggageQuantity(itemKey, 1)}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3 bg-background/80 rounded-xl p-1 border shadow-sm group-hover:bg-background transition-colors">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => updateLuggageQuantity(type.id, -1)}
-                            disabled={!luggageQuantities[type.id]}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="text-sm font-bold w-6 text-center">
-                            {luggageQuantities[type.id] || 0}
-                          </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
-                            onClick={() => updateLuggageQuantity(type.id, 1)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   <div className="pt-2">
                     <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest px-1">Notes (Optional)</Label>
@@ -586,10 +617,18 @@ const ClientMoveRequests = () => {
                                 <p className="text-lg font-black text-primary tracking-tighter">${offer.price}</p>
                                 <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Fixed Price</p>
                               </div>
-                              {selected.status === "PENDING" && (
-                                <Button size="sm" onClick={() => handleAcceptOffer(offer.id)} className="h-10 px-6 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-md transition-transform active:scale-95">
-                                  Accept
-                                </Button>
+                              {(selected.status === "CREATED" || selected.status === "OFFER_AVAILABLE") && offer.status === "OFFER_SENT" && (
+                                <div className="flex gap-2">
+                                  <Button size="sm" variant="outline" onClick={() => handleRejectOffer(offer.id)} className="h-10 px-4 rounded-xl border-destructive text-destructive hover:bg-destructive/5 font-bold shadow-sm">
+                                    Reject
+                                  </Button>
+                                  <Button size="sm" onClick={() => handleAcceptOffer(offer.id)} className="h-10 px-6 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-md transition-transform active:scale-95">
+                                    Accept
+                                  </Button>
+                                </div>
+                              )}
+                              {offer.status !== "OFFER_SENT" && (
+                                <StatusBadge status={offer.status} />
                               )}
                             </div>
                           </div>

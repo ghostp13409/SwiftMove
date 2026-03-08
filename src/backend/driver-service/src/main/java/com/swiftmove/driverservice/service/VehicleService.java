@@ -54,7 +54,7 @@ public class VehicleService {
             return Mapper.toVehicleDto(newVehicle);
         }
         catch (Exception ex){
-            throw new RuntimeException("Failed to create MoveOffer: " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to create vehicle: " + ex.getMessage(), ex);
         }
     }
 //    Edit
@@ -67,7 +67,11 @@ public class VehicleService {
                         existingVehicle.setModel(vehicleDto.getModel());
                         existingVehicle.setYear(vehicleDto.getYear());
                         existingVehicle.setColor(vehicleDto.getColor());
+                        existingVehicle.setPricePerKm(vehicleDto.getPricePerKm());
+                        existingVehicle.setIsActive(vehicleDto.getIsActive());
+                        existingVehicle.setCanCarryFurniture(vehicleDto.getCanCarryFurniture());
                         existingVehicle.setDriverId(vehicleDto.getDriverId());
+                        existingVehicle.setVehicleTypeId(vehicleDto.getVehicleTypeId());
                         return Mapper.toVehicleDto(vehicleRepository.save(existingVehicle));
                     })
                     .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + id));

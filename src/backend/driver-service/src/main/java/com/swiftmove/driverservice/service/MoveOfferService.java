@@ -1,13 +1,18 @@
 package com.swiftmove.driverservice.service;
 
 import com.swiftmove.driverservice.client.AuthClient;
+import com.swiftmove.driverservice.client.ClientServiceClient;
+import com.swiftmove.driverservice.client.TripServiceClient;
 import com.swiftmove.driverservice.dto.CreateMoveOfferDto;
+import com.swiftmove.driverservice.dto.CreateMoveTripDto;
 import com.swiftmove.driverservice.dto.MoveOfferDto;
+import com.swiftmove.driverservice.dto.MoveRequestDto;
 import com.swiftmove.driverservice.mapper.Mapper;
 import com.swiftmove.driverservice.model.MoveOffer;
 import com.swiftmove.driverservice.repository.MoveOfferRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +22,8 @@ public class MoveOfferService {
 
     private final MoveOfferRepository moveOfferRepository;
     private final AuthClient authClient;
+    private final ClientServiceClient clientServiceClient;
+    private final TripServiceClient tripServiceClient;
 
 //    Get All
     public List<MoveOfferDto> getAll(){
@@ -60,6 +67,19 @@ public class MoveOfferService {
         try{
             MoveOffer newMoveOffer = Mapper.createMoveOfferEntity(newMoveOfferDto);
             newMoveOffer = moveOfferRepository.save(newMoveOffer);
+
+            // Update Move Request Status if needed
+            try {
+                MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(newMoveOffer.getMoveRequestId());
+                if ("CREATED".equals(moveRequest.getStatus())) {
+                    moveRequest.setStatus("OFFER_AVAILABLE");
+                    clientServiceClient.updateMoveRequest(moveRequest.getId(), moveRequest);
+                }
+            } catch (Exception e) {
+                // Log error but don't fail offer creation
+                System.err.println("Failed to update move request status: " + e.getMessage());
+            }
+
             return Mapper.toMoveOfferDto(newMoveOffer);
         }
         catch (Exception ex){
@@ -73,7 +93,7 @@ public class MoveOfferService {
         try{
             validateMoveOffer(moveOfferDto);
             MoveOffer existingMoveOffer = moveOfferRepository.findById(id).orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
-            existingMoveOffer.setOfferedDate(moveOfferDto.getOfferedDate());
+            existingMoveOffer.setOfferedDate(moveOfferDto.getOfferDate());
             existingMoveOffer.setPrice(moveOfferDto.getPrice());
             existingMoveOffer.setStatus(moveOfferDto.getStatus());
             existingMoveOffer.setMoveRequestId(moveOfferDto.getMoveRequestId());
@@ -86,6 +106,40 @@ public class MoveOfferService {
         catch (Exception ex){
             throw new RuntimeException("Failed to edit move offer: " + ex.getMessage(), ex);
         }
+    }
+
+    @Transactional
+    public MoveOfferDto accept(Long id) {
+        MoveOffer offer = moveOfferRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
+
+        // Update Offer Status
+        offer.setStatus("ACCEPTED");
+        moveOfferRepository.save(offer);
+
+        // Update Move Request Status
+        MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(offer.getMoveRequestId());
+        moveRequest.setStatus("ACCEPTED");
+        clientServiceClient.updateMoveRequest(moveRequest.getId(), moveRequest);
+
+        // Create Move Trip
+        CreateMoveTripDto tripDto = new CreateMoveTripDto();
+        tripDto.setMoveRequestId(offer.getMoveRequestId());
+        tripDto.setMoveOfferId(offer.getId());
+        tripDto.setStatus("SCHEDULED");
+        tripServiceClient.createTrip(tripDto);
+
+        return Mapper.toMoveOfferDto(offer);
+    }
+
+    @Transactional
+    public MoveOfferDto reject(Long id) {
+        MoveOffer offer = moveOfferRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
+
+        offer.setStatus("REJECTED");
+        moveOfferRepository.save(offer);
+        return Mapper.toMoveOfferDto(offer);
     }
 
 //    Delete

@@ -1,23 +1,32 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "@/components/StatusBadge";
-import { Loader2 } from "lucide-react";
+import { Loader2, Route } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { tripService } from "@/services/tripService";
-import type { MoveTrip } from "@/types";
+import { populationFactory } from "@/services/populationFactory";
+import type { MoveTripDetailed } from "@/types";
 
 const ClientTrips = () => {
   const { userId } = useAuth();
-  const [myTrips, setMyTrips] = useState<MoveTrip[]>([]);
-  const [selected, setSelected] = useState<MoveTrip | null>(null);
+  const [myTrips, setMyTrips] = useState<MoveTripDetailed[]>([]);
+  const [selected, setSelected] = useState<MoveTripDetailed | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!userId) return;
     const fetchTrips = async () => {
       try {
+        setIsLoading(true);
         const data = await tripService.getTripsByClient(userId);
-        setMyTrips(Array.isArray(data) ? data : []);
+        
+        // Populate and filter for current client
+        const populated = await Promise.all(
+          data.map(t => populationFactory.populateMoveTripDetailed(t))
+        );
+        
+        const filtered = populated.filter(t => t.moveRequestPopulated.clientId === userId);
+        setMyTrips(filtered);
       } catch (err) {
         console.error("Failed to load trips:", err);
       } finally {
@@ -30,8 +39,6 @@ const ClientTrips = () => {
   const activeTrip = myTrips.find(
     (t) => t.status === "SCHEDULED" || t.status === "IN_PROGRESS",
   );
-  const getCity = (addr: MoveTrip["fromAddress"]) => addr?.city || "—";
-  const formatDate = (dt: string | undefined) => (dt ? dt.split("T")[0] : "—");
 
   if (isLoading) {
     return (
@@ -51,31 +58,35 @@ const ClientTrips = () => {
       </div>
 
       {activeTrip && (
-        <Card className="shadow-card border-l-4 border-l-primary">
-          <CardHeader className="pb-2">
+        <Card className="shadow-card border-l-4 border-l-primary overflow-hidden">
+          <CardHeader className="pb-2 bg-primary/5">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Active Trip</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Route className="w-4 h-4 text-primary" /> Active Trip
+              </CardTitle>
               <StatusBadge status={activeTrip.status} />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <p className="text-muted-foreground text-xs">From</p>
-                <p>{getCity(activeTrip.fromAddress)}</p>
+                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">From</p>
+                <p className="font-medium">{activeTrip.moveRequestPopulated.fromAddress.city}</p>
               </div>
               <div>
-                <p className="text-muted-foreground text-xs">To</p>
-                <p>{getCity(activeTrip.toAddress)}</p>
+                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">To</p>
+                <p className="font-medium">{activeTrip.moveRequestPopulated.toAddress.city}</p>
               </div>
               <div>
-                <p className="text-muted-foreground text-xs">Driver</p>
-                <p>{activeTrip.driverName || "—"}</p>
+                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Driver</p>
+                <p className="font-medium">
+                  {activeTrip.moveOfferPopulated.driver.user.firstName} {activeTrip.moveOfferPopulated.driver.user.lastName}
+                </p>
               </div>
               <div>
-                <p className="text-muted-foreground text-xs">Price</p>
-                <p className="font-semibold">
-                  {activeTrip.price != null ? `$${activeTrip.price}` : "—"}
+                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Price</p>
+                <p className="font-bold text-primary text-lg">
+                  ${activeTrip.moveOfferPopulated.price}
                 </p>
               </div>
             </div>
@@ -84,35 +95,37 @@ const ClientTrips = () => {
       )}
 
       {myTrips.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No trips yet. Accept a move offer to schedule your first trip!
-        </p>
+        <div className="text-center py-12 bg-secondary/10 rounded-3xl border border-dashed border-border/60">
+          <p className="text-sm font-medium text-muted-foreground">
+            No trips yet. Accept a move offer to schedule your first trip!
+          </p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {myTrips.map((trip) => (
             <Card
               key={trip.id}
-              className={`shadow-card cursor-pointer hover:shadow-card-lg transition-all ${selected?.id === trip.id ? "ring-2 ring-primary" : ""}`}
+              className={`shadow-card cursor-pointer hover:shadow-card-lg transition-all border-2 ${selected?.id === trip.id ? "border-primary bg-primary/5" : "border-transparent"}`}
               onClick={() => setSelected(trip)}
             >
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <p className="font-medium">
-                      {getCity(trip.fromAddress)} → {getCity(trip.toAddress)}
+                    <p className="font-bold text-sm">
+                      {trip.moveRequestPopulated.fromAddress.city} → {trip.moveRequestPopulated.toAddress.city}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Driver: {trip.driverName || "—"}
+                    <p className="text-xs text-muted-foreground mt-1 font-medium">
+                      Driver: {trip.moveOfferPopulated.driver.user.firstName} {trip.moveOfferPopulated.driver.user.lastName}
                     </p>
                   </div>
                   <StatusBadge status={trip.status} />
                 </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground text-xs">
-                    {formatDate(trip.startTime)}
+                <div className="flex justify-between items-center text-sm pt-2 border-t">
+                  <span className="text-muted-foreground text-xs font-medium">
+                    {new Date(trip.moveRequestPopulated.moveDate).toLocaleDateString()}
                   </span>
-                  <span className="font-semibold">
-                    {trip.price != null ? `$${trip.price}` : "—"}
+                  <span className="font-bold text-primary">
+                    ${trip.moveOfferPopulated.price}
                   </span>
                 </div>
               </CardContent>

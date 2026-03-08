@@ -15,5 +15,5 @@ public class VehicleTypeDto {
     private Long id;
     private VehicleTypeEnum type;
     private Double maxWeight;
-    private Double capacity;
+    private Double maxCapacity;
 }

@@ -74,6 +74,16 @@ export const moveOfferService = {
     };
   },
 
+  // Reject a move offer (client action)
+  rejectOffer: async (offerId: string | number): Promise<MoveOffer> => {
+    const response = await apiClient.patch(`${API_BASE}/${offerId}/reject`);
+    const result = response.data.data || response.data;
+    return {
+      ...result,
+      offerDate: new Date(result.offerDate)
+    };
+  },
+
   // Update move offer
   updateMoveOffer: async (
     id: string | number,

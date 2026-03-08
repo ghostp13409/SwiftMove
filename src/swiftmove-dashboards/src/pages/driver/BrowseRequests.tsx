@@ -54,7 +54,7 @@ const BrowseRequests = () => {
           driverService.getDriverByUserId(userId),
         ]);
 
-        const pending = requests.filter((r) => r.status === "PENDING");
+        const pending = requests.filter((r) => r.status === "CREATED");
         const populatedPending = await Promise.all(
           pending.map((req) => populationFactory.populateMoveRequest(req))
         );
@@ -94,7 +94,7 @@ const BrowseRequests = () => {
     try {
       await moveOfferService.createMoveOffer({
         moveRequestId: selected.id,
-        driverId: driverInfo.id,
+        driverId: driverInfo.userId, // use userId instead of driverInfo.id
         vehicleId: parseInt(selectedVehicleId),
         price: parseFloat(offerPrice),
         offerDate: new Date(offeredDateTime),
@@ -140,7 +140,7 @@ const BrowseRequests = () => {
         <div className="lg:col-span-1 space-y-3">
           {pendingRequests.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No pending move requests available.
+              No available move requests.
             </p>
           ) : (
             pendingRequests.map((req) => (

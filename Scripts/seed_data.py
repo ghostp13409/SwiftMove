@@ -118,10 +118,15 @@ for d in driver_infos:
 clients = [u for u in users if u['role'] == 'CLIENT']
 move_requests = []
 mrid = 1
-statuses = ['CREATED', 'OFFER_SENT', 'OFFER_AVAILABLE', 'PENDING']
+# statuses defined for reference but not used directly in generation
+mr_statuses = ['CREATED', 'OFFER_AVAILABLE', 'ACCEPTED', 'CANCELLED']
+mo_statuses = ['OFFER_SENT', 'ACCEPTED', 'REJECTED', 'CANCELLED']
+trip_statuses = ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
+
 for c in clients:
     num_req = fake.random_int(1, 5)
     for _ in range(num_req):
+        # initial request
         mr = {
             'id': mrid,
             'move_date': fake.date_time_this_year(),
@@ -129,33 +134,49 @@ for c in clients:
             'client_id': c['id'],
             'from_address_id': fake.random_int(1, 200),
             'to_address_id': fake.random_int(1, 200),
-            'status': fake.random_element(statuses)
+            'status': 'CREATED'
         }
         move_requests.append(mr)
         mrid += 1
 
-# Luggage entries
+# Luggage entries - at most one entry per luggage type, max 5 per request
 luggage_entries = []
 leid = 1
 for mr in move_requests:
-    num_ent = fake.random_int(1, 10)
-    for _ in range(num_ent):
+    # sample between 1 and 5 distinct luggage types
+    types = fake.random_elements(elements=[1, 2, 3, 4, 5], length=fake.random_int(1, 5), unique=True)
+    for lt in types:
         le = {
             'id': leid,
             'quantity': fake.random_int(1, 20),
             'move_request_id': mr['id'],
-            'luggage_type_id': fake.random_int(1, 5)
+            'luggage_type_id': lt
         }
         luggage_entries.append(le)
         leid += 1
 
-# Move offers
+# Move offers and associated status transitions
+# precompute driver and vehicle id lists for selection
 drivers_list = [d['id'] for d in drivers]
 vehicles_list = [v['id'] for v in vehicles]
+
 move_offers = []
 moid = 1
+# we will create trips only for accepted offers
+move_trips = []
+mtid = 1
+
 for mr in move_requests:
+    # decide if request will be cancelled immediately (before offers)
+    if fake.boolean(chance_of_getting_true=10):
+        mr['status'] = 'CANCELLED'
+        continue
+
+    # generate offers for this request
     num_off = fake.random_int(1, 5)
+    offers_for_request = []
+    accepted_offer = None
+
     for _ in range(num_off):
         driver_id = fake.random_element(drivers_list)
         veh_for_driver = [v for v in vehicles if v['driver_id'] == driver_id]
@@ -163,6 +184,7 @@ for mr in move_requests:
             veh_id = fake.random_element(veh_for_driver)['id']
         else:
             veh_id = fake.random_element(vehicles_list)
+
         mo = {
             'id': moid,
             'price': fake.random_int(50, mr['max_budget']),
@@ -170,29 +192,69 @@ for mr in move_requests:
             'move_request_id': mr['id'],
             'driver_id': driver_id,
             'vehicle_id': veh_id,
-            'status': fake.random_element(statuses)
+            'status': 'OFFER_SENT'
         }
+        offers_for_request.append(mo)
         move_offers.append(mo)
         moid += 1
 
-# Move trips
-move_trips = []
-mtid = 1
-trip_statuses = ['CONFIRMED', 'PAYMENT_COMPLETED', 'IS_IN_TRANSIT', 'COMPLETED']
-for mo in move_offers:
-    if fake.boolean(chance_of_getting_true=30):
-        mt = {
-            'id': mtid,
-            'move_request_id': mo['move_request_id'],
-            'move_offer_id': mo['id'],
-            'status': fake.random_element(trip_statuses)
-        }
-        move_trips.append(mt)
-        mtid += 1
+    if offers_for_request:
+        # at least one offer means request moves to OFFER_AVAILABLE
+        mr['status'] = 'OFFER_AVAILABLE'
+        # decide if request will eventually be cancelled after offers with some chance
+        if fake.boolean(chance_of_getting_true=10):
+            mr['status'] = 'CANCELLED'
+            # mark all offers as cancelled
+            for o in offers_for_request:
+                o['status'] = 'CANCELLED'
+        else:
+            # randomly accept one of the offers with a modest chance
+            if fake.boolean(chance_of_getting_true=30):
+                accepted_offer = fake.random_element(offers_for_request)
+                accepted_offer['status'] = 'ACCEPTED'
+                mr['status'] = 'ACCEPTED'
+                # mark the other offers as rejected or cancelled
+                for o in offers_for_request:
+                    if o is not accepted_offer:
+                        o['status'] = fake.random_element(['REJECTED', 'CANCELLED'])
+
+                # create a move trip for the accepted offer
+                trip = {
+                    'id': mtid,
+                    'move_request_id': mr['id'],
+                    'move_offer_id': accepted_offer['id'],
+                    'status': 'SCHEDULED'
+                }
+                # progress the trip randomly
+                if fake.boolean(chance_of_getting_true=50):
+                    trip['status'] = 'IN_PROGRESS'
+                    if fake.boolean(chance_of_getting_true=50):
+                        trip['status'] = fake.random_element(['COMPLETED', 'CANCELLED'])
+                move_trips.append(trip)
+                mtid += 1
+            else:
+                # no offer accepted: transition all offers off of OFFER_SENT
+                for o in offers_for_request:
+                    o['status'] = fake.random_element(['REJECTED', 'CANCELLED'])
+    # if we never accepted an offer and didn't cancel request, status remains OFFER_AVAILABLE
+
+# end generate offers/trips
 
 # Write to SQL file
-with open('Scripts/seed_data.sql', 'w') as f:
+# determine output path relative to this script so running from anywhere works
+import os
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+output_file = os.path.join(script_dir, 'seed_data.sql')
+
+# ensure parent directory exists (should already, but safe)
+os.makedirs(script_dir, exist_ok=True)
+
+with open(output_file, 'w') as f:
     f.write("-- Seed data generated by seed_data.py\n\n")
+
+    # clean up existing rows to avoid foreign key issues
+    f.write("TRUNCATE TABLE move_trips, move_offers, luggage_entries, move_requests, vehicles, driver_infos, users, addresses, luggage_types, vehicle_types RESTART IDENTITY CASCADE;\n\n")
 
     # Vehicle types
     f.write("INSERT INTO vehicle_types (type, max_weight, capacity) VALUES\n")
@@ -217,12 +279,12 @@ with open('Scripts/seed_data.sql', 'w') as f:
     ]
     f.write(",\n".join(lt_values) + ";\n\n")
 
-    # Addresses
-    f.write("INSERT INTO addresses (line1, line2, city, state_or_province, country, postal_or_zip_code) VALUES\n")
+    # Addresses (include explicit id to guarantee referential integrity)
+    f.write("INSERT INTO addresses (id, line1, line2, city, state_or_province, country, postal_or_zip_code) VALUES\n")
     addr_values = []
     for a in addresses:
         line2 = f"'{a['line2']}'" if a['line2'] else 'NULL'
-        val = f"('{a['line1']}', {line2}, '{a['city']}', '{a['state_or_province']}', '{a['country']}', '{a['postal_or_zip_code']}')"
+        val = f"({a['id']}, '{a['line1']}', {line2}, '{a['city']}', '{a['state_or_province']}', '{a['country']}', '{a['postal_or_zip_code']}')"
         addr_values.append(val)
     f.write(",\n".join(addr_values) + ";\n\n")
 

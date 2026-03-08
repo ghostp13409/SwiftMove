@@ -54,11 +54,11 @@ const Vehicles = () => {
         ]);
 
         if (driverRes.status === "fulfilled") {
-          const driverData = driverRes.value;
+          const driverData = driverRes.value as any;
           setDriver(driverData);
-          // Use driverInfo.id (driverInfoId) for vehicle lookups
+          // driverData is DriverInfo, use .id directly
           const vehicles = await vehicleService.getVehiclesByDriver(
-            driverData.driverInfo.id,
+            driverData.id,
           );
           setMyVehicles(Array.isArray(vehicles) ? vehicles : []);
         }
@@ -109,7 +109,7 @@ const Vehicles = () => {
         isActive: true,
         canCarryFurniture,
         // driverId in VehicleForm maps to driverInfo.id
-        driverId: driver!.driverInfo.id,
+        driverId: (driver as any).id,
       });
       toast({
         title: "Vehicle Added",
@@ -126,7 +126,7 @@ const Vehicles = () => {
       setCanCarryFurniture(false);
       // Refresh vehicles
       const vehicles = await vehicleService.getVehiclesByDriver(
-        driver!.driverInfo.id,
+        (driver as any).id,
       );
       setMyVehicles(Array.isArray(vehicles) ? vehicles : []);
     } catch (err) {

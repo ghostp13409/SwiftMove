@@ -227,6 +227,26 @@ class DriverController {
         }
     }
 
+    @PatchMapping("/move-offers/{id}/accept")
+    public ResponseEntity<MoveOfferDto> acceptMoveOffer(@PathVariable Long id) {
+        try {
+            MoveOfferDto acceptedOffer = moveOfferService.accept(id);
+            return ResponseEntity.ok(acceptedOffer);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @PatchMapping("/move-offers/{id}/reject")
+    public ResponseEntity<MoveOfferDto> rejectMoveOffer(@PathVariable Long id) {
+        try {
+            MoveOfferDto rejectedOffer = moveOfferService.reject(id);
+            return ResponseEntity.ok(rejectedOffer);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
 //    Vehicle Endpoints
 
 //    Get All, by Driver Id. DriverId = driverInfoId
