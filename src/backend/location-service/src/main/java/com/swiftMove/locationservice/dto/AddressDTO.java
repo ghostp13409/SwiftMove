@@ -1,12 +1,12 @@
 package com.swiftMove.locationservice.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class AddressDTO {
     private Long id;
     private String line1;

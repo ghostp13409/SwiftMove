@@ -1,0 +1,38 @@
+Summary,Description,Parent summary
+"As a Driver, I should be able to swtich all available cars for the MoveRequest so that i can use the car of my choice.",,Driver Dashboard
+"As a Driver, I want to change my driver info, so that I can change my driver range, etc.",,Driver Dashboard
+"As a Driver, I want to be able to cancel a MoveTrip, so that I can give Client a notice of cancellation",,Driver Dashboard
+"As a Driver, I want to view all available MoveRequests so that i can send a MoveOffer",,Driver Dashboard
+"As a Client, I should be able to make cancel my MoveRequest so that I can change my plans",,Client Dashboard
+"As a Client, I should be able to manage my MoveRequests so that I can have a better control over my requests",,Client Dashboard
+"As a User, I should be able to Manage my Account so that I can make changes to my account",,User Authentication And Account Management
+"As a User, I should be able to Logout of the system, so that i can secure my account after use.",,User Authentication And Account Management
+"As a User, I should be able to login into my account so that i can access my accont.",,User Authentication And Account Management
+"As a User, I should be able to make an account, so that I can use the App.",,User Authentication And Account Management
+"As a Client, I want to browse and accept driver offers on my MoveRequest so that I can perform MoveTrip.","* View a List of Move Offers from different movers
+* Accept Move Offer ",Client Dashboard
+"As a Driver, I want to manage my vehicles so that I can change my vehicle info","* Swifters should be able to perform CRUD operations on Vehicles
+** Edit
+*** Vehicle License Plate
+*** Vehicle Name
+*** Model
+*** Max load
+*** Color
+*** Type (EV, Gas)
+** Remove vehicle
+** Add vehicle",Driver Dashboard
+"As a Developer, I want dummy data in database so that I can test out my back end during development",Create a Seeded data for each entity,System Analysis and Design
+As a developer I want a Database for the system so that I can start designing database compatible back end.,Implement DB Design,System Analysis and Design
+"As a Developer, I want to have a clear understanding of all the entities and their relations so that I can create Database Schema ",,System Analysis and Design
+"As a Client, I want to create a MoveRequest so that I can find drivers' offers.","* Select the date and time for the trip
+* Select the start and end location for the trip
+* Set a max budget ",Client Dashboard
+"As an Admin, I should be able to manage user accounts so that I can perform administrative actions.","* Should be able to perform CRUD operations for both Swifters and Movers
+** Add New Users
+** Edit Users
+*** Passwords
+*** Personal Info
+*** Addresses
+** Delete Accounts
+** Ban Accounts
+** View User Accounts",Admin Dashboard

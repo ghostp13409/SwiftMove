@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import { vehicleService } from "@/services/vehicleService";
-import type { Vehicle } from "@/types";
-
+import { Vehicle } from "@/types";
 const AdminVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,11 +81,11 @@ const AdminVehicles = () => {
                         {v.year} {v.make} {v.model}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        #{v.driverId || v.driverInfoId || "—"}
+                        #{v.driverId}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
-                          {v.vehicleType || "—"}
+                          {v.vehicleType || `Type #${v.vehicleTypeId}`}
                         </Badge>
                       </TableCell>
                       <TableCell>${v.pricePerKm}/km</TableCell>

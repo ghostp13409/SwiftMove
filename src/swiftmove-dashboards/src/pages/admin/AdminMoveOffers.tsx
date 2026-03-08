@@ -12,10 +12,12 @@ import {
 } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import { moveOfferService } from "@/services/moveOfferService";
-import type { MoveOffer } from "@/types";
+import { populationFactory } from "@/services/populationFactory";
+import { getVehicleString } from "@/utils";
+import type { MoveOfferPopulated } from "@/types";
 
 const AdminMoveOffers = () => {
-  const [offers, setOffers] = useState<MoveOffer[]>([]);
+  const [offers, setOffers] = useState<MoveOfferPopulated[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +25,10 @@ const AdminMoveOffers = () => {
     const fetchOffers = async () => {
       try {
         const data = await moveOfferService.getAllMoveOffers();
-        setOffers(Array.isArray(data) ? data : []);
+        const populatedData = await Promise.all(
+          data.map((offer) => populationFactory.populateMoveOffer(offer)),
+        );
+        setOffers(populatedData);
       } catch (err) {
         console.error("Failed to load move offers:", err);
         setError("Failed to load move offers.");
@@ -80,11 +85,12 @@ const AdminMoveOffers = () => {
                     <TableRow key={offer.id}>
                       <TableCell className="font-medium">#{offer.id}</TableCell>
                       <TableCell>
-                        {offer.driverName || `Driver #${offer.driverId}`}
+                        {offer.driver.user.firstName}{" "}
+                        {offer.driver.user.lastName}
                       </TableCell>
                       <TableCell>Request #{offer.moveRequestId}</TableCell>
                       <TableCell className="text-muted-foreground">
-                        {offer.vehicleInfo || `Vehicle #${offer.vehicleId}`}
+                        {getVehicleString(offer.vehicle)}
                       </TableCell>
                       <TableCell className="font-semibold">
                         ${offer.price}

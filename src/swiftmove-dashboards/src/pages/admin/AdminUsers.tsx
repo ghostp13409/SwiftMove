@@ -37,13 +37,10 @@ const AdminUsers = () => {
   }, []);
 
   const filtered = users.filter((u) =>
-    `${u.firstName} ${u.lastName} ${u.email} ${u.userType || u.role}`
+    `${u.firstName} ${u.lastName} ${u.email} ${u.role}`
       .toLowerCase()
       .includes(search.toLowerCase()),
   );
-
-  const getUserRole = (u: User) => u.userType || u.role || "—";
-  const getStatus = (u: User) => u.status || "active";
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -82,9 +79,8 @@ const AdminUsers = () => {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Username</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -92,7 +88,7 @@ const AdminUsers = () => {
                 {filtered.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={5}
                       className="text-center text-muted-foreground py-10"
                     >
                       {search
@@ -109,33 +105,17 @@ const AdminUsers = () => {
                       <TableCell className="text-muted-foreground">
                         {user.email}
                       </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            getUserRole(user).toUpperCase() === "ADMIN" ||
-                              getUserRole(user) === "Admin"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {getUserRole(user)}
-                        </Badge>
+                      <TableCell className="text-muted-foreground">
+                        {user.username}
                       </TableCell>
                       <TableCell>
                         <Badge
                           variant={
-                            getStatus(user) === "active"
-                              ? "outline"
-                              : "destructive"
+                            user.role === "ADMIN" ? "default" : "secondary"
                           }
                         >
-                          {getStatus(user)}
+                          {user.role}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {user.createdAt
-                          ? new Date(user.createdAt).toLocaleDateString()
-                          : "—"}
                       </TableCell>
                       <TableCell>
                         <Button size="sm" variant="ghost" className="text-xs">

@@ -1,7 +1,7 @@
-import apiClient from './apiClient';
-import { MoveTrip } from '../types';
+import apiClient from "./apiClient";
+import { MoveTrip } from "@/types";
 
-const API_BASE = '/trips';
+const API_BASE = "/trips";
 
 export const tripService = {
   // Get all trips (admin)
@@ -26,5 +26,11 @@ export const tripService = {
   getTripsByDriver: async (driverId: string | number): Promise<MoveTrip[]> => {
     const response = await apiClient.get(`${API_BASE}/driver/${driverId}`);
     return response.data.data || response.data || [];
+  },
+
+  // Update trip status
+  updateTripStatus: async (id: string | number, status: string): Promise<MoveTrip> => {
+    const response = await apiClient.patch(`${API_BASE}/${id}/status?status=${status}`);
+    return response.data.data || response.data;
   },
 };

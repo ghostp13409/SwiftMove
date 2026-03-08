@@ -16,20 +16,22 @@ import { moveRequestService } from "@/services/moveRequestService";
 import { moveOfferService } from "@/services/moveOfferService";
 import { tripService } from "@/services/tripService";
 import { vehicleService } from "@/services/vehicleService";
+import { populationFactory } from "@/services/populationFactory";
 import type {
   MoveRequest,
-  MoveOffer,
-  MoveTrip,
+  MoveOfferPopulated,
+  MoveTripDetailed,
   Vehicle,
-  Driver,
+  DriverWithInfo,
 } from "@/types";
+import { getVehicleString } from "@/utils";
 
 const DriverDashboard = () => {
   const { userId, name } = useAuth();
-  const [driver, setDriver] = useState<Driver | null>(null);
+  const [driver, setDriver] = useState<DriverWithInfo | null>(null);
   const [pendingRequests, setPendingRequests] = useState<MoveRequest[]>([]);
-  const [myOffers, setMyOffers] = useState<MoveOffer[]>([]);
-  const [myTrips, setMyTrips] = useState<MoveTrip[]>([]);
+  const [myOffers, setMyOffers] = useState<MoveOfferPopulated[]>([]);
+  const [myTrips, setMyTrips] = useState<MoveTripDetailed[]>([]);
   const [myVehicles, setMyVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,10 +40,9 @@ const DriverDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [driverRes, requestsRes, allTripsRes] = await Promise.allSettled([
+        const [driverRes, requestsRes] = await Promise.allSettled([
           driverService.getCurrentDriver(),
           moveRequestService.getAllMoveRequests(),
-          tripService.getAllTrips(),
         ]);
 
         const driverData =
@@ -51,30 +52,33 @@ const DriverDashboard = () => {
         const requestsData =
           requestsRes.status === "fulfilled" ? requestsRes.value : [];
         setPendingRequests(
-          (requestsData as MoveRequest[]).filter((r) => r.status === "PENDING"),
+          (requestsData as MoveRequest[]).filter((r) => r.status === "CREATED"),
         );
 
-        const tripsData =
-          allTripsRes.status === "fulfilled" ? allTripsRes.value : [];
-
         if (driverData) {
-          // Get driver-specific data
+          // Use driverInfo.id as the driverInfoId for vehicle/offer/trip lookups
+          const driverInfoId = driverData.driverInfo.id;
+
           const [offersRes, driverTripsRes, vehiclesRes] =
             await Promise.allSettled([
-              moveOfferService.getOffersByDriver(driverData.id),
-              tripService.getTripsByDriver(driverData.id),
-              vehicleService.getVehiclesByDriver(driverData.id),
+              moveOfferService.getOffersByDriver(driverInfoId),
+              tripService.getTripsByDriver(driverInfoId),
+              vehicleService.getVehiclesByDriver(driverInfoId),
             ]);
 
-          const offersData =
-            offersRes.status === "fulfilled" ? offersRes.value : [];
-          setMyOffers(offersData);
+          if (offersRes.status === "fulfilled") {
+             const populatedOffers = await Promise.all(
+               offersRes.value.map(o => populationFactory.populateMoveOffer(o))
+             );
+             setMyOffers(populatedOffers);
+          }
 
-          const driverTrips =
-            driverTripsRes.status === "fulfilled" ? driverTripsRes.value : [];
-          setMyTrips(
-            driverTrips.length > 0 ? driverTrips : (tripsData as MoveTrip[]),
-          );
+          if (driverTripsRes.status === "fulfilled") {
+             const populatedTrips = await Promise.all(
+               driverTripsRes.value.map(t => populationFactory.populateMoveTripDetailed(t))
+             );
+             setMyTrips(populatedTrips);
+          }
 
           const vehiclesData =
             vehiclesRes.status === "fulfilled" ? vehiclesRes.value : [];
@@ -89,9 +93,6 @@ const DriverDashboard = () => {
     fetchData();
   }, [userId]);
 
-  const getCity = (addr: any) => addr?.city || "—";
-  const formatDate = (dt: string | undefined) => (dt ? dt.split("T")[0] : "—");
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -103,7 +104,7 @@ const DriverDashboard = () => {
   const activeTrips = myTrips.filter((t) => t.status === "SCHEDULED");
   const earnings = myTrips
     .filter((t) => t.status === "COMPLETED")
-    .reduce((s, t) => s + (t.price || 0), 0);
+    .reduce((s, t) => s + t.moveOfferPopulated.price, 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -125,7 +126,7 @@ const DriverDashboard = () => {
           title="My Offers"
           value={myOffers.length}
           icon={<HandCoins className="w-4 h-4" />}
-          description={`${myOffers.filter((o) => o.status === "PENDING").length} pending`}
+          description={`${myOffers.filter((o) => o.status === "OFFER_SENT").length} pending`}
         />
         <StatsCard
           title="Active Trips"
@@ -162,16 +163,15 @@ const DriverDashboard = () => {
                 >
                   <div>
                     <p className="text-sm font-medium">
-                      {getCity(trip.fromAddress)} → {getCity(trip.toAddress)}
+                      {trip.moveRequestPopulated.fromAddress.city} → {trip.moveRequestPopulated.toAddress.city}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {trip.clientName ? `Client: ${trip.clientName} · ` : ""}
-                      {formatDate(trip.startTime)}
+                      Client: {trip.moveRequestPopulated.client.firstName} {trip.moveRequestPopulated.client.lastName}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm">
-                      {trip.price != null ? `$${trip.price}` : "—"}
+                      ${trip.moveOfferPopulated.price}
                     </span>
                     <StatusBadge status={trip.status} />
                   </div>
@@ -201,7 +201,7 @@ const DriverDashboard = () => {
                       Request #{offer.moveRequestId}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {offer.vehicleInfo || `Vehicle #${offer.vehicleId}`} · $
+                      {getVehicleString(offer.vehicle)} · $
                       {offer.price}
                     </p>
                   </div>

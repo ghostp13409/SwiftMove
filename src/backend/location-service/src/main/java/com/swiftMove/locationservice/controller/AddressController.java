@@ -3,6 +3,7 @@ package com.swiftMove.locationservice.controller;
 
 import java.util.List;
 
+import com.swiftMove.locationservice.dto.CreateAddressDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,7 +29,7 @@ public class AddressController {
 
     //get all address
     @GetMapping
-        public ResponseEntity<List<AddressDTO>> getAllAddress(){
+    public ResponseEntity<List<AddressDTO>> getAllAddress(){
         return ResponseEntity.ok(addressService.getAllAddresses());
     }
 
@@ -43,9 +44,9 @@ public class AddressController {
 
     //Add new Address
     @PostMapping
-    public ResponseEntity<Void> addNewAddress(@RequestBody AddressDTO addressDTO){
-        addressService.addNewAddress(addressDTO);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AddressDTO> addNewAddress(@RequestBody CreateAddressDto createAddressDTO){
+        AddressDTO addressDto = addressService.addNewAddress(createAddressDTO);
+        return ResponseEntity.ok(addressDto);
     }
 
     //Update an existing address

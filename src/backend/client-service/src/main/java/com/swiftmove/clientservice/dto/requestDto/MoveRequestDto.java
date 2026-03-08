@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 public class MoveRequestDto {
     private Long id;
-    private LocalDateTime moveDate;
+    private Instant moveDate;
     private Long maxBudget;
     private Long clientId;
     private Long fromAddressId;

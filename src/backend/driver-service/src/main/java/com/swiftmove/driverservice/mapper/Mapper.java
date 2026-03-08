@@ -66,7 +66,7 @@ public class Mapper {
         MoveOfferDto dto = new MoveOfferDto();
         dto.setId(offer.getId());
         dto.setPrice(offer.getPrice());
-        dto.setOfferedDate(offer.getOfferedDate());
+        dto.setOfferDate(offer.getOfferedDate());
         dto.setMoveRequestId(offer.getMoveRequestId());
         dto.setDriverId(offer.getDriverId());
         dto.setVehicleId(offer.getVehicleId());
@@ -79,7 +79,7 @@ public class Mapper {
         MoveOffer offer = new MoveOffer();
         offer.setId(offerDto.getId());
         offer.setPrice(offerDto.getPrice());
-        offer.setOfferedDate(offerDto.getOfferedDate());
+        offer.setOfferedDate(offerDto.getOfferDate());
         offer.setMoveRequestId(offerDto.getMoveRequestId());
         offer.setDriverId(offerDto.getDriverId());
         offer.setVehicleId(offerDto.getVehicleId());
@@ -93,7 +93,7 @@ public class Mapper {
         dto.setId(vehicleType.getId());
         dto.setType(vehicleType.getType());
         dto.setMaxWeight(vehicleType.getMaxWeight());
-        dto.setCapacity(vehicleType.getCapacity());
+        dto.setMaxCapacity(vehicleType.getCapacity());
         return dto;
     }
 
@@ -106,11 +106,11 @@ public class Mapper {
         return driverInfo;
     }
 
-    public static MoveOffer toMoveOfferEntityFromCreateDto(CreateMoveOfferDto createMoveOfferDto) {
+    public static MoveOffer createMoveOfferEntity(CreateMoveOfferDto createMoveOfferDto) {
         MoveOffer offer = new MoveOffer();
 
         offer.setPrice(createMoveOfferDto.getPrice());
-        offer.setOfferedDate(createMoveOfferDto.getOfferedDate());
+        offer.setOfferedDate(createMoveOfferDto.getOfferDate());
         offer.setMoveRequestId(createMoveOfferDto.getMoveRequestId());
         offer.setDriverId(createMoveOfferDto.getDriverId());
         offer.setVehicleId(createMoveOfferDto.getVehicleId());
@@ -118,8 +118,7 @@ public class Mapper {
 
         return offer;
     }
-    
-    public  static Vehicle toVehicleEntityFromCreateDto(CreateVehicleDto createVehicleDto) {
+    public  static Vehicle createVehicleEntity(CreateVehicleDto createVehicleDto) {
         Vehicle vehicle = new Vehicle();
 
         vehicle.setModel(createVehicleDto.getModel());

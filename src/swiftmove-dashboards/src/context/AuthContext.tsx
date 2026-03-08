@@ -5,7 +5,9 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { authService, GoogleUser } from "../services/authService";
+import { authService } from "../services/authService";
+import { GoogleUser } from "@/types";
+import { z } from "zod";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -19,7 +21,9 @@ interface AuthContextType {
     password: string,
     firstName: string,
     lastName: string,
-    role?: string,
+    dob: Date,
+    role?: "CLIENT" | "DRIVER" | "ADMIN",
+    username?: string,
   ) => Promise<void>;
   loginWithGoogle: () => void; // Google OAuth login
   loginAsTestUser: (userType: "client" | "admin" | "driver") => void; // Test user login
@@ -49,6 +53,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userId, setUserId] = useState<number | null>(null);
   const [name, setName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [dob, setDob] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check authentication status on app load
@@ -154,14 +159,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     password: string,
     firstName: string,
     lastName: string,
-    role?: string,
+    dob: Date,
+    role?: "CLIENT" | "DRIVER" | "ADMIN",
+    username?: string,
   ) => {
     const response = await authService.register({
       email,
       password,
       firstName,
       lastName,
+      dob,
       role,
+      username,
     });
     authService.setAuthData(
       response.token,

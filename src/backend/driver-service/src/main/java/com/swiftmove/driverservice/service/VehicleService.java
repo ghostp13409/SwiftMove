@@ -3,7 +3,6 @@ package com.swiftmove.driverservice.service;
 import com.swiftmove.driverservice.dto.CreateVehicleDto;
 import com.swiftmove.driverservice.dto.VehicleDto;
 import com.swiftmove.driverservice.mapper.Mapper;
-import com.swiftmove.driverservice.model.MoveOffer;
 import com.swiftmove.driverservice.model.Vehicle;
 import com.swiftmove.driverservice.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +19,14 @@ public class VehicleService {
 //    All
     public List<VehicleDto> getAll(){
         return vehicleRepository.findAll().stream()
-                .map(vehicle -> Mapper.toVehicleDto(vehicle))
+                .map(Mapper::toVehicleDto)
                 .toList();
     }
 
 //    Get by Driver Info ID
     public List<VehicleDto> getByDriverInfoId(Long driverInfoId){
         return vehicleRepository.findByDriverId(driverInfoId).stream()
-                .map(vehicle -> Mapper.toVehicleDto(vehicle))
+                .map(Mapper::toVehicleDto)
                 .toList();
     }
 
@@ -50,12 +49,12 @@ public class VehicleService {
     public VehicleDto add(CreateVehicleDto vehicleDto){
         try{
             validateNewVehicle(vehicleDto);
-            Vehicle newVehicle = Mapper.toVehicleEntityFromCreateDto(vehicleDto);
+            Vehicle newVehicle = Mapper.createVehicleEntity(vehicleDto);
             newVehicle = vehicleRepository.save(newVehicle);
             return Mapper.toVehicleDto(newVehicle);
         }
         catch (Exception ex){
-            throw new RuntimeException("Failed to create MoveOffer: " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to create vehicle: " + ex.getMessage(), ex);
         }
     }
 //    Edit
@@ -68,7 +67,11 @@ public class VehicleService {
                         existingVehicle.setModel(vehicleDto.getModel());
                         existingVehicle.setYear(vehicleDto.getYear());
                         existingVehicle.setColor(vehicleDto.getColor());
+                        existingVehicle.setPricePerKm(vehicleDto.getPricePerKm());
+                        existingVehicle.setIsActive(vehicleDto.getIsActive());
+                        existingVehicle.setCanCarryFurniture(vehicleDto.getCanCarryFurniture());
                         existingVehicle.setDriverId(vehicleDto.getDriverId());
+                        existingVehicle.setVehicleTypeId(vehicleDto.getVehicleTypeId());
                         return Mapper.toVehicleDto(vehicleRepository.save(existingVehicle));
                     })
                     .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + id));
@@ -103,6 +106,7 @@ public class VehicleService {
             errorMessages.append("Vehicle cannot be null.");
         }
 
+        assert vehicleDto != null;
         if(vehicleDto.getMake() == null || vehicleDto.getMake().trim().isEmpty()) {
             errorMessages.append("Make cannot be null or empty.");
         }
@@ -123,7 +127,7 @@ public class VehicleService {
             errorMessages.append("Driver Info ID must be valid and exist.");
         }
 
-        if(errorMessages.length() > 0) {
+        if(!errorMessages.isEmpty()) {
             throw new IllegalArgumentException(errorMessages.toString());
         }
 
@@ -157,7 +161,7 @@ public class VehicleService {
             errorMessages.append("Driver Info ID must be valid and exist.");
         }
 
-        if(errorMessages.length() > 0) {
+        if(!errorMessages.isEmpty()) {
             throw new IllegalArgumentException(errorMessages.toString());
         }
 
