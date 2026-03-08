@@ -10,8 +10,8 @@ export const MoveOfferSchema = z.object({
   moveRequestId: z.number(),
   driverId: z.number(),
   vehicleId: z.number(),
-  // "OFFER_SENT" | "ACCEPTED" | "REJECTED"
-  status: z.enum(["OFFER_SENT", "ACCEPTED", "REJECTED"]),
+  // "OFFER_SENT" | "ACCEPTED" | "REJECTED" | "CANCELLED"
+  status: z.enum(["OFFER_SENT", "ACCEPTED", "REJECTED", "CANCELLED"]),
 });
 
 export const MoveOfferFormSchema = z.object({
@@ -20,7 +20,7 @@ export const MoveOfferFormSchema = z.object({
   moveRequestId: z.number(),
   driverId: z.number(),
   vehicleId: z.number(),
-  status: z.enum(["OFFER_SENT", "ACCEPTED", "REJECTED"]),
+  status: z.enum(["OFFER_SENT", "ACCEPTED", "REJECTED", "CANCELLED"]),
 });
 
 export const MoveOfferPopulatedSchema = MoveOfferSchema.extend({

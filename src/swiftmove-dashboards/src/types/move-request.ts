@@ -10,7 +10,7 @@ export const MoveRequestSchema = z.object({
   clientId: z.number(),
   fromAddressId: z.number(),
   toAddressId: z.number(),
-  status: z.enum(["PENDING", "ACCEPTED", "OFFER_AVAILABLE", "CANCELLED"]),
+  status: z.enum(["CREATED", "OFFER_AVAILABLE", "ACCEPTED", "CANCELLED"]),
 });
 
 export const MoveRequestFormSchema = z.object({
@@ -19,7 +19,7 @@ export const MoveRequestFormSchema = z.object({
   clientId: z.number(),
   fromAddressId: z.number(),
   toAddressId: z.number(),
-  status: z.enum(["PENDING", "ACCEPTED", "OFFER_AVAILABLE", "CANCELLED"]),
+  status: z.enum(["CREATED", "OFFER_AVAILABLE", "ACCEPTED", "CANCELLED"]),
 });
 
 export const MoveRequestPopulatedSchema = MoveRequestSchema.extend({

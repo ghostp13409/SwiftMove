@@ -1,12 +1,13 @@
-package com.swiftmove.userservice.dto;
+package com.swiftMove.userservice.dto;
+
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter

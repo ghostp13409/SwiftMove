@@ -1,4 +1,4 @@
-package com.swiftmove.userservice.controller;
+package com.swiftMove.userservice.controller;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -6,10 +6,9 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.swiftmove.userservice.dto.AddressDTO;
-import com.swiftmove.userservice.dto.UserRequestDTO;
-import com.swiftmove.userservice.dto.UserResponseDTO;
-import com.swiftmove.userservice.service.UserService;
+import com.swiftMove.userservice.dto.UserRequestDTO;
+import com.swiftMove.userservice.dto.UserResponseDTO;
+import com.swiftMove.userservice.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 

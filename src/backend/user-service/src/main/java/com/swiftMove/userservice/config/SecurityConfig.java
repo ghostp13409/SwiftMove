@@ -1,4 +1,4 @@
-package com.swiftmove.userservice.config;
+package com.swiftMove.userservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
