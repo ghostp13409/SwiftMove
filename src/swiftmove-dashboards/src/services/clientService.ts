@@ -1,7 +1,8 @@
-import apiClient from './apiClient';
-import { Client } from '../types';
+import { addressService } from "./addressService";
+import apiClient from "./apiClient";
+import { Client, MoveRequest, MoveRequestForm } from "@/types";
 
-const API_BASE = '/clients';
+const API_BASE = "/clients";
 
 export const clientService = {
   // Get all clients (admin)
@@ -10,7 +11,7 @@ export const clientService = {
       const response = await apiClient.get(`${API_BASE}`);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error fetching clients:', error);
+      console.error("Error fetching clients:", error);
       throw error;
     }
   },
@@ -21,7 +22,7 @@ export const clientService = {
       const response = await apiClient.get(`${API_BASE}/${id}`);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error fetching client:', error);
+      console.error("Error fetching client:", error);
       throw error;
     }
   },
@@ -32,40 +33,7 @@ export const clientService = {
       const response = await apiClient.get(`${API_BASE}/me`);
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error fetching current client:', error);
-      throw error;
-    }
-  },
-
-  // Get client's active move requests
-  getActiveRequests: async (id: string | number): Promise<any[]> => {
-    try {
-      const response = await apiClient.get(`${API_BASE}/move-requests/active`);
-      return response.data.data || response.data;
-    } catch (error) {
-      console.error('Error fetching active requests:', error);
-      throw error;
-    }
-  },
-
-  // Get client's all move requests
-  getAllRequests: async (id: string | number): Promise<any[]> => {
-    try {
-      const response = await apiClient.get(`${API_BASE}/${id}/move-requests`);
-      return response.data.data || response.data;
-    } catch (error) {
-      console.error('Error fetching request history:', error);
-      throw error;
-    }
-  },
-
-  // Add move request for client
-  addMoveRequest: async (clientId: string | number, requestData: any): Promise<any> => {
-    try {
-      const response = await apiClient.post(`${API_BASE}/move-requests`, requestData);
-      return response.data.data || response.data;
-    } catch (error) {
-      console.error('Error adding move request:', error);
+      console.error("Error fetching current client:", error);
       throw error;
     }
   },

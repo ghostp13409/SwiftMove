@@ -1,19 +1,22 @@
 package com.swiftmove.clientservice.service;
 
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.swiftmove.clientservice.dto.CreateMoveRequestDto;
 import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.mapper.Mapper;
 import com.swiftmove.clientservice.model.MoveRequest;
 import com.swiftmove.clientservice.repository.LuggageEntryRepository;
 import com.swiftmove.clientservice.repository.MoveRequestRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -23,16 +26,18 @@ public class MoveRequestService {
 
 
 //    CRUD
-    public List<MoveRequest> findAll() {
-        return moveRequestRepository.findAll();
+    public List<MoveRequestDto> findAll() {
+        List<MoveRequest> moveRequests = moveRequestRepository.findAll();
+        return moveRequests.stream().map(Mapper::toMoveRequestDto).toList();
     }
 
-    public MoveRequest findById(Long moveRequestId) {
+    public MoveRequestDto findById(Long moveRequestId) {
         MoveRequest moveRequest = moveRequestRepository.findById(moveRequestId).orElse(null);
         if(moveRequest == null){
             System.out.println("MoveRequestRepository returned a null.");
         }
-        return moveRequestRepository.findById(moveRequestId).orElse(null);
+        assert moveRequest != null;
+        return Mapper.toMoveRequestDto(moveRequest);
     }
     public void update(Long id,  MoveRequestDto moveRequestDto) {
             MoveRequest existingMoveRequest = moveRequestRepository.findById(id)
@@ -48,10 +53,14 @@ public class MoveRequestService {
         }
     }
 
-    public MoveRequest add(MoveRequest moveRequest) {
+    public MoveRequestDto add(CreateMoveRequestDto createMoveRequestDto) {
         try{
+            MoveRequest moveRequest = Mapper.createMoveRequestEntity(createMoveRequestDto);
             validateMoveRequest(moveRequest);
-            return moveRequestRepository.save(moveRequest);
+            // Make move Request Status to "CREATED"
+            moveRequest.setStatus("CREATED");
+            moveRequestRepository.save(moveRequest);
+            return Mapper.toMoveRequestDto(moveRequest);
         }catch(Exception e){
             return null;
         }
@@ -62,30 +71,31 @@ public class MoveRequestService {
         moveRequestRepository.deleteById(moveRequestId);
     }
 
+    public void cancel(Long id) {
+        MoveRequest moveRequest = moveRequestRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Move Request not found"));
+        moveRequest.setStatus("CANCELLED");
+        moveRequestRepository.save(moveRequest);
+    }
+
     public MoveRequest getRandom(){
 
         Long randomLong = ThreadLocalRandom.current().nextLong(1, 77);
-        MoveRequest moveRequest = moveRequestRepository.findById(randomLong).orElse(null);
-        return moveRequest;
+        return moveRequestRepository.findById(randomLong).orElse(null);
     }
 
-    public List<MoveRequest> findByClientId(Long clientId)
+    public List<MoveRequestDto> findByClientId(Long clientId)
     {
 
         List<MoveRequest> moveRequests = moveRequestRepository.findByClientId(clientId);
 
-//        // Add Move Offers to All Move Requests
-//        for(MoveRequest mr : moveRequests){
-//            addMoveOffers(mr);
-//        }
-
-        return moveRequests;
+        return moveRequests.stream().map(Mapper::toMoveRequestDto).toList();
     }
 
     //Get all active move request for the client
-    public List<MoveRequest> findActiveByClientId(Long clientId)
+    public List<MoveRequestDto> findActiveByClientId(Long clientId)
     {
-        String [] activeStatuses = {"PENDING", "OFFER_AVAILABLE", "CREATED"};
+        String [] activeStatuses = {"CREATED", "OFFER_AVAILABLE"};
 
         List<MoveRequest> moveRequests = moveRequestRepository.findByClientId(clientId);
 
@@ -94,7 +104,16 @@ public class MoveRequestService {
                 .filter(mr -> Arrays.asList(activeStatuses).contains(mr.getStatus()))
                 .toList();
 
-        return moveRequests;
+        return moveRequests.stream().map(Mapper::toMoveRequestDto).toList();
+    }
+
+    public List<MoveRequestDto> findAllActive() {
+        String [] activeStatuses = {"CREATED", "OFFER_AVAILABLE"};
+        List<MoveRequest> moveRequests = moveRequestRepository.findAll();
+        return moveRequests.stream()
+                .filter(mr -> Arrays.asList(activeStatuses).contains(mr.getStatus()))
+                .map(Mapper::toMoveRequestDto)
+                .toList();
     }
 
     // Get Currently Logged in User
@@ -103,17 +122,13 @@ public class MoveRequestService {
 
 //        FIXME: Implement Proper Validation
         StringBuilder errors = new StringBuilder();
-        // Id
-        if(moveRequest.getId() == null){
-           errors.append("Id is null.");
-        }
 
         // Move Date
         if(moveRequest.getMoveDate() == null){
             errors.append("Move Date is null.");
         }
         // Move date cannot be in the past
-        if(moveRequest.getMoveDate() != null && moveRequest.getMoveDate().isBefore(LocalDateTime.now())){
+        if(moveRequest.getMoveDate() != null && moveRequest.getMoveDate().isBefore(Instant.now())){
             errors.append("Move Date cannot be in the past.");
         }
 
@@ -133,7 +148,7 @@ public class MoveRequestService {
         if(moveRequest.getToAddressId() == null){
             errors.append("To Address Id is null.");
         }
-        if(errors.length() > 0){
+        if(!errors.isEmpty()){
             throw new IllegalArgumentException(errors.toString());
         }
         return true;

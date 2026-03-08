@@ -24,26 +24,25 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { vehicleService } from "@/services/vehicleService";
 import { driverService } from "@/services/driverService";
-import { VEHICLE_TYPES } from "@/data/mockData";
-import type { Vehicle, Driver, VehicleType } from "@/types";
+import type { Vehicle, DriverWithInfo, VehicleType } from "@/types";
 
 const Vehicles = () => {
   const { userId } = useAuth();
   const { toast } = useToast();
   const [myVehicles, setMyVehicles] = useState<Vehicle[]>([]);
-  const [driver, setDriver] = useState<Driver | null>(null);
-  const [vehicleTypes, setVehicleTypes] =
-    useState<VehicleType[]>(VEHICLE_TYPES);
+  const [driver, setDriver] = useState<DriverWithInfo | null>(null);
+  const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentVehicleId, setCurrentVehicleId] = useState<number | null>(null);
 
   // Form state
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
   const [color, setColor] = useState("");
-  const [licensePlate, setLicensePlate] = useState("");
   const [pricePerKm, setPricePerKm] = useState("");
   const [vehicleTypeId, setVehicleTypeId] = useState("");
   const [canCarryFurniture, setCanCarryFurniture] = useState(false);
@@ -57,8 +56,9 @@ const Vehicles = () => {
         ]);
 
         if (driverRes.status === "fulfilled") {
-          const driverData = driverRes.value;
+          const driverData = driverRes.value as any;
           setDriver(driverData);
+          // driverData is DriverInfo, use .id directly
           const vehicles = await vehicleService.getVehiclesByDriver(
             driverData.id,
           );
@@ -81,7 +81,20 @@ const Vehicles = () => {
     fetchData();
   }, [userId]);
 
-  const handleAddVehicle = async (e: React.FormEvent) => {
+  const handleEditVehicle = (v: Vehicle) => {
+    setIsEditing(true);
+    setCurrentVehicleId(v.id);
+    setMake(v.make);
+    setModel(v.model);
+    setYear(String(v.year));
+    setColor(v.color);
+    setPricePerKm(String(v.pricePerKm));
+    setVehicleTypeId(String(v.vehicleTypeId));
+    setCanCarryFurniture(v.canCarryFurniture);
+    setDialogOpen(true);
+  };
+
+  const handleSubmitVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: string[] = [];
     if (!driver)
@@ -101,7 +114,7 @@ const Vehicles = () => {
     }
     setIsSubmitting(true);
     try {
-      await vehicleService.createVehicle({
+      const vehicleData = {
         make,
         model,
         year: parseInt(year),
@@ -110,30 +123,31 @@ const Vehicles = () => {
         pricePerKm: parseFloat(pricePerKm),
         isActive: true,
         canCarryFurniture,
-        driverInfoId: driver.id,
-        licensePlate,
-      });
+        // driverId in VehicleForm maps to driverInfo.id
+        driverId: (driver as any).id,
+      };
+
+      if (isEditing && currentVehicleId) {
+        await vehicleService.updateVehicle(currentVehicleId, vehicleData);
+      } else {
+        await vehicleService.createVehicle(vehicleData);
+      }
+
       toast({
-        title: "Vehicle Added",
-        description: "Your vehicle has been registered.",
+        title: isEditing ? "Vehicle Updated" : "Vehicle Added",
+        description: isEditing ? "Your vehicle has been updated." : "Your vehicle has been registered.",
       });
       setDialogOpen(false);
-      // Reset form
-      setMake("");
-      setModel("");
-      setYear("");
-      setColor("");
-      setLicensePlate("");
-      setPricePerKm("");
-      setVehicleTypeId("");
-      setCanCarryFurniture(false);
+      resetForm();
       // Refresh vehicles
-      const vehicles = await vehicleService.getVehiclesByDriver(driver.id);
+      const vehicles = await vehicleService.getVehiclesByDriver(
+        (driver as any).id,
+      );
       setMyVehicles(Array.isArray(vehicles) ? vehicles : []);
     } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to add vehicle.",
+        description: `Failed to ${isEditing ? "update" : "add"} vehicle.`,
         variant: "destructive",
       });
     } finally {
@@ -175,7 +189,10 @@ const Vehicles = () => {
             Manage your registered vehicles
           </p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={(val) => {
+          setDialogOpen(val);
+          if (!val) resetForm();
+        }}>
           <DialogTrigger asChild>
             <Button className="gradient-brand text-primary-foreground border-0 gap-2">
               <Plus className="w-4 h-4" /> Add Vehicle
@@ -183,9 +200,9 @@ const Vehicles = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Vehicle</DialogTitle>
+              <DialogTitle>{isEditing ? "Edit Vehicle" : "Add New Vehicle"}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddVehicle} className="space-y-4">
+            <form onSubmit={handleSubmitVehicle} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>Make *</Label>
@@ -235,31 +252,22 @@ const Vehicles = () => {
                         key={vt.id ?? idx}
                         value={String(vt.id ?? idx + 1)}
                       >
-                        {vt.type} (Max: {vt.maxWeight} lbs, {vt.volume} cu ft)
+                        {vt.type} (Max: {vt.maxWeight} kg, {vt.maxCapacity} cu
+                        ft)
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>License Plate</Label>
-                  <Input
-                    placeholder="ABC-1234"
-                    value={licensePlate}
-                    onChange={(e) => setLicensePlate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Price/km ($) *</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    placeholder="2.50"
-                    value={pricePerKm}
-                    onChange={(e) => setPricePerKm(e.target.value)}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>Price/km ($) *</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  placeholder="2.50"
+                  value={pricePerKm}
+                  onChange={(e) => setPricePerKm(e.target.value)}
+                />
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -314,7 +322,8 @@ const Vehicles = () => {
                   {vehicle.year} {vehicle.make} {vehicle.model}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {vehicle.vehicleType || "—"} · {vehicle.color}
+                  {vehicle.vehicleType || `Type #${vehicle.vehicleTypeId}`} ·{" "}
+                  {vehicle.color}
                 </p>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t">
                   <span className="text-xs text-muted-foreground">
@@ -326,18 +335,28 @@ const Vehicles = () => {
                 </div>
                 {vehicle.canCarryFurniture && (
                   <p className="text-xs text-green-600 mt-2">
-                    🛋 Can carry furniture
+                     Couch Can carry furniture
                   </p>
                 )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full mt-3 text-xs"
-                  onClick={() => handleToggleActive(vehicle.id)}
-                >
-                  {vehicle.isActive ? "Deactivate" : "Activate"}
-                </Button>
-              </CardContent>
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() => handleEditVehicle(vehicle)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() => handleToggleActive(vehicle.id)}
+                  >
+                    {vehicle.isActive ? "Deactivate" : "Activate"}
+                  </Button>
+                </div>
+                </CardContent>
             </Card>
           ))}
         </div>

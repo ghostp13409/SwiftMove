@@ -1,7 +1,9 @@
 package com.swiftmove.clientservice.service;
 
 import com.swiftmove.clientservice.dto.AddLuggageEntryDto;
+import com.swiftmove.clientservice.dto.LuggageTypeDto;
 import com.swiftmove.clientservice.dto.UpdateLuggageEntryDto;
+import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.mapper.Mapper;
 import com.swiftmove.clientservice.model.LuggageEntry;
 import com.swiftmove.clientservice.model.LuggageType;
@@ -36,18 +38,23 @@ public class LuggageService {
 
     public LuggageEntry addLuggageEntry(Long moverequestId, AddLuggageEntryDto luggageEntryDto){
 
-        Optional<LuggageEntry> existingEntry = luggageEntryRepository.findById(luggageEntryDto.getId());
+        Optional<LuggageEntry> existingEntry = luggageEntryRepository.findById(luggageEntryDto.getId() != null ? luggageEntryDto.getId() : -1L);
         if(existingEntry.isPresent()){
-            LuggageEntry entry = existingEntry.get();
-            entry.setQuantity(entry.getQuantity() + luggageEntryDto.getQuantity());
-
-            return luggageEntryRepository.save(entry);
+            LuggageEntry luggageEntry = existingEntry.get();
+            luggageEntry.setQuantity(luggageEntryDto.getQuantity());
+            return luggageEntryRepository.save(luggageEntry);
         }
         else {
-            MoveRequest moveRequest = moveRequestService.findById(moverequestId);
             LuggageEntry newLuggageEntry = Mapper.toLuggageEntryEntity(luggageEntryDto);
-            newLuggageEntry.setMoveRequest(moveRequest);
-            newLuggageEntry.setLuggageType(luggageTypeRepository.findLuggageTypeByType(luggageEntryDto.getLuggageType()));
+            newLuggageEntry.setMoveRequestId(moverequestId);
+            
+            if (luggageEntryDto.getLuggageType() != null) {
+                LuggageType type = luggageTypeRepository.findLuggageTypeByType(luggageEntryDto.getLuggageType());
+                if (type != null) {
+                    newLuggageEntry.setLuggageTypeId(type.getId());
+                }
+            }
+            
             return luggageEntryRepository.save(newLuggageEntry);
         }
     }
@@ -69,10 +76,17 @@ public class LuggageService {
         List<LuggageEntry> luggageEntries = luggageEntryRepository.findByMoveRequestId(moveRequestId);
         luggageEntryRepository.deleteAll(luggageEntries);
     }
-    public List<LuggageType> getAllTypes(){
-        return luggageTypeRepository.findAll();
-    }
+    public List<LuggageTypeDto> getAllTypes(){
+List<LuggageType> luggageTypes =luggageTypeRepository.findAll();
+        return luggageTypes.stream()
+                .map(Mapper::toLuggageTypeDto)
+                .toList();  }
     private LuggageType getLuggageTypeByEnum(LuggageTypeEnum luggageTypeEnum){
         return luggageTypeRepository.findLuggageTypeByType(luggageTypeEnum);
+    }
+
+    public LuggageTypeDto getTypeById(Long id) {
+        Optional<LuggageType> luggageType = luggageTypeRepository.findById(id);
+        return luggageType.map(Mapper::toLuggageTypeDto).orElse(null);
     }
 }

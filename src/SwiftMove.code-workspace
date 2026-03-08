@@ -1,0 +1,22 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {},
+  "launch": {
+    "configurations": [
+      {
+        "type": "java",
+        "name": "Spring Boot-ApiGatewayApplication<api-gateway>",
+        "request": "launch",
+        "cwd": "${workspaceFolder}/backend/api-gateway",
+        "mainClass": "com.swiftmove.apigateway.ApiGatewayApplication",
+        "projectName": "api-gateway",
+        "args": "",
+        "envFile": "${workspaceFolder}/backend/api-gateway/.env",
+      },
+    ],
+  },
+}

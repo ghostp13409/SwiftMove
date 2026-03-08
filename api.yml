@@ -1,0 +1,1432 @@
+openapi: 3.0.3
+info:
+  title: Spring API
+  version: 1.0.0
+paths:
+  /addresses:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_0
+                  type: object
+                  properties:
+                    line1:
+                      type: string
+                    line2:
+                      type: string
+                    city:
+                      type: string
+                    stateOrProvince:
+                      type: string
+                    country:
+                      type: string
+                    postalOrZipCode:
+                      type: string
+    post:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_0
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int64
+                line1:
+                  type: string
+                line2:
+                  type: string
+                city:
+                  type: string
+                stateOrProvince:
+                  type: string
+                country:
+                  type: string
+                postalOrZipCode:
+                  type: string
+            example:
+              id: 0
+              line1: ''
+              line2: ''
+              city: ''
+              stateOrProvince: ''
+              country: ''
+              postalOrZipCode: ''
+  /addresses/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_0
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_0
+      requestBody:
+        content:
+          application/json:
+            schema: *ref_0
+            example:
+              id: 0
+              line1: ''
+              line2: ''
+              city: ''
+              stateOrProvince: ''
+              country: ''
+              postalOrZipCode: ''
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /clients/test:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /clients:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_1
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    username:
+                      type: string
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    email:
+                      type: string
+                    passwordHash:
+                      type: string
+                    dob:
+                      type: string
+                      format: date
+                    rating:
+                      type: number
+                      format: float
+                    role:
+                      type: string
+                    addressId:
+                      type: integer
+                      format: int64
+  /clients/me:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /clients/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_1
+  /clients/move-requests:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_2
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    moveDate:
+                      type: string
+                      format: date-time
+                    maxBudget:
+                      type: integer
+                      format: int64
+                    clientId:
+                      type: integer
+                      format: int64
+                    fromAddressId:
+                      type: integer
+                      format: int64
+                    toAddressId:
+                      type: integer
+                      format: int64
+                    status:
+                      type: string
+    post:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                moveDate:
+                  type: string
+                  format: date-time
+                maxBudget:
+                  type: integer
+                  format: int64
+                clientId:
+                  type: integer
+                  format: int64
+                fromAddressId:
+                  type: integer
+                  format: int64
+                toAddressId:
+                  type: integer
+                  format: int64
+                status:
+                  type: string
+            example:
+              moveDate: '2026-03-08T10:30:00Z'
+              maxBudget: 0
+              clientId: 0
+              fromAddressId: 0
+              toAddressId: 0
+              status: ''
+  /clients/move-requests/all:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: *ref_2
+  /clients/move-requests/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_2
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_2
+      requestBody:
+        content:
+          application/json:
+            schema: *ref_2
+            example:
+              id: 0
+              moveDate: '2026-03-08T10:30:00Z'
+              maxBudget: 0
+              clientId: 0
+              fromAddressId: 0
+              toAddressId: 0
+              status: ''
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: &ref_4
+                type: object
+                properties: {}
+                required: []
+  /clients/move-requests/active:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: *ref_2
+  /clients/move-requests/luggage:
+    get:
+      parameters:
+        - name: moveRequestId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_3
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    quantity:
+                      type: integer
+                      format: int32
+                    moveRequestId:
+                      type: integer
+                      format: int64
+                    luggageTypeId:
+                      type: integer
+                      format: int64
+                    createdAt:
+                      type: string
+                      format: date-time
+                    updatedAt:
+                      type: string
+                      format: date-time
+    post:
+      parameters:
+        - name: moveRequestId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int64
+                quantity:
+                  type: integer
+                  format: int32
+                moveRequestId:
+                  type: integer
+                  format: int64
+                luggageType:
+                  type: object
+                  properties: &ref_5 {}
+            example:
+              id: 0
+              quantity: 0
+              moveRequestId: 0
+              luggageType: {}
+  /clients/move-requests/luggage/{id}:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  format: int32
+            example:
+              quantity: 0
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_4
+  /clients/move-requests/luggage/empty:
+    delete:
+      parameters:
+        - name: moveRequestId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_4
+  /clients/move-requests/luggage/types:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_6
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    type:
+                      type: object
+                      properties: *ref_5
+                    name:
+                      type: string
+                    volume:
+                      type: number
+                      format: double
+                    weight:
+                      type: number
+                      format: double
+  /clients/move-requests/luggage/types/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_6
+  /drivers/test:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: string
+  /drivers:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: *ref_1
+  /drivers/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_1
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_4
+  /drivers/me:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_1
+  /drivers/info:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_7
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    userId:
+                      type: integer
+                      format: int64
+                    drivingLicense:
+                      type: string
+                    drivingExperience:
+                      type: integer
+                      format: int32
+                    range:
+                      type: number
+                      format: double
+    post:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_7
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  format: int64
+                drivingLicense:
+                  type: string
+                drivingExperience:
+                  type: integer
+                  format: int32
+                range:
+                  type: number
+                  format: double
+            example:
+              userId: 0
+              drivingLicense: ''
+              drivingExperience: 0
+              range: 0
+  /drivers/info/me:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_7
+  /drivers/info/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_7
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_7
+      requestBody:
+        content:
+          application/json:
+            schema: *ref_7
+            example:
+              id: 0
+              userId: 0
+              drivingLicense: ''
+              drivingExperience: 0
+              range: 0
+  /drivers/info/by-driver:
+    get:
+      parameters:
+        - name: driverId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_7
+  /drivers/move-offers:
+    get:
+      parameters:
+        - name: moveRequestId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: driverId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_8
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    price:
+                      type: integer
+                      format: int64
+                    offeredDate:
+                      type: string
+                      format: date-time
+                    moveRequestId:
+                      type: integer
+                      format: int64
+                    driverId:
+                      type: integer
+                      format: int64
+                    vehicleId:
+                      type: integer
+                      format: int64
+                    status:
+                      type: string
+    post:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_8
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                price:
+                  type: integer
+                  format: int64
+                offeredDate:
+                  type: string
+                  format: date-time
+                moveRequestId:
+                  type: integer
+                  format: int64
+                driverId:
+                  type: integer
+                  format: int64
+                vehicleId:
+                  type: integer
+                  format: int64
+                status:
+                  type: string
+            example:
+              price: 0
+              offeredDate: '2026-03-08T10:30:00Z'
+              moveRequestId: 0
+              driverId: 0
+              vehicleId: 0
+              status: ''
+  /drivers/move-offers/me:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: *ref_8
+  /drivers/move-offers/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_8
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_8
+      requestBody:
+        content:
+          application/json:
+            schema: *ref_8
+            example:
+              id: 0
+              price: 0
+              offeredDate: '2026-03-08T10:30:00Z'
+              moveRequestId: 0
+              driverId: 0
+              vehicleId: 0
+              status: ''
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_4
+  /drivers/vehicles:
+    get:
+      parameters:
+        - name: driverId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_9
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    model:
+                      type: string
+                    make:
+                      type: string
+                    year:
+                      type: integer
+                      format: int32
+                    color:
+                      type: string
+                    pricePerKm:
+                      type: integer
+                      format: int64
+                    isActive:
+                      type: boolean
+                    canCarryFurniture:
+                      type: boolean
+                    driverId:
+                      type: integer
+                      format: int64
+                    vehicleTypeId:
+                      type: integer
+                      format: int64
+    post:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_9
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                make:
+                  type: string
+                year:
+                  type: integer
+                  format: int32
+                color:
+                  type: string
+                pricePerKm:
+                  type: integer
+                  format: int64
+                isActive:
+                  type: boolean
+                canCarryFurniture:
+                  type: boolean
+                driverId:
+                  type: integer
+                  format: int64
+                vehicleTypeId:
+                  type: integer
+                  format: int64
+            example:
+              model: ''
+              make: ''
+              year: 0
+              color: ''
+              pricePerKm: 0
+              isActive: false
+              canCarryFurniture: false
+              driverId: 0
+              vehicleTypeId: 0
+  /drivers/vehicles/me:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: *ref_9
+  /drivers/vehicles/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_9
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_9
+      requestBody:
+        content:
+          application/json:
+            schema: *ref_9
+            example:
+              id: 0
+              model: ''
+              make: ''
+              year: 0
+              color: ''
+              pricePerKm: 0
+              isActive: false
+              canCarryFurniture: false
+              driverId: 0
+              vehicleTypeId: 0
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_4
+  /drivers/vehicle-types:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_10
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    type:
+                      type: object
+                      properties: {}
+                    maxWeight:
+                      type: number
+                      format: double
+                    capacity:
+                      type: number
+                      format: double
+  /drivers/vehicle-types/by-vehicle:
+    get:
+      parameters:
+        - name: vehicleId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_10
+  /users:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_11
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    username:
+                      type: string
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    email:
+                      type: string
+                    passwordHash:
+                      type: string
+                    dob:
+                      type: string
+                      format: date
+                    rating:
+                      type: number
+                      format: float
+                    role:
+                      type: string
+                    addressId:
+                      type: integer
+                      format: int64
+    post:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_11
+      requestBody:
+        content:
+          application/json:
+            schema: &ref_12
+              type: object
+              properties:
+                userName:
+                  type: string
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                role:
+                  type: string
+                dob:
+                  type: string
+                  format: date
+                addressId:
+                  type: integer
+                  format: int64
+            example: &ref_13
+              userName: ''
+              password: ''
+              firstName: ''
+              lastName: ''
+              email: ''
+              role: ''
+              dob: '2026-03-08'
+              addressId: 0
+  /users/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_11
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_4
+      requestBody:
+        content:
+          application/json:
+            schema: *ref_12
+            example: *ref_13
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_4
+  /users/byEmail:
+    get:
+      parameters:
+        - name: email
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_11
+  /trips:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: &ref_14
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    moveRequestId:
+                      type: integer
+                      format: int64
+                    moveOfferId:
+                      type: integer
+                      format: int64
+                    status:
+                      type: string
+    post:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_14
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                moveRequestId:
+                  type: integer
+                  format: int64
+                moveOfferId:
+                  type: integer
+                  format: int64
+                status:
+                  type: string
+            example:
+              moveRequestId: 0
+              moveOfferId: 0
+              status: ''
+  /trips/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_14
+  /auth/login:
+    post:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: &ref_15
+                type: object
+                properties:
+                  token:
+                    type: string
+                  role:
+                    type: string
+                  userId:
+                    type: integer
+                    format: int64
+                  name:
+                    type: string
+                  email:
+                    type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+            example:
+              email: ''
+              password: ''
+  /auth/register:
+    post:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_15
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                dob:
+                  type: string
+                  format: date
+                role:
+                  type: string
+            example:
+              username: ''
+              email: ''
+              password: ''
+              firstName: ''
+              lastName: ''
+              dob: '2026-03-08'
+              role: ''
+  /auth/logout:
+    post:
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_4
+  /auth/check:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /auth/me:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                  username:
+                    type: string
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  email:
+                    type: string
+                  passwordHash:
+                    type: string
+                  dob:
+                    type: string
+                    format: date
+                  rating:
+                    type: number
+                    format: float
+                  role:
+                    type: string
+                  addressId:
+                    type: integer
+                    format: int64

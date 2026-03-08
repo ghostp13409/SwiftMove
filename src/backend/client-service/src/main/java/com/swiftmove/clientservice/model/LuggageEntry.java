@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -21,17 +25,17 @@ public class LuggageEntry {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @ManyToOne
-    @JoinColumn(name = "move_request_id", nullable = false)
-    private MoveRequest moveRequest;
+    @Column(name = "move_request_id", nullable = false)
+    private Long moveRequestId;
 
-    @ManyToOne
-    @JoinColumn(name = "luggage_type_id", nullable = false)
-    private LuggageType luggageType;
+    @Column(name = "luggage_type_id", nullable = false)
+    private Long luggageTypeId;
 
-    @Column(name = "created_at")
-    private java.sql.Timestamp createdAt;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
-    private java.sql.Timestamp updatedAt;
+    private Instant updatedAt;
 }

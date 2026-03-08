@@ -3,10 +3,11 @@ import StatusBadge from "@/components/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tripService } from "@/services/tripService";
 import { driverService } from "@/services/driverService";
-import { MoveTrip, Driver } from "@/types/index";
+import { populationFactory } from "@/services/populationFactory";
+import type { MoveTripDetailed, DriverInfo } from "@/types";
 
 const DriverTrips = () => {
-  const [myTrips, setMyTrips] = useState<MoveTrip[]>([]);
+  const [myTrips, setMyTrips] = useState<MoveTripDetailed[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,9 +16,12 @@ const DriverTrips = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const driver: Driver = await driverService.getCurrentDriver();
+        const driver: DriverInfo = await driverService.getCurrentDriver();
         const trips = await tripService.getTripsByDriver(driver.id);
-        setMyTrips(trips);
+        const populatedTrips = await Promise.all(
+          trips.map((trip) => populationFactory.populateMoveTripDetailed(trip))
+        );
+        setMyTrips(populatedTrips);
       } catch (err: any) {
         setError(
           err?.response?.data?.message ??
@@ -70,19 +74,21 @@ const DriverTrips = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground text-xs">From</p>
-                    <p>{activeTrip.fromAddress?.city ?? "—"}</p>
+                    <p>{activeTrip.moveRequestPopulated.fromAddress.city}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">To</p>
-                    <p>{activeTrip.toAddress?.city ?? "—"}</p>
+                    <p>{activeTrip.moveRequestPopulated.toAddress.city}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Client</p>
-                    <p>{activeTrip.clientName ?? "—"}</p>
+                    <p>{activeTrip.moveRequestPopulated.client.firstName} {activeTrip.moveRequestPopulated.client.lastName}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Price</p>
-                    <p className="font-semibold">${activeTrip.price}</p>
+                    <p className="font-semibold">
+                      ${activeTrip.moveOfferPopulated.price}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -103,18 +109,18 @@ const DriverTrips = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">
-                          {trip.fromAddress?.city ?? "?"} →{" "}
-                          {trip.toAddress?.city ?? "?"}
+                          {trip.moveRequestPopulated.fromAddress.city} →{" "}
+                          {trip.moveRequestPopulated.toAddress.city}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {trip.clientName
-                            ? `Client: ${trip.clientName} · `
-                            : ""}
-                          {trip.startTime ? trip.startTime.split("T")[0] : "—"}
+                          Client: {trip.moveRequestPopulated.client.firstName} {trip.moveRequestPopulated.client.lastName} · 
+                          Date: {trip.moveRequestPopulated.moveDate.toLocaleDateString()}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="font-semibold">${trip.price}</span>
+                        <span className="font-semibold">
+                          ${trip.moveOfferPopulated.price}
+                        </span>
                         <StatusBadge status={trip.status} />
                       </div>
                     </div>

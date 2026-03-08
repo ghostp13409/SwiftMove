@@ -1,11 +1,21 @@
-package com.swiftmove.userservice.model;
+package com.swiftMove.userservice.model;
 
-import jakarta.persistence.*;
+import java.time.Instant;
+import java.time.LocalDate;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,9 +56,11 @@ public class User {
     @JoinColumn(name = "address_id", nullable = true)
     private Long addressId;
 
-    @Column(name = "created_at")
-    private LocalDate createdAt;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDate updatedAt;
+    private Instant updatedAt;
 }

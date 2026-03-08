@@ -1,4 +1,4 @@
-package com.swiftmove.userservice.dto;
+package com.swiftMove.userservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

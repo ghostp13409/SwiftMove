@@ -1,7 +1,8 @@
 package com.swiftMove.locationservice.service;
 
 
-import com.swiftMove.locationservice.mapper.AddressMapper;
+import com.swiftMove.locationservice.dto.CreateAddressDto;
+import com.swiftMove.locationservice.mapper.Mapper;
 import com.swiftMove.locationservice.dto.AddressDTO;
 import com.swiftMove.locationservice.model.Address;
 import com.swiftMove.locationservice.repository.AddressRepository;
@@ -20,15 +21,12 @@ public class AddressService {
     private final AddressRepository addressRepository;
 
     // Adding a new Address
-    public AddressDTO addNewAddress(AddressDTO addressDTO) {
+    public AddressDTO addNewAddress(CreateAddressDto createAddressDto) {
 
-        Address address = AddressMapper.toAddress(addressDTO);
-
-        address.setCreatedAt(LocalDate.now());
-        address.setUpdatedAt(LocalDate.now());
+        Address address = Mapper.createAddressDto(createAddressDto);
 
         Address savedAddress= addressRepository.save(address);
-        return AddressMapper.toDTO(savedAddress);
+        return Mapper.toDTO(savedAddress);
 
     }
     //Update the existing address
@@ -43,10 +41,9 @@ public class AddressService {
         existingAddress.setStateOrProvince(addressDTO.getStateOrProvince());
         existingAddress.setPostalOrZipCode(addressDTO.getPostalOrZipCode());
         existingAddress.setCountry(addressDTO.getCountry());
-        existingAddress.setUpdatedAt(LocalDate.now());
 
         Address updatedAddress = addressRepository.save(existingAddress);
-        return AddressMapper.toDTO(updatedAddress);
+        return Mapper.toDTO(updatedAddress);
 
     }
     // getting all addresses
@@ -54,7 +51,7 @@ public class AddressService {
         return addressRepository
                 .findAll()
                 .stream()
-                .map(AddressMapper::toDTO)
+                .map(Mapper::toDTO)
                 .toList();
 
     }
@@ -64,7 +61,7 @@ public class AddressService {
         Address address = addressRepository.findById(id).orElse(null);
         if (address == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Address not found");
-        return AddressMapper.toDTO(address);
+        return Mapper.toDTO(address);
     }
     //Delete By ID
     public void deleteAddressById(Long id) {

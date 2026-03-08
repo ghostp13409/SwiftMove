@@ -14,12 +14,17 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { normalizeRole } from "@/utils";
+import z from "zod";
 
 const Register = () => {
   const [role, setRole] = useState<"Client" | "Driver">("Client");
+  const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  // Dob in YYYY-MM-DD format
+  const [dob, setDob] = useState<Date | null>(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +34,7 @@ const Register = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firstName || !lastName || !email || !password) {
+    if (!username || !firstName || !lastName || !email || !password || !dob) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -39,7 +44,15 @@ const Register = () => {
     }
     setIsLoading(true);
     try {
-      await register(email, password, firstName, lastName, role);
+      await register(
+        email,
+        password,
+        firstName,
+        lastName,
+        dob, // pass Date directly
+        role === "Client" ? "CLIENT" : "DRIVER",
+        username,
+      );
       if (role === "Driver") navigate("/driver");
       else navigate("/client");
     } catch (err: any) {
@@ -109,6 +122,15 @@ const Register = () => {
                 </div>
               </div>
               <div className="space-y-2">
+                <Label>Username</Label>
+                <Input
+                  placeholder="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
                 <Label>Email</Label>
                 <Input
                   type="email"
@@ -117,6 +139,17 @@ const Register = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
                   autoComplete="email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Date of Birth</Label>
+                <Input
+                  type="date"
+                  value={dob ? dob.toISOString().split("T")[0] : ""}
+                  onChange={(e) =>
+                    setDob(e.target.value ? new Date(e.target.value) : null)
+                  }
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">

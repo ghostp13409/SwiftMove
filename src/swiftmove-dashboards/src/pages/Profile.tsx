@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { userService } from "@/services/userService";
-import { UserUpdateData } from "@/types/index";
+import type { UserForm } from "@/types";
 
 const Profile = () => {
   const { userId, name, email } = useAuth();
@@ -14,7 +14,6 @@ const Profile = () => {
   const [lastName, setLastName] = useState("");
   const [emailField, setEmailField] = useState(email ?? "");
   const [userName, setUserName] = useState("");
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -44,11 +43,11 @@ const Profile = () => {
       setIsSaving(true);
       setSaveError(null);
       setSaveSuccess(false);
-      const data: UserUpdateData = {
+      const data: Partial<UserForm> = {
         firstName,
         lastName,
         email: emailField,
-        userName,
+        username: userName,
       };
       await userService.updateUserProfile(userId, data);
       setSaveSuccess(true);
@@ -80,7 +79,7 @@ const Profile = () => {
 
     try {
       setIsUpdatingPassword(true);
-      const data: UserUpdateData = { password: newPassword };
+      const data: Partial<UserForm> = { password: newPassword };
       await userService.updateUserProfile(userId, data);
       setPasswordSuccess(true);
       setCurrentPassword("");

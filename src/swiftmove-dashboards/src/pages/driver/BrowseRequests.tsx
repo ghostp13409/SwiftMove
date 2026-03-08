@@ -24,16 +24,18 @@ import { moveRequestService } from "@/services/moveRequestService";
 import { moveOfferService } from "@/services/moveOfferService";
 import { driverService } from "@/services/driverService";
 import { vehicleService } from "@/services/vehicleService";
+import { populationFactory } from "@/services/populationFactory";
 import { useToast } from "@/hooks/use-toast";
-import type { MoveRequest, Vehicle, Driver } from "@/types";
+import type { MoveRequestPopulated, Vehicle, DriverInfo } from "@/types";
+import { getVehicleString } from "@/utils";
 
 const BrowseRequests = () => {
   const { userId } = useAuth();
   const { toast } = useToast();
-  const [selected, setSelected] = useState<MoveRequest | null>(null);
-  const [pendingRequests, setPendingRequests] = useState<MoveRequest[]>([]);
+  const [selected, setSelected] = useState<MoveRequestPopulated | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<MoveRequestPopulated[]>([]);
   const [driverVehicles, setDriverVehicles] = useState<Vehicle[]>([]);
-  const [driver, setDriver] = useState<Driver | null>(null);
+  const [driverInfo, setDriverInfo] = useState<DriverInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [offerDialogOpen, setOfferDialogOpen] = useState(false);
@@ -45,27 +47,23 @@ const BrowseRequests = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!userId) return;
       try {
-        const [reqRes, driverRes] = await Promise.allSettled([
+        const [requests, driver] = await Promise.all([
           moveRequestService.getAllMoveRequests(),
-          driverService.getCurrentDriver(),
+          driverService.getDriverByUserId(userId),
         ]);
 
-        if (reqRes.status === "fulfilled") {
-          setPendingRequests(
-            (reqRes.value as MoveRequest[]).filter(
-              (r) => r.status === "PENDING",
-            ),
-          );
-        }
+        const pending = requests.filter((r) => r.status === "CREATED");
+        const populatedPending = await Promise.all(
+          pending.map((req) => populationFactory.populateMoveRequest(req))
+        );
+        setPendingRequests(populatedPending);
 
-        if (driverRes.status === "fulfilled") {
-          const driverData = driverRes.value;
-          setDriver(driverData);
-          const vehicles = await vehicleService.getVehiclesByDriver(
-            driverData.id,
-          );
-          setDriverVehicles((vehicles as Vehicle[]).filter((v) => v.isActive));
+        if (driver) {
+          setDriverInfo(driver);
+          const vehicles = await vehicleService.getVehiclesByDriver(driver.id);
+          setDriverVehicles(vehicles.filter((v) => v.isActive));
         }
       } catch (err) {
         console.error("Failed to load browse requests data:", err);
@@ -79,7 +77,7 @@ const BrowseRequests = () => {
   const handleSubmitOffer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (
-      !driver ||
+      !driverInfo ||
       !selected ||
       !selectedVehicleId ||
       !offerPrice ||
@@ -95,12 +93,12 @@ const BrowseRequests = () => {
     setIsSubmitting(true);
     try {
       await moveOfferService.createMoveOffer({
-        moveRequestId: selected.id as number,
-        driverId: driver.id,
+        moveRequestId: selected.id,
+        driverId: driverInfo.userId, // use userId instead of driverInfo.id
         vehicleId: parseInt(selectedVehicleId),
         price: parseFloat(offerPrice),
-        offeredDate: offeredDateTime.replace("T", " ") + ":00",
-        statusId: 1,
+        offerDate: new Date(offeredDateTime),
+        status: "OFFER_SENT",
       });
       toast({
         title: "Offer Submitted",
@@ -120,8 +118,6 @@ const BrowseRequests = () => {
       setIsSubmitting(false);
     }
   };
-
-  const getCity = (addr: any) => addr?.city || "—";
 
   if (isLoading) {
     return (
@@ -144,7 +140,7 @@ const BrowseRequests = () => {
         <div className="lg:col-span-1 space-y-3">
           {pendingRequests.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No pending move requests available.
+              No available move requests.
             </p>
           ) : (
             pendingRequests.map((req) => (
@@ -156,12 +152,12 @@ const BrowseRequests = () => {
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <p className="font-medium text-sm">
-                      {getCity(req.fromAddress)} → {getCity(req.toAddress)}
+                      {req.fromAddress.city} → {req.toAddress.city}
                     </p>
                     <StatusBadge status={req.status} />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {req.moveDate} · Budget: ${req.maxBudget}
+                    {req.moveDate.toLocaleDateString()} · Budget: ${req.maxBudget}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {(req.luggageEntries ?? []).reduce(
@@ -169,7 +165,6 @@ const BrowseRequests = () => {
                       0,
                     )}{" "}
                     items
-                    {req.hasFurniture ? " · 🛋 Furniture" : ""}
                   </p>
                 </CardContent>
               </Card>
@@ -183,8 +178,7 @@ const BrowseRequests = () => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-lg">
-                    {getCity(selected.fromAddress)} →{" "}
-                    {getCity(selected.toAddress)}
+                    {selected.fromAddress.city} → {selected.toAddress.city}
                   </CardTitle>
                   <StatusBadge status={selected.status} />
                 </div>
@@ -194,31 +188,29 @@ const BrowseRequests = () => {
                   <div>
                     <p className="text-muted-foreground text-xs">From</p>
                     <p>
-                      {selected.fromAddress?.line1 || "—"},{" "}
-                      {getCity(selected.fromAddress)}
+                      {selected.fromAddress.line1},{" "}
+                      {selected.fromAddress.city}
                     </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">To</p>
                     <p>
-                      {selected.toAddress?.line1 || "—"},{" "}
-                      {getCity(selected.toAddress)}
+                      {selected.toAddress.line1},{" "}
+                      {selected.toAddress.city}
                     </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Move Date</p>
-                    <p>{selected.moveDate}</p>
+                    <p>{selected.moveDate.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Max Budget</p>
                     <p className="font-semibold">${selected.maxBudget}</p>
                   </div>
-                  {selected.clientName && (
-                    <div>
-                      <p className="text-muted-foreground text-xs">Client</p>
-                      <p>{selected.clientName}</p>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-muted-foreground text-xs">Client</p>
+                    <p>{selected.client.firstName} {selected.client.lastName}</p>
+                  </div>
                 </div>
 
                 {(selected.luggageEntries ?? []).length > 0 && (
@@ -233,22 +225,10 @@ const BrowseRequests = () => {
                           className="text-xs px-2 py-1 rounded-md bg-secondary"
                         >
                           {l.quantity}x{" "}
-                          {l.luggageType || `Type #${l.luggageTypeId}`}
+                          {l.luggageType?.name || `Type #${l.luggageTypeId}`}
                         </span>
                       ))}
-                      {selected.hasFurniture && (
-                        <span className="text-xs px-2 py-1 rounded-md bg-warning/10 text-warning">
-                          🛋 Furniture
-                        </span>
-                      )}
                     </div>
-                  </div>
-                )}
-
-                {selected.notes && (
-                  <div>
-                    <p className="text-muted-foreground text-xs">Notes</p>
-                    <p className="text-sm">{selected.notes}</p>
                   </div>
                 )}
 
@@ -285,8 +265,7 @@ const BrowseRequests = () => {
                           <SelectContent>
                             {driverVehicles.map((v) => (
                               <SelectItem key={v.id} value={String(v.id)}>
-                                {v.year} {v.make} {v.model} (
-                                {v.vehicleType || "—"})
+                                {getVehicleString(v)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -302,12 +281,11 @@ const BrowseRequests = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Offered Date & Time</Label>
+                        <Label>Offer Date & Time</Label>
                         <Input
                           type="datetime-local"
                           value={offeredDateTime}
                           onChange={(e) => setOfferedDateTime(e.target.value)}
-                          defaultValue={selected.moveDate + "T09:00"}
                         />
                       </div>
                       <Button

@@ -1,5 +1,6 @@
 package com.swiftmove.authservice.client;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,10 +19,9 @@ public class UserDTO {
     private String lastName;
     private String email;
     private String passwordHash;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dob;
     private Float rating;
     private String role;
     private Long addressId;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
 }

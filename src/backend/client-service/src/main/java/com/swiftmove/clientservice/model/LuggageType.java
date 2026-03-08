@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -32,8 +34,8 @@ public class LuggageType {
     private Double weight;
 
     @Column(name = "created_at")
-    private java.sql.Timestamp createdAt;
+    private Instant createdAt;
 
     @Column(name = "updated_at")
-    private java.sql.Timestamp updatedAt;
+    private Instant updatedAt;
 }

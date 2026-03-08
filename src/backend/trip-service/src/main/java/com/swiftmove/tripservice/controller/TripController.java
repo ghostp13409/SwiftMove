@@ -1,58 +1,76 @@
 package com.swiftmove.tripservice.controller;
 
-import java.util.List;
-
+import com.swiftmove.tripservice.dto.CreateMoveTripDto;
+import com.swiftmove.tripservice.dto.MoveTripDto;
+import com.swiftmove.tripservice.service.MoveTripService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.swiftmove.tripservice.dto.TripDTO;
-import com.swiftmove.tripservice.service.TripService;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/trips")
-public class TripController {
-    private final TripService tripService;
+@RequiredArgsConstructor
+class TripController {
+
+    private final MoveTripService moveTripService;
+
+    // For Admin: GET /trips - get all trips
+    @GetMapping
+    public ResponseEntity<List<MoveTripDto>> getAll()
+    {
+        List<MoveTripDto> trips = moveTripService.getAll();
+        return ResponseEntity.ok(trips);
+    }
+    //Get By ID
+    @GetMapping("/{id}")
+    public ResponseEntity<MoveTripDto> getById(@PathVariable Long id)
+    {
+        MoveTripDto trip = moveTripService.getById(id);
+        if (trip == null)
+            return ResponseEntity.notFound().build();
+      return  ResponseEntity.ok(moveTripService.getById(id));
+    }
+    //Create a new Move Trip
+    @PostMapping
+    public ResponseEntity<MoveTripDto> create(@RequestBody CreateMoveTripDto newMoveTrip)
+    {
+        try {
+            MoveTripDto createdTrip = moveTripService.add(newMoveTrip);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdTrip);
+        }
+        catch (Exception e)
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<MoveTripDto>> getByClientId(@PathVariable Long clientId) {
+        // For now, return all trips as we don't store clientId in move_trips table
+        // and would need to call client-service for each trip to filter.
+        // In a real app, we'd store clientId in the trip table or use a join.
+        return ResponseEntity.ok(moveTripService.getAll());
+    }
+
+    @GetMapping("/driver/{driverId}")
+    public ResponseEntity<List<MoveTripDto>> getByDriverId(@PathVariable Long driverId) {
+        return ResponseEntity.ok(moveTripService.getAll());
+    }
 
     @GetMapping("/allTrips")
-    public ResponseEntity<List<TripDTO>> getAllTrips() {
-        return ResponseEntity.ok(tripService.getAllTrips());
+    public ResponseEntity<List<MoveTripDto>> getAllTrips() {
+        return ResponseEntity.ok(moveTripService.getAll());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TripDTO> getTripById(@PathVariable Long id) {
-        TripDTO trip = tripService.getTripById(id);
-        if (trip == null) {
-            return ResponseEntity.notFound().build();
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<MoveTripDto> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        try {
+            return ResponseEntity.ok(moveTripService.updateStatus(id, status));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-        return ResponseEntity.ok(trip);
-    }
-
-    @GetMapping("/user")
-    public ResponseEntity<List<TripDTO>> getTripsByUserId(@RequestParam Long userId) {
-
-        // Return Not Implemented
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-    }
-
-    // GET /trips/client/{clientId} - Get trips for a client
-    @GetMapping("/client/{clientId}")
-    public ResponseEntity<List<TripDTO>> getTripsForClient(@PathVariable Long clientId) {
-        List<TripDTO> trips = tripService.getTripsByClient(clientId);
-        return ResponseEntity.ok(trips);
-    }
-
-    // GET /trips/driver/{driverId} - Get trips for a driver
-    @GetMapping("/driver/{driverId}")
-    public ResponseEntity<List<TripDTO>> getTripsForDriver(@PathVariable Long driverId) {
-        List<TripDTO> trips = tripService.getTripsByDriver(driverId);
-        return ResponseEntity.ok(trips);
     }
 }

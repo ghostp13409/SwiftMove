@@ -8,20 +8,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="api-gateway" />
-        <module name="config-service" />
         <module name="eureka-server" />
+        <module name="config-service" />
       </profile>
-      <profile name="Annotation profile for client-service" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
-        </processorPath>
-        <module name="client-service" />
-      </profile>
-      <profile name="Annotation profile for driver-service" enabled="true">
+      <profile name="Annotation profile for trip-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -31,13 +21,11 @@
         <module name="trip-service" />
         <module name="auth-service" />
         <module name="user-service" />
-        <module name="driver-service" />
         <module name="location-service" />
+        <module name="driver-service" />
+        <module name="client-service" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="test-service" target="21" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
@@ -48,7 +36,6 @@
       <module name="driver-service" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
       <module name="location-service" options="-parameters" />
-      <module name="test-service" options="-parameters" />
       <module name="trip-service" options="-parameters" />
       <module name="user-service" options="-parameters" />
     </option>
