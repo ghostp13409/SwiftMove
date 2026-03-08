@@ -165,6 +165,16 @@ public class ClientController {
         }
     }
 
+    @PatchMapping("/move-requests/{id}/cancel")
+    public ResponseEntity<Void> cancelMoveRequest(@PathVariable Long id) {
+        try {
+            moveRequestService.cancel(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
 //    Luggage
 
 //    Get All or by MoveRequestId

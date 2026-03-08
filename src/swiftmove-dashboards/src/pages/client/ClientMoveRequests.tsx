@@ -47,6 +47,8 @@ const ClientMoveRequests = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentRequestId, setCurrentRequestId] = useState<number | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
   const [step, setStep] = useState(1);
 
@@ -172,6 +174,65 @@ const ClientMoveRequests = () => {
     }));
   };
 
+  const handleEditRequest = (req: MoveRequestPopulated) => {
+    setIsEditing(true);
+    setCurrentRequestId(req.id);
+    
+    // Populate form
+    setFromLine1(req.fromAddress.line1);
+    setFromLine2(req.fromAddress.line2 || "");
+    setFromCity(req.fromAddress.city);
+    setFromState(req.fromAddress.stateOrProvince);
+    setFromCountry(req.fromAddress.country);
+    setFromPostal(req.fromAddress.postalOrZipCode);
+
+    setToLine1(req.toAddress.line1);
+    setToLine2(req.toAddress.line2 || "");
+    setToCity(req.toAddress.city);
+    setToState(req.toAddress.stateOrProvince);
+    setToCountry(req.toAddress.country);
+    setToPostal(req.toAddress.postalOrZipCode);
+
+    // Format date for datetime-local input
+    if (req.moveDate) {
+      const d = new Date(req.moveDate);
+      const formattedDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      setMoveDate(formattedDate);
+    }
+    
+    setMaxBudget(String(req.maxBudget));
+    
+    // Populate luggage
+    const newQtys: Record<string, number> = {};
+    luggageTypes.forEach(t => {
+      const key = String(t.id || t.type || t.luggageTypeEnum);
+      const entry = req.luggageEntries?.find(le => le.luggageTypeId === t.id);
+      newQtys[key] = entry ? entry.quantity : 0;
+    });
+    setLuggageQuantities(newQtys);
+    
+    setDialogOpen(true);
+  };
+
+  const handleCancelRequest = async (id: number) => {
+    if (!confirm("Are you sure you want to cancel this move request?")) return;
+    try {
+      await moveRequestService.cancelMoveRequest(id);
+      toast({
+        title: "Request Cancelled",
+        description: "Your move request has been cancelled.",
+      });
+      fetchRequests();
+      setSelected(null);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to cancel move request.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const nextStep = () => {
     if (!fromLine1 || !fromCity || !fromState || !fromPostal || 
         !toLine1 || !toCity || !toState || !toPostal || 
@@ -189,57 +250,92 @@ const ClientMoveRequests = () => {
   const handleSubmitRequest = async () => {
     setIsSubmitting(true);
     try {
-      const [fromAddr, toAddr] = await Promise.all([
-        addressService.createAddress({
-          line1: fromLine1,
-          line2: fromLine2,
-          city: fromCity,
-          stateOrProvince: fromState,
-          country: fromCountry,
-          postalOrZipCode: fromPostal,
-        }),
-        addressService.createAddress({
-          line1: toLine1,
-          line2: toLine2,
-          city: toCity,
-          stateOrProvince: toState,
-          country: toCountry,
-          postalOrZipCode: toPostal,
-        }),
-      ]);
+      let reqId = currentRequestId;
+      
+      const addrDataFrom = {
+        line1: fromLine1,
+        line2: fromLine2,
+        city: fromCity,
+        stateOrProvince: fromState,
+        country: fromCountry,
+        postalOrZipCode: fromPostal,
+      };
 
-      const newRequest = await moveRequestService.createMoveRequest({
-        clientId: userId!,
-        fromAddressId: fromAddr.id,
-        toAddressId: toAddr.id,
-        moveDate: new Date(moveDate),
-        maxBudget: parseFloat(maxBudget),
-        status: "CREATED",
-      });
+      const addrDataTo = {
+        line1: toLine1,
+        line2: toLine2,
+        city: toCity,
+        stateOrProvince: toState,
+        country: toCountry,
+        postalOrZipCode: toPostal,
+      };
 
+      if (isEditing && selected) {
+        // Update existing addresses
+        await Promise.all([
+          addressService.updateAddress(selected.fromAddressId, addrDataFrom),
+          addressService.updateAddress(selected.toAddressId, addrDataTo),
+        ]);
+        
+        // Update move request
+        await moveRequestService.updateMoveRequest(currentRequestId!, {
+          clientId: userId!,
+          fromAddressId: selected.fromAddressId,
+          toAddressId: selected.toAddressId,
+          moveDate: new Date(moveDate),
+          maxBudget: parseFloat(maxBudget),
+          status: selected.status as any,
+        });
+      } else {
+        // Create new addresses
+        const [fromAddr, toAddr] = await Promise.all([
+          addressService.createAddress(addrDataFrom),
+          addressService.createAddress(addrDataTo),
+        ]);
+
+        // Create new move request
+        const newRequest = await moveRequestService.createMoveRequest({
+          clientId: userId!,
+          fromAddressId: fromAddr.id,
+          toAddressId: toAddr.id,
+          moveDate: new Date(moveDate),
+          maxBudget: parseFloat(maxBudget),
+          status: "CREATED",
+        });
+        reqId = newRequest.id;
+      }
+
+      // Sync Luggage
       const luggageEntriesToCreate = Object.entries(luggageQuantities)
         .filter(([_, qty]) => qty > 0)
         .map(([key, qty]) => {
           const type = luggageTypes.find(t => String(t.id || t.type || t.luggageTypeEnum) === key);
+          
+          let existingEntryId = null;
+          if (isEditing && selected?.luggageEntries) {
+            const existing = selected.luggageEntries.find(le => le.luggageTypeId === type?.id);
+            if (existing) existingEntryId = existing.id;
+          }
+
           return {
-            id: type?.id || 0,
+            id: existingEntryId,
             luggageTypeId: type?.id || 0,
             quantity: qty,
             luggageType: type?.luggageTypeEnum || type?.type,
           };
         });
 
-      if (luggageEntriesToCreate.length > 0) {
+      if (reqId) {
         await Promise.all(
           luggageEntriesToCreate.map(entry => 
-            luggageService.createLuggageEntry(newRequest.id, entry as any)
+            luggageService.createLuggageEntry(reqId!, entry as any)
           )
         );
       }
 
       toast({
-        title: "Request Created",
-        description: "Your move request has been submitted.",
+        title: isEditing ? "Request Updated" : "Request Created",
+        description: isEditing ? "Your move request has been updated." : "Your move request has been submitted.",
       });
       setDialogOpen(false);
       resetForm();
@@ -247,7 +343,7 @@ const ClientMoveRequests = () => {
     } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to create move request.",
+        description: `Failed to ${isEditing ? "update" : "create"} move request.`,
         variant: "destructive",
       });
     } finally {
@@ -256,6 +352,8 @@ const ClientMoveRequests = () => {
   };
 
   const resetForm = () => {
+    setIsEditing(false);
+    setCurrentRequestId(null);
     setFromLine1("");
     setFromLine2("");
     setFromCity("");
@@ -541,7 +639,19 @@ const ClientMoveRequests = () => {
                       </div>
                       Move Details
                     </CardTitle>
-                    <StatusBadge status={selected.status} />
+                    <div className="flex items-center gap-3">
+                      {(selected.status === "CREATED" || selected.status === "OFFER_AVAILABLE") && (
+                        <>
+                          <Button variant="outline" size="sm" onClick={() => handleEditRequest(selected)} className="h-8 px-3 rounded-lg text-xs font-semibold border-primary/30 hover:bg-primary/5">
+                            Edit Request
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleCancelRequest(selected.id)} className="h-8 px-3 rounded-lg text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5">
+                            Cancel Request
+                          </Button>
+                        </>
+                      )}
+                      <StatusBadge status={selected.status} />
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-8 p-8">

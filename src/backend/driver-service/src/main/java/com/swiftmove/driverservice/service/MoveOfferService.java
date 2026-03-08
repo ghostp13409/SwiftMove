@@ -142,6 +142,16 @@ public class MoveOfferService {
         return Mapper.toMoveOfferDto(offer);
     }
 
+    @Transactional
+    public MoveOfferDto cancel(Long id) {
+        MoveOffer offer = moveOfferRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
+
+        offer.setStatus("CANCELLED");
+        moveOfferRepository.save(offer);
+        return Mapper.toMoveOfferDto(offer);
+    }
+
 //    Delete
     public MoveOfferDto delete(Long id){
         try{

@@ -45,6 +45,13 @@ public class MoveTripService {
 
     }
 
+    public MoveTripDto updateStatus(Long id, String status) {
+        MoveTrip trip = moveTripRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Move Trip Not Found"));
+        trip.setStatus(status);
+        return Mapper.toMoveTripDto(moveTripRepository.save(trip));
+    }
+
 
     private void validate ( CreateMoveTripDto newMoveTripDto) {
         StringBuilder errorMessages = new StringBuilder();
