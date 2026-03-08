@@ -14,6 +14,7 @@ import lombok.Setter;
 public class LuggageTypeDto {
     private Long id;
     private LuggageTypeEnum type;
+    private LuggageTypeEnum luggageTypeEnum;
     private String name;
     private Double volume;
     private Double weight;

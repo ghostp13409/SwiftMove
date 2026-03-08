@@ -52,7 +52,7 @@ const DriverDashboard = () => {
         const requestsData =
           requestsRes.status === "fulfilled" ? requestsRes.value : [];
         setPendingRequests(
-          (requestsData as MoveRequest[]).filter((r) => r.status === "PENDING"),
+          (requestsData as MoveRequest[]).filter((r) => r.status === "CREATED"),
         );
 
         if (driverData) {

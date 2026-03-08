@@ -1,16 +1,17 @@
 package com.swiftmove.tripservice.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.swiftmove.tripservice.dto.CreateMoveTripDto;
 import com.swiftmove.tripservice.dto.MoveTripDto;
 import com.swiftmove.tripservice.mapper.Mapper;
 import com.swiftmove.tripservice.model.MoveTrip;
 import com.swiftmove.tripservice.repository.MoveTripRepository;
+
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

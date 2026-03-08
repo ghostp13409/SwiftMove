@@ -13,7 +13,7 @@ const statusConfig: Record<
   }
 > = {
   // MoveRequest statuses
-  PENDING: { label: "Pending", variant: "secondary" },
+  CREATED: { label: "Created", variant: "secondary" },
   ACCEPTED: { label: "Accepted", variant: "default" },
   OFFER_AVAILABLE: { label: "Offer Available", variant: "default" },
   CANCELLED: { label: "Cancelled", variant: "destructive" },

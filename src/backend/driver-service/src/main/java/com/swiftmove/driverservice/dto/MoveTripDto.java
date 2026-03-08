@@ -5,19 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-public class CreateMoveOfferDto {
-
-    private Long price;
-    private Instant offerDate;
+public class MoveTripDto {
+    private Long id;
     private Long moveRequestId;
-    private Long driverId;
-    private Long vehicleId;
+    private Long moveOfferId;
     private String status;
 }

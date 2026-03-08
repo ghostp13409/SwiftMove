@@ -1,21 +1,22 @@
 package com.swiftmove.clientservice.service;
 
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.swiftmove.clientservice.dto.CreateMoveRequestDto;
 import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.mapper.Mapper;
 import com.swiftmove.clientservice.model.MoveRequest;
 import com.swiftmove.clientservice.repository.LuggageEntryRepository;
 import com.swiftmove.clientservice.repository.MoveRequestRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +57,8 @@ public class MoveRequestService {
         try{
             MoveRequest moveRequest = Mapper.createMoveRequestEntity(createMoveRequestDto);
             validateMoveRequest(moveRequest);
+            // Make move Request Status to "CREATED"
+            moveRequest.setStatus("CREATED");
             moveRequestRepository.save(moveRequest);
             return Mapper.toMoveRequestDto(moveRequest);
         }catch(Exception e){
@@ -85,7 +88,7 @@ public class MoveRequestService {
     //Get all active move request for the client
     public List<MoveRequestDto> findActiveByClientId(Long clientId)
     {
-        String [] activeStatuses = {"PENDING", "OFFER_AVAILABLE", "CREATED"};
+        String [] activeStatuses = {"CREATED", "OFFER_AVAILABLE"};
 
         List<MoveRequest> moveRequests = moveRequestRepository.findByClientId(clientId);
 
@@ -95,6 +98,15 @@ public class MoveRequestService {
                 .toList();
 
         return moveRequests.stream().map(Mapper::toMoveRequestDto).toList();
+    }
+
+    public List<MoveRequestDto> findAllActive() {
+        String [] activeStatuses = {"CREATED", "OFFER_AVAILABLE"};
+        List<MoveRequest> moveRequests = moveRequestRepository.findAll();
+        return moveRequests.stream()
+                .filter(mr -> Arrays.asList(activeStatuses).contains(mr.getStatus()))
+                .map(Mapper::toMoveRequestDto)
+                .toList();
     }
 
     // Get Currently Logged in User

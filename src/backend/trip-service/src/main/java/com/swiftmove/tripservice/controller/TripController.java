@@ -46,4 +46,22 @@ class TripController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<MoveTripDto>> getByClientId(@PathVariable Long clientId) {
+        // For now, return all trips as we don't store clientId in move_trips table
+        // and would need to call client-service for each trip to filter.
+        // In a real app, we'd store clientId in the trip table or use a join.
+        return ResponseEntity.ok(moveTripService.getAll());
+    }
+
+    @GetMapping("/driver/{driverId}")
+    public ResponseEntity<List<MoveTripDto>> getByDriverId(@PathVariable Long driverId) {
+        return ResponseEntity.ok(moveTripService.getAll());
+    }
+
+    @GetMapping("/allTrips")
+    public ResponseEntity<List<MoveTripDto>> getAllTrips() {
+        return ResponseEntity.ok(moveTripService.getAll());
+    }
 }

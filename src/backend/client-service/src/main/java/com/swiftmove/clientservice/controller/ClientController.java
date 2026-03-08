@@ -72,6 +72,9 @@ public class ClientController {
             else if(Objects.equals(user.getRole(), "CLIENT")){
                 moveRequests = moveRequestService.findByClientId(user.getId());
             }
+            else if(Objects.equals(user.getRole(), "DRIVER")){
+                moveRequests = moveRequestService.findAllActive();
+            }
             else{
                 throw new Exception("Unauthorized role: " + user.getRole());
             }

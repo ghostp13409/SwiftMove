@@ -92,7 +92,7 @@ public class Mapper {
         LuggageEntry luggageEntry = new LuggageEntry();
         luggageEntry.setId(luggageEntryDto.getId());
         luggageEntry.setQuantity(luggageEntryDto.getQuantity());
-        luggageEntry.setMoveRequestId(luggageEntryDto.getId());
+        luggageEntry.setMoveRequestId(luggageEntryDto.getMoveRequestId());
         luggageEntry.setLuggageTypeId(luggageEntryDto.getLuggageTypeId());
         return luggageEntry;
     }
@@ -100,6 +100,8 @@ public class Mapper {
         LuggageEntry luggageEntry = new LuggageEntry();
         luggageEntry.setId(luggageEntryDto.getId());
         luggageEntry.setQuantity(luggageEntryDto.getQuantity());
+        luggageEntry.setMoveRequestId(luggageEntryDto.getMoveRequestId());
+        // Note: luggageTypeId needs to be set by the service using the enum from DTO
         return luggageEntry;
 
     }
@@ -108,6 +110,7 @@ public class Mapper {
         LuggageTypeDto luggageTypeDto = new LuggageTypeDto();
         luggageTypeDto.setId(luggageType.getId());
         luggageTypeDto.setType(luggageType.getType());
+        luggageTypeDto.setLuggageTypeEnum(luggageType.getType());
         luggageTypeDto.setName(luggageType.getName());
         luggageTypeDto.setVolume(luggageType.getVolume());
         luggageTypeDto.setWeight(luggageType.getWeight());

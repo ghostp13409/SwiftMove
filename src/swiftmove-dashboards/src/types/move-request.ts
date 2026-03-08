@@ -32,3 +32,5 @@ export const MoveRequestPopulatedSchema = MoveRequestSchema.extend({
 export type MoveRequest = z.infer<typeof MoveRequestSchema>;
 export type MoveRequestForm = z.infer<typeof MoveRequestFormSchema>;
 export type MoveRequestPopulated = z.infer<typeof MoveRequestPopulatedSchema>;
+
+export type MoveRequestStatus = z.infer<typeof MoveRequestSchema.shape.status>;

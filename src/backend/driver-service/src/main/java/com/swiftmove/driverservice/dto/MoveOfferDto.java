@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class MoveOfferDto {
     private Long id;
     private Long price;
-    private Instant offeredDate;
+    private Instant offerDate;
     private Long moveRequestId;
     private Long driverId;
     private Long vehicleId;
