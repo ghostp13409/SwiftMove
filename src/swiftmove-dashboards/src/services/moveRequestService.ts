@@ -83,9 +83,16 @@ export const moveRequestService = {
   // Create new move request
   createMoveRequest: async (data: MoveRequestForm): Promise<MoveRequest> => {
     try {
-      const response = await apiClient.post(`${API_BASE}`, data);
+      const formattedData = {
+        ...data,
+        moveDate: data.moveDate instanceof Date ? data.moveDate.toISOString() : data.moveDate,
+      };
+      const response = await apiClient.post(`${API_BASE}`, formattedData);
       const moveRequest: MoveRequest = response.data.data || response.data;
-      return moveRequest;
+      return {
+        ...moveRequest,
+        moveDate: new Date(moveRequest.moveDate),
+      };
     } catch (error) {
       console.error("Error creating move request:", error);
       throw error;
@@ -98,8 +105,16 @@ export const moveRequestService = {
     data: any,
   ): Promise<MoveRequest> => {
     try {
-      const response = await apiClient.put(`${API_BASE}/${id}`, data);
-      return response.data.data || response.data;
+      const formattedData = { ...data };
+      if (data.moveDate instanceof Date) {
+        formattedData.moveDate = data.moveDate.toISOString();
+      }
+      const response = await apiClient.put(`${API_BASE}/${id}`, formattedData);
+      const moveRequest = response.data.data || response.data;
+      return {
+        ...moveRequest,
+        moveDate: new Date(moveRequest.moveDate),
+      };
     } catch (error) {
       console.error("Error updating move request:", error);
       throw error;

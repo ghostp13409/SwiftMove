@@ -52,14 +52,26 @@ export const moveOfferService = {
 
   // Create move offer
   createMoveOffer: async (data: MoveOfferForm): Promise<MoveOffer> => {
-    const response = await apiClient.post(`${API_BASE}`, data);
-    return response.data.data || response.data;
+    const formattedData = {
+      ...data,
+      offerDate: data.offerDate instanceof Date ? data.offerDate.toISOString() : data.offerDate,
+    };
+    const response = await apiClient.post(`${API_BASE}`, formattedData);
+    const result = response.data.data || response.data;
+    return {
+      ...result,
+      offerDate: new Date(result.offerDate)
+    };
   },
 
   // Accept a move offer (client action)
   acceptOffer: async (offerId: string | number): Promise<MoveOffer> => {
     const response = await apiClient.patch(`${API_BASE}/${offerId}/accept`);
-    return response.data.data || response.data;
+    const result = response.data.data || response.data;
+    return {
+      ...result,
+      offerDate: new Date(result.offerDate)
+    };
   },
 
   // Update move offer
@@ -67,8 +79,16 @@ export const moveOfferService = {
     id: string | number,
     data: Partial<MoveOfferForm>,
   ): Promise<MoveOffer> => {
-    const response = await apiClient.put(`${API_BASE}/${id}`, data);
-    return response.data.data || response.data;
+    const formattedData = { ...data };
+    if (data.offerDate instanceof Date) {
+      formattedData.offerDate = data.offerDate;
+    }
+    const response = await apiClient.put(`${API_BASE}/${id}`, formattedData);
+    const result = response.data.data || response.data;
+    return {
+      ...result,
+      offerDate: new Date(result.offerDate)
+    };
   },
 
   // Delete move offer

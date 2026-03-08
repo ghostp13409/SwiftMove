@@ -7,7 +7,7 @@ export const luggageService = {
   // Get all luggage types
   getAllLuggageTypes: async (): Promise<LuggageType[]> => {
     try {
-      const response = await apiClient.get(`${API_BASE}`);
+      const response = await apiClient.get(`${API_BASE}/types`);
       return response.data.data || response.data;
     } catch (error) {
       console.error("Error fetching luggage types:", error);
@@ -37,6 +37,23 @@ export const luggageService = {
       return response.data.data || response.data;
     } catch (error) {
       console.error("Error fetching luggage entries:", error);
+      throw error;
+    }
+  },
+
+  // Create luggage entry
+  createLuggageEntry: async (
+    moveRequestId: number,
+    data: Omit<LuggageEntry, "moveRequestId">,
+  ): Promise<LuggageEntry> => {
+    try {
+      const response = await apiClient.post(
+        `${API_BASE}?moveRequestId=${moveRequestId}`,
+        data,
+      );
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error("Error creating luggage entry:", error);
       throw error;
     }
   },

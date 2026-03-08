@@ -103,10 +103,6 @@ public class MoveRequestService {
 
 //        FIXME: Implement Proper Validation
         StringBuilder errors = new StringBuilder();
-        // Id
-        if(moveRequest.getId() == null){
-           errors.append("Id is null.");
-        }
 
         // Move Date
         if(moveRequest.getMoveDate() == null){

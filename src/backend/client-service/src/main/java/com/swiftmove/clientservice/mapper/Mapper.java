@@ -106,6 +106,7 @@ public class Mapper {
 
     public static LuggageTypeDto toLuggageTypeDto(LuggageType luggageType) {
         LuggageTypeDto luggageTypeDto = new LuggageTypeDto();
+        luggageTypeDto.setId(luggageType.getId());
         luggageTypeDto.setType(luggageType.getType());
         luggageTypeDto.setName(luggageType.getName());
         luggageTypeDto.setVolume(luggageType.getVolume());
