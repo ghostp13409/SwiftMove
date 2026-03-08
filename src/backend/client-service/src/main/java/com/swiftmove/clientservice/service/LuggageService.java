@@ -40,12 +40,12 @@ public class LuggageService {
 
         Optional<LuggageEntry> existingEntry = luggageEntryRepository.findById(luggageEntryDto.getId());
         if(existingEntry.isPresent()){
-            LuggageEntry entry = existingEntry.get();
-            entry.setQuantity(entry.getQuantity() + luggageEntryDto.getQuantity());
-
-            return luggageEntryRepository.save(entry);
+            LuggageEntry luggageEntry = existingEntry.get();
+            luggageEntry.setQuantity(luggageEntryDto.getQuantity());
+            return luggageEntryRepository.save(luggageEntry);
         }
         else {
+//            Why Move Request?
             MoveRequestDto moveRequest = moveRequestService.findById(moverequestId);
             LuggageEntry newLuggageEntry = Mapper.toLuggageEntryEntity(luggageEntryDto);
             MoveRequest moveRequestEntity = Mapper.toMoveRequestEntity(moveRequest);
