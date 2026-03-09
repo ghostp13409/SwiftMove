@@ -4,6 +4,7 @@ package com.swiftMove.userservice.mapper;
 import com.swiftMove.userservice.dto.UserRequestDTO;
 import com.swiftMove.userservice.dto.UserResponseDTO;
 import com.swiftMove.userservice.model.User;
+import com.swiftMove.userservice.model.UserRole;
 
 public class UserMapper {
 
@@ -18,7 +19,7 @@ public class UserMapper {
                 user.getPasswordHash(),
                 user.getDob(),
                 user.getRating(),
-                user.getRole(),
+                user.getRole() != null ? user.getRole().name() : null,
                 user.getAddressId()
         );
     }
@@ -32,6 +33,13 @@ public class UserMapper {
         user.setEmail(dto.getEmail());
         user.setDob(dto.getDob());
         user.setAddressId(dto.getAddressId());
+        if (dto.getRole() != null && !dto.getRole().isBlank()) {
+            try {
+                user.setRole(UserRole.valueOf(dto.getRole().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                user.setRole(UserRole.CLIENT);
+            }
+        }
 
         return user;
 
@@ -40,12 +48,19 @@ public class UserMapper {
 
     public static void updateEntity(User existing, UserRequestDTO dto) {
 
-        existing.setUsername(dto.getUserName());
-        existing.setFirstName(dto.getFirstName());
-        existing.setLastName(dto.getLastName());
-        existing.setEmail(dto.getEmail());
-        existing.setDob(dto.getDob());
-        existing.setAddressId(dto.getAddressId());
+        if (dto.getUserName() != null) existing.setUsername(dto.getUserName());
+        if (dto.getFirstName() != null) existing.setFirstName(dto.getFirstName());
+        if (dto.getLastName() != null) existing.setLastName(dto.getLastName());
+        if (dto.getEmail() != null) existing.setEmail(dto.getEmail());
+        if (dto.getDob() != null) existing.setDob(dto.getDob());
+        if (dto.getAddressId() != null) existing.setAddressId(dto.getAddressId());
+        if (dto.getRole() != null && !dto.getRole().isBlank()) {
+            try {
+                existing.setRole(UserRole.valueOf(dto.getRole().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Keep existing role if new one is invalid
+            }
+        }
     }
 
 

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.swiftmove.tripservice.dto.CreateMoveTripDto;
 import com.swiftmove.tripservice.dto.MoveTripDto;
 import com.swiftmove.tripservice.mapper.Mapper;
+import com.swiftmove.tripservice.model.MoveStatus;
 import com.swiftmove.tripservice.model.MoveTrip;
 import com.swiftmove.tripservice.repository.MoveTripRepository;
 
@@ -48,7 +49,9 @@ public class MoveTripService {
     public MoveTripDto updateStatus(Long id, String status) {
         MoveTrip trip = moveTripRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Move Trip Not Found"));
-        trip.setStatus(status);
+        if (status != null) {
+            trip.setStatus(MoveStatus.valueOf(status));
+        }
         return Mapper.toMoveTripDto(moveTripRepository.save(trip));
     }
 

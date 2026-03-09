@@ -81,6 +81,19 @@ public class VehicleService {
         }
     }
 
+    public VehicleDto toggleActive(Long id) {
+        try {
+            return vehicleRepository.findById(id)
+                    .map(existingVehicle -> {
+                        existingVehicle.setIsActive(!existingVehicle.getIsActive());
+                        return Mapper.toVehicleDto(vehicleRepository.save(existingVehicle));
+                    })
+                    .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + id));
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to toggle vehicle status: " + ex.getMessage(), ex);
+        }
+    }
+
 //    Delete
     public VehicleDto delete(Long id){
         try{

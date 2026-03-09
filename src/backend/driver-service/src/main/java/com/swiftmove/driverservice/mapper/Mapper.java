@@ -4,6 +4,7 @@ import com.swiftmove.driverservice.dto.*;
 import com.swiftmove.driverservice.model.DriverInfo;
 import com.swiftmove.driverservice.model.Vehicle;
 import com.swiftmove.driverservice.model.MoveOffer;
+import com.swiftmove.driverservice.model.MoveStatus;
 import com.swiftmove.driverservice.model.VehicleType;
 
 public class Mapper {
@@ -70,7 +71,9 @@ public class Mapper {
         dto.setMoveRequestId(offer.getMoveRequestId());
         dto.setDriverId(offer.getDriverId());
         dto.setVehicleId(offer.getVehicleId());
-        dto.setStatus(offer.getStatus());
+        if (offer.getStatus() != null) {
+            dto.setStatus(offer.getStatus().name());
+        }
         return dto;
     }
 
@@ -83,7 +86,9 @@ public class Mapper {
         offer.setMoveRequestId(offerDto.getMoveRequestId());
         offer.setDriverId(offerDto.getDriverId());
         offer.setVehicleId(offerDto.getVehicleId());
-        offer.setStatus(offerDto.getStatus());
+        if (offerDto.getStatus() != null) {
+            offer.setStatus(MoveStatus.valueOf(offerDto.getStatus()));
+        }
         return offer;
     }
 
@@ -114,7 +119,9 @@ public class Mapper {
         offer.setMoveRequestId(createMoveOfferDto.getMoveRequestId());
         offer.setDriverId(createMoveOfferDto.getDriverId());
         offer.setVehicleId(createMoveOfferDto.getVehicleId());
-        offer.setStatus(createMoveOfferDto.getStatus());
+        if (createMoveOfferDto.getStatus() != null) {
+            offer.setStatus(MoveStatus.valueOf(createMoveOfferDto.getStatus()));
+        }
 
         return offer;
     }

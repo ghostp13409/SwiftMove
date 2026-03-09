@@ -1,13 +1,11 @@
 package com.swiftmove.driverservice.dto;
 
+import java.time.Instant;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor

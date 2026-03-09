@@ -134,7 +134,8 @@ for c in clients:
             'client_id': c['id'],
             'from_address_id': fake.random_int(1, 200),
             'to_address_id': fake.random_int(1, 200),
-            'status': 'CREATED'
+            'status': 'CREATED',
+            'has_furniture': fake.boolean()
         }
         move_requests.append(mr)
         mrid += 1
@@ -314,10 +315,10 @@ with open(output_file, 'w') as f:
     f.write(",\n".join(veh_values) + ";\n\n")
 
     # Move requests
-    f.write("INSERT INTO move_requests (move_date, max_budget, client_id, from_address_id, to_address_id, status) VALUES\n")
+    f.write("INSERT INTO move_requests (move_date, max_budget, client_id, from_address_id, to_address_id, status, has_furniture) VALUES\n")
     mr_values = []
     for mr in move_requests:
-        val = f"('{mr['move_date']}', {mr['max_budget']}, {mr['client_id']}, {mr['from_address_id']}, {mr['to_address_id']}, '{mr['status']}')"
+        val = f"('{mr['move_date']}', {mr['max_budget']}, {mr['client_id']}, {mr['from_address_id']}, {mr['to_address_id']}, '{mr['status']}', {str(mr['has_furniture']).lower()})"
         mr_values.append(val)
     f.write(",\n".join(mr_values) + ";\n\n")
 
@@ -345,4 +346,4 @@ with open(output_file, 'w') as f:
         mt_values.append(val)
     f.write(",\n".join(mt_values) + ";\n\n")
 
-print("Seed data generated in Planning/seed_data.sql")
+print(f"Seed data generated in {output_file}")

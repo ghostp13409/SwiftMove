@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { AddressSchema } from "./address";
 import { ClientSchema } from "./client";
-import { LuggageEntryPopulatedSchema, LuggageEntrySchema } from "./luggage";
+import { LuggageEntryPopulatedSchema } from "./luggage";
 
 export const MoveRequestSchema = z.object({
   id: z.number(),
@@ -11,6 +11,7 @@ export const MoveRequestSchema = z.object({
   fromAddressId: z.number(),
   toAddressId: z.number(),
   status: z.enum(["CREATED", "OFFER_AVAILABLE", "ACCEPTED", "CANCELLED"]),
+  hasFurniture: z.boolean().default(false),
 });
 
 export const MoveRequestFormSchema = z.object({
@@ -20,6 +21,7 @@ export const MoveRequestFormSchema = z.object({
   fromAddressId: z.number(),
   toAddressId: z.number(),
   status: z.enum(["CREATED", "OFFER_AVAILABLE", "ACCEPTED", "CANCELLED"]),
+  hasFurniture: z.boolean().default(false),
 });
 
 export const MoveRequestPopulatedSchema = MoveRequestSchema.extend({

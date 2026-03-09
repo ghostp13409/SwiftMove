@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Truck, Loader2 } from "lucide-react";
+import { Plus, Truck, Loader2, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +47,18 @@ const Vehicles = () => {
   const [vehicleTypeId, setVehicleTypeId] = useState("");
   const [canCarryFurniture, setCanCarryFurniture] = useState(false);
 
+  const resetForm = () => {
+    setMake("");
+    setModel("");
+    setYear("");
+    setColor("");
+    setPricePerKm("");
+    setVehicleTypeId("");
+    setCanCarryFurniture(false);
+    setIsEditing(false);
+    setCurrentVehicleId(null);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -58,7 +70,6 @@ const Vehicles = () => {
         if (driverRes.status === "fulfilled") {
           const driverData = driverRes.value as any;
           setDriver(driverData);
-          // driverData is DriverInfo, use .id directly
           const vehicles = await vehicleService.getVehiclesByDriver(
             driverData.id,
           );
@@ -123,7 +134,6 @@ const Vehicles = () => {
         pricePerKm: parseFloat(pricePerKm),
         isActive: true,
         canCarryFurniture,
-        // driverId in VehicleForm maps to driverInfo.id
         driverId: (driver as any).id,
       };
 
@@ -139,7 +149,6 @@ const Vehicles = () => {
       });
       setDialogOpen(false);
       resetForm();
-      // Refresh vehicles
       const vehicles = await vehicleService.getVehiclesByDriver(
         (driver as any).id,
       );
@@ -167,6 +176,25 @@ const Vehicles = () => {
       toast({
         title: "Error",
         description: "Failed to toggle vehicle status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteVehicle = async (vehicleId: number) => {
+    if (!window.confirm("Are you sure you want to delete this vehicle?")) return;
+    
+    try {
+      await vehicleService.deleteVehicle(vehicleId);
+      setMyVehicles((prev) => prev.filter((v) => v.id !== vehicleId));
+      toast({
+        title: "Vehicle Deleted",
+        description: "The vehicle has been removed from your profile.",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to delete vehicle.",
         variant: "destructive",
       });
     }
@@ -286,10 +314,10 @@ const Vehicles = () => {
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Adding...
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> {isEditing ? "Updating..." : "Adding..."}
                   </>
                 ) : (
-                  "Add Vehicle"
+                  isEditing ? "Update Vehicle" : "Add Vehicle"
                 )}
               </Button>
             </form>
@@ -335,14 +363,14 @@ const Vehicles = () => {
                 </div>
                 {vehicle.canCarryFurniture && (
                   <p className="text-xs text-green-600 mt-2">
-                     Couch Can carry furniture
+                    Can carry furniture
                   </p>
                 )}
-                <div className="grid grid-cols-2 gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-4">
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-xs"
+                    className="flex-1 text-xs h-8"
                     onClick={() => handleEditVehicle(vehicle)}
                   >
                     Edit
@@ -350,13 +378,21 @@ const Vehicles = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-xs"
+                    className="flex-1 text-xs h-8 whitespace-nowrap"
                     onClick={() => handleToggleActive(vehicle.id)}
                   >
                     {vehicle.isActive ? "Deactivate" : "Activate"}
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 p-2 h-8"
+                    onClick={() => handleDeleteVehicle(vehicle.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
-                </CardContent>
+              </CardContent>
             </Card>
           ))}
         </div>

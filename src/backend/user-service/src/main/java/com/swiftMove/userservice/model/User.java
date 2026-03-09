@@ -4,10 +4,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -49,9 +52,11 @@ public class User {
     @Column(name = "rating")
     private Float rating;
 
-    @Column(name = "role")
-    private String role;
+    @Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(name = "role", columnDefinition = "user_role", nullable = false)
 
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    private UserRole role;
 
     @JoinColumn(name = "address_id", nullable = true)
     private Long addressId;

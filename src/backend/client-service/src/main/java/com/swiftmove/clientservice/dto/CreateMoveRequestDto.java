@@ -1,14 +1,11 @@
 package com.swiftmove.clientservice.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,4 +18,5 @@ public class CreateMoveRequestDto {
     private Long fromAddressId;
     private Long toAddressId;
     private String status;
+    private Boolean hasFurniture;
 }

@@ -15,6 +15,7 @@ import com.swiftMove.userservice.dto.UserResponseDTO;
 import com.swiftMove.userservice.feign.AddressClient;
 import com.swiftMove.userservice.mapper.UserMapper;
 import com.swiftMove.userservice.model.User;
+import com.swiftMove.userservice.model.UserRole;
 import com.swiftMove.userservice.repo.UserRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -38,8 +39,10 @@ public class UserService {
         // Bcrypt Hashing
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
 
-        // Use role from request, default to CLIENT if not provided
-        user.setRole(dto.getRole() != null && !dto.getRole().isBlank() ? dto.getRole().toUpperCase() : "CLIENT");
+        // Ensure role is set, default to CLIENT if mapper didn't set it (though mapper should handle it)
+        if (user.getRole() == null) {
+            user.setRole(UserRole.CLIENT);
+        }
 
         User savedUser = userRepo.save(user);
         return UserMapper.userToResponseDto(savedUser);

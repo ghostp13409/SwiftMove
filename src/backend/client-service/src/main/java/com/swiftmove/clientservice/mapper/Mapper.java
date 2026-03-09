@@ -1,14 +1,16 @@
 package com.swiftmove.clientservice.mapper;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-import com.swiftmove.clientservice.dto.*;
+import com.swiftmove.clientservice.dto.AddLuggageEntryDto;
+import com.swiftmove.clientservice.dto.CreateMoveRequestDto;
+import com.swiftmove.clientservice.dto.LuggageEntryDto;
+import com.swiftmove.clientservice.dto.LuggageTypeDto;
+import com.swiftmove.clientservice.dto.UserResponseDto;
 import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.model.Client;
 import com.swiftmove.clientservice.model.LuggageEntry;
 import com.swiftmove.clientservice.model.LuggageType;
 import com.swiftmove.clientservice.model.MoveRequest;
+import com.swiftmove.clientservice.model.MoveStatus;
 import com.swiftmove.clientservice.service.MoveRequestService;
 
 
@@ -39,7 +41,10 @@ public class Mapper {
         moveRequest.setToAddressId(moveRequestDto.getToAddressId());
         moveRequest.setMaxBudget(moveRequestDto.getMaxBudget());
         moveRequest.setMoveDate(moveRequestDto.getMoveDate());
-        moveRequest.setStatus(moveRequestDto.getStatus());
+        moveRequest.setHasFurniture(moveRequestDto.getHasFurniture());
+        if (moveRequestDto.getStatus() != null) {
+            moveRequest.setStatus(MoveStatus.valueOf(moveRequestDto.getStatus()));
+        }
         return moveRequest;
     }
 
@@ -52,7 +57,10 @@ public class Mapper {
         moveRequestDto.setToAddressId(moveRequest.getToAddressId());
         moveRequestDto.setMaxBudget(moveRequest.getMaxBudget());
         moveRequestDto.setMoveDate(moveRequest.getMoveDate());
-        moveRequestDto.setStatus(moveRequest.getStatus());
+        moveRequestDto.setHasFurniture(moveRequest.getHasFurniture());
+        if (moveRequest.getStatus() != null) {
+            moveRequestDto.setStatus(moveRequest.getStatus().name());
+        }
         return moveRequestDto;
     }
 
@@ -63,7 +71,10 @@ public class Mapper {
             moveRequest.setToAddressId(createMoveRequestDto.getToAddressId());
             moveRequest.setMaxBudget(createMoveRequestDto.getMaxBudget());
             moveRequest.setMoveDate(createMoveRequestDto.getMoveDate());
-            moveRequest.setStatus(createMoveRequestDto.getStatus());
+            moveRequest.setHasFurniture(createMoveRequestDto.getHasFurniture());
+            if (createMoveRequestDto.getStatus() != null) {
+                moveRequest.setStatus(MoveStatus.valueOf(createMoveRequestDto.getStatus()));
+            }
 
             return moveRequest;
     }
@@ -74,7 +85,10 @@ public class Mapper {
         moveRequest.setToAddressId(moveRequestDto.getToAddressId());
         moveRequest.setMaxBudget(moveRequestDto.getMaxBudget());
         moveRequest.setMoveDate(moveRequestDto.getMoveDate());
-        moveRequest.setStatus(moveRequestDto.getStatus());
+        moveRequest.setHasFurniture(moveRequestDto.getHasFurniture());
+        if (moveRequestDto.getStatus() != null) {
+            moveRequest.setStatus(MoveStatus.valueOf(moveRequestDto.getStatus()));
+        }
     }
 
 //    LuggageEntry

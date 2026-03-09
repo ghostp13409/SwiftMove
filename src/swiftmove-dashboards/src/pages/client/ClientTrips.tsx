@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { tripService } from "@/services/tripService";
 import { populationFactory } from "@/services/populationFactory";
 import type { MoveTripDetailed } from "@/types";
+import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 const ClientTrips = () => {
   const { userId } = useAuth();
@@ -19,13 +21,15 @@ const ClientTrips = () => {
       try {
         setIsLoading(true);
         const data = await tripService.getTripsByClient(userId);
-        
+
         // Populate and filter for current client
         const populated = await Promise.all(
-          data.map(t => populationFactory.populateMoveTripDetailed(t))
+          data.map((t) => populationFactory.populateMoveTripDetailed(t)),
         );
-        
-        const filtered = populated.filter(t => t.moveRequestPopulated.clientId === userId);
+
+        const filtered = populated.filter(
+          (t) => t.moveRequestPopulated.clientId === userId,
+        );
         setMyTrips(filtered);
       } catch (err) {
         console.error("Failed to load trips:", err);
@@ -52,9 +56,11 @@ const ClientTrips = () => {
       if (!userId) return;
       const data = await tripService.getTripsByClient(userId);
       const populated = await Promise.all(
-        data.map(t => populationFactory.populateMoveTripDetailed(t))
+        data.map((t) => populationFactory.populateMoveTripDetailed(t)),
       );
-      setMyTrips(populated.filter(t => t.moveRequestPopulated.clientId === userId));
+      setMyTrips(
+        populated.filter((t) => t.moveRequestPopulated.clientId === userId),
+      );
     } catch (err) {
       toast({
         title: "Error",
@@ -89,7 +95,12 @@ const ClientTrips = () => {
                 <Route className="w-4 h-4 text-primary" /> Active Trip
               </CardTitle>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="destructive" onClick={() => handleCancelTrip(activeTrip.id)} className="h-7 px-3 text-xs">
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleCancelTrip(activeTrip.id)}
+                  className="h-7 px-3 text-xs"
+                >
                   Cancel Trip
                 </Button>
                 <StatusBadge status={activeTrip.status} />
@@ -99,21 +110,34 @@ const ClientTrips = () => {
           <CardContent className="pt-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">From</p>
-                <p className="font-medium">{activeTrip.moveRequestPopulated.fromAddress.city}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">To</p>
-                <p className="font-medium">{activeTrip.moveRequestPopulated.toAddress.city}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Driver</p>
+                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
+                  From
+                </p>
                 <p className="font-medium">
-                  {activeTrip.moveOfferPopulated.driver.user.firstName} {activeTrip.moveOfferPopulated.driver.user.lastName}
+                  {activeTrip.moveRequestPopulated.fromAddress.city}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Price</p>
+                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
+                  To
+                </p>
+                <p className="font-medium">
+                  {activeTrip.moveRequestPopulated.toAddress.city}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
+                  Driver
+                </p>
+                <p className="font-medium">
+                  {activeTrip.moveOfferPopulated.driver.user.firstName}{" "}
+                  {activeTrip.moveOfferPopulated.driver.user.lastName}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
+                  Price
+                </p>
                 <p className="font-bold text-primary text-lg">
                   ${activeTrip.moveOfferPopulated.price}
                 </p>
@@ -141,17 +165,21 @@ const ClientTrips = () => {
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <p className="font-bold text-sm">
-                      {trip.moveRequestPopulated.fromAddress.city} → {trip.moveRequestPopulated.toAddress.city}
+                      {trip.moveRequestPopulated.fromAddress.city} →{" "}
+                      {trip.moveRequestPopulated.toAddress.city}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1 font-medium">
-                      Driver: {trip.moveOfferPopulated.driver.user.firstName} {trip.moveOfferPopulated.driver.user.lastName}
+                      Driver: {trip.moveOfferPopulated.driver.user.firstName}{" "}
+                      {trip.moveOfferPopulated.driver.user.lastName}
                     </p>
                   </div>
                   <StatusBadge status={trip.status} />
                 </div>
                 <div className="flex justify-between items-center text-sm pt-2 border-t">
                   <span className="text-muted-foreground text-xs font-medium">
-                    {new Date(trip.moveRequestPopulated.moveDate).toLocaleDateString()}
+                    {new Date(
+                      trip.moveRequestPopulated.moveDate,
+                    ).toLocaleDateString()}
                   </span>
                   <span className="font-bold text-primary">
                     ${trip.moveOfferPopulated.price}

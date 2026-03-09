@@ -1,5 +1,10 @@
 package com.swiftmove.driverservice.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.swiftmove.driverservice.client.AuthClient;
 import com.swiftmove.driverservice.client.ClientServiceClient;
 import com.swiftmove.driverservice.client.TripServiceClient;
@@ -7,14 +12,13 @@ import com.swiftmove.driverservice.dto.CreateMoveOfferDto;
 import com.swiftmove.driverservice.dto.CreateMoveTripDto;
 import com.swiftmove.driverservice.dto.MoveOfferDto;
 import com.swiftmove.driverservice.dto.MoveRequestDto;
+import com.swiftmove.driverservice.dto.VehicleDto;
 import com.swiftmove.driverservice.mapper.Mapper;
 import com.swiftmove.driverservice.model.MoveOffer;
+import com.swiftmove.driverservice.model.MoveStatus;
 import com.swiftmove.driverservice.repository.MoveOfferRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ public class MoveOfferService {
     private final AuthClient authClient;
     private final ClientServiceClient clientServiceClient;
     private final TripServiceClient tripServiceClient;
+    private final VehicleService vehicleService;
 
 //    Get All
     public List<MoveOfferDto> getAll(){
@@ -65,6 +70,9 @@ public class MoveOfferService {
 //    Add
     public MoveOfferDto add(CreateMoveOfferDto newMoveOfferDto){
         try{
+            validateCreateMoveOffer(newMoveOfferDto);
+            validateVehicleForMoveRequest(newMoveOfferDto.getVehicleId(), newMoveOfferDto.getMoveRequestId());
+
             MoveOffer newMoveOffer = Mapper.createMoveOfferEntity(newMoveOfferDto);
             newMoveOffer = moveOfferRepository.save(newMoveOffer);
 
@@ -92,10 +100,12 @@ public class MoveOfferService {
     public MoveOfferDto edit(Long id, MoveOfferDto moveOfferDto){
         try{
             validateMoveOffer(moveOfferDto);
+            validateVehicleForMoveRequest(moveOfferDto.getVehicleId(), moveOfferDto.getMoveRequestId());
+
             MoveOffer existingMoveOffer = moveOfferRepository.findById(id).orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
             existingMoveOffer.setOfferedDate(moveOfferDto.getOfferDate());
             existingMoveOffer.setPrice(moveOfferDto.getPrice());
-            existingMoveOffer.setStatus(moveOfferDto.getStatus());
+            existingMoveOffer.setStatus(MoveStatus.valueOf(moveOfferDto.getStatus()));
             existingMoveOffer.setMoveRequestId(moveOfferDto.getMoveRequestId());
             existingMoveOffer.setDriverId(moveOfferDto.getDriverId());
             existingMoveOffer.setVehicleId(moveOfferDto.getVehicleId());
@@ -114,7 +124,7 @@ public class MoveOfferService {
                 .orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
 
         // Update Offer Status
-        offer.setStatus("ACCEPTED");
+        offer.setStatus(MoveStatus.ACCEPTED);
         moveOfferRepository.save(offer);
 
         // Update Move Request Status
@@ -137,7 +147,7 @@ public class MoveOfferService {
         MoveOffer offer = moveOfferRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
 
-        offer.setStatus("REJECTED");
+        offer.setStatus(MoveStatus.REJECTED);
         moveOfferRepository.save(offer);
         return Mapper.toMoveOfferDto(offer);
     }
@@ -147,7 +157,7 @@ public class MoveOfferService {
         MoveOffer offer = moveOfferRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
 
-        offer.setStatus("CANCELLED");
+        offer.setStatus(MoveStatus.CANCELLED);
         moveOfferRepository.save(offer);
         return Mapper.toMoveOfferDto(offer);
     }
@@ -161,6 +171,16 @@ public class MoveOfferService {
         }
         catch (Exception ex){
             throw new RuntimeException("Failed to delete move offer: " + ex.getMessage(), ex);
+        }
+    }
+
+    private void validateVehicleForMoveRequest(Long vehicleId, Long moveRequestId) {
+        MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(moveRequestId);
+        if (moveRequest != null && Boolean.TRUE.equals(moveRequest.getHasFurniture())) {
+            VehicleDto vehicle = vehicleService.getById(vehicleId);
+            if (vehicle != null && !Boolean.TRUE.equals(vehicle.getCanCarryFurniture())) {
+                throw new IllegalArgumentException("This move request requires a vehicle that can carry furniture.");
+            }
         }
     }
 

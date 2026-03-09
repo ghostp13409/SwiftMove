@@ -17,8 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import StatusBadge from "@/components/StatusBadge";
-import { Loader2 } from "lucide-react";
+import { Loader2, Armchair, Info } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { moveRequestService } from "@/services/moveRequestService";
 import { moveOfferService } from "@/services/moveOfferService";
@@ -33,7 +34,9 @@ const BrowseRequests = () => {
   const { userId } = useAuth();
   const { toast } = useToast();
   const [selected, setSelected] = useState<MoveRequestPopulated | null>(null);
-  const [pendingRequests, setPendingRequests] = useState<MoveRequestPopulated[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<
+    MoveRequestPopulated[]
+  >([]);
   const [driverVehicles, setDriverVehicles] = useState<Vehicle[]>([]);
   const [driverInfo, setDriverInfo] = useState<DriverInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +59,7 @@ const BrowseRequests = () => {
 
         const pending = requests.filter((r) => r.status === "CREATED");
         const populatedPending = await Promise.all(
-          pending.map((req) => populationFactory.populateMoveRequest(req))
+          pending.map((req) => populationFactory.populateMoveRequest(req)),
         );
         setPendingRequests(populatedPending);
 
@@ -94,7 +97,7 @@ const BrowseRequests = () => {
     try {
       await moveOfferService.createMoveOffer({
         moveRequestId: selected.id,
-        driverId: driverInfo.userId, // use userId instead of driverInfo.id
+        driverId: driverInfo.userId,
         vehicleId: parseInt(selectedVehicleId),
         price: parseFloat(offerPrice),
         offerDate: new Date(offeredDateTime),
@@ -108,16 +111,22 @@ const BrowseRequests = () => {
       setSelectedVehicleId("");
       setOfferPrice("");
       setOfferedDateTime("");
-    } catch (err) {
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: "Failed to submit offer. Please try again.",
+        description:
+          err?.response?.data?.message ||
+          "Failed to submit offer. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const filteredVehicles = selected?.hasFurniture
+    ? driverVehicles.filter((v) => v.canCarryFurniture)
+    : driverVehicles;
 
   if (isLoading) {
     return (
@@ -156,9 +165,15 @@ const BrowseRequests = () => {
                     </p>
                     <StatusBadge status={req.status} />
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {req.moveDate.toLocaleDateString()} · Budget: ${req.maxBudget}
-                  </p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>
+                      {req.moveDate.toLocaleDateString()} · Budget: $
+                      {req.maxBudget}
+                    </span>
+                    {req.hasFurniture && (
+                      <Armchair className="w-3 h-3 text-primary" />
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">
                     {(req.luggageEntries ?? []).reduce(
                       (s, l) => s + l.quantity,
@@ -177,9 +192,19 @@ const BrowseRequests = () => {
             <Card className="shadow-card">
               <CardHeader>
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">
-                    {selected.fromAddress.city} → {selected.toAddress.city}
-                  </CardTitle>
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">
+                      {selected.fromAddress.city} → {selected.toAddress.city}
+                    </CardTitle>
+                    {selected.hasFurniture && (
+                      <Badge
+                        variant="secondary"
+                        className="gap-1 bg-primary/10 text-primary border-0 rounded-lg px-2 text-[10px] h-5"
+                      >
+                        <Armchair className="w-3 h-3" /> Includes Furniture
+                      </Badge>
+                    )}
+                  </div>
                   <StatusBadge status={selected.status} />
                 </div>
               </CardHeader>
@@ -188,15 +213,13 @@ const BrowseRequests = () => {
                   <div>
                     <p className="text-muted-foreground text-xs">From</p>
                     <p>
-                      {selected.fromAddress.line1},{" "}
-                      {selected.fromAddress.city}
+                      {selected.fromAddress.line1}, {selected.fromAddress.city}
                     </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">To</p>
                     <p>
-                      {selected.toAddress.line1},{" "}
-                      {selected.toAddress.city}
+                      {selected.toAddress.line1}, {selected.toAddress.city}
                     </p>
                   </div>
                   <div>
@@ -209,7 +232,9 @@ const BrowseRequests = () => {
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Client</p>
-                    <p>{selected.client.firstName} {selected.client.lastName}</p>
+                    <p>
+                      {selected.client.firstName} {selected.client.lastName}
+                    </p>
                   </div>
                 </div>
 
@@ -252,57 +277,88 @@ const BrowseRequests = () => {
                         Submit Offer for Request #{selected.id}
                       </DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleSubmitOffer} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label>Vehicle</Label>
-                        <Select
-                          onValueChange={setSelectedVehicleId}
-                          value={selectedVehicleId}
+                    {selected.hasFurniture && filteredVehicles.length === 0 ? (
+                      <div className="py-6 text-center space-y-3">
+                        <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                          <Armchair className="w-6 h-6 text-destructive" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-bold text-destructive">
+                            Furniture Handling Required
+                          </p>
+                          <p className="text-xs text-muted-foreground px-4">
+                            This move request contains furniture. You don't have
+                            any active vehicles capable of carrying furniture.
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          onClick={() => setOfferDialogOpen(false)}
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select vehicle" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {driverVehicles.map((v) => (
-                              <SelectItem key={v.id} value={String(v.id)}>
-                                {getVehicleString(v)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          <a href="/driver/vehicles">Manage Vehicles</a>
+                        </Button>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Price ($)</Label>
-                        <Input
-                          type="number"
-                          placeholder="Enter your price"
-                          value={offerPrice}
-                          onChange={(e) => setOfferPrice(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Offer Date & Time</Label>
-                        <Input
-                          type="datetime-local"
-                          value={offeredDateTime}
-                          onChange={(e) => setOfferedDateTime(e.target.value)}
-                        />
-                      </div>
-                      <Button
-                        type="submit"
-                        className="w-full gradient-brand text-primary-foreground border-0"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
-                            Submitting...
-                          </>
-                        ) : (
-                          "Submit Offer"
-                        )}
-                      </Button>
-                    </form>
+                    ) : (
+                      <form onSubmit={handleSubmitOffer} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Vehicle</Label>
+                          <Select
+                            onValueChange={setSelectedVehicleId}
+                            value={selectedVehicleId}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select vehicle" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredVehicles.map((v) => (
+                                <SelectItem key={v.id} value={String(v.id)}>
+                                  {getVehicleString(v)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {selected.hasFurniture && (
+                            <p className="text-[10px] text-primary font-medium flex items-center gap-1">
+                              <Info className="w-3 h-3" /> Showing only
+                              furniture-capable vehicles
+                            </p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Price ($)</Label>
+                          <Input
+                            type="number"
+                            placeholder="Enter your price"
+                            value={offerPrice}
+                            onChange={(e) => setOfferPrice(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Offer Date & Time</Label>
+                          <Input
+                            type="datetime-local"
+                            value={offeredDateTime}
+                            onChange={(e) => setOfferedDateTime(e.target.value)}
+                          />
+                        </div>
+                        <Button
+                          type="submit"
+                          className="w-full gradient-brand text-primary-foreground border-0"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
+                              Submitting...
+                            </>
+                          ) : (
+                            "Submit Offer"
+                          )}
+                        </Button>
+                      </form>
+                    )}
                   </DialogContent>
                 </Dialog>
               </CardContent>
