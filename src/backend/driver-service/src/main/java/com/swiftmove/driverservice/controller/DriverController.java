@@ -339,6 +339,17 @@ class DriverController {
         }
     }
 
+    @PatchMapping("/vehicles/{id}/toggle-active")
+    public ResponseEntity<VehicleDto> toggleVehicleActive(@PathVariable Long id) {
+        try{
+            VehicleDto updatedVehicle = vehicleService.toggleActive(id);
+            return ResponseEntity.ok(updatedVehicle);
+        }
+        catch (Exception ex){
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
 //    Vehicle Type Endpoints
 
 //    Get All

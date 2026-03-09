@@ -13,6 +13,7 @@ import com.swiftmove.clientservice.dto.CreateMoveRequestDto;
 import com.swiftmove.clientservice.dto.requestDto.MoveRequestDto;
 import com.swiftmove.clientservice.mapper.Mapper;
 import com.swiftmove.clientservice.model.MoveRequest;
+import com.swiftmove.clientservice.model.MoveStatus;
 import com.swiftmove.clientservice.repository.LuggageEntryRepository;
 import com.swiftmove.clientservice.repository.MoveRequestRepository;
 
@@ -58,7 +59,7 @@ public class MoveRequestService {
             MoveRequest moveRequest = Mapper.createMoveRequestEntity(createMoveRequestDto);
             validateMoveRequest(moveRequest);
             // Make move Request Status to "CREATED"
-            moveRequest.setStatus("CREATED");
+            moveRequest.setStatus(MoveStatus.CREATED);
             moveRequestRepository.save(moveRequest);
             return Mapper.toMoveRequestDto(moveRequest);
         }catch(Exception e){
@@ -74,7 +75,7 @@ public class MoveRequestService {
     public void cancel(Long id) {
         MoveRequest moveRequest = moveRequestRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Move Request not found"));
-        moveRequest.setStatus("CANCELLED");
+        moveRequest.setStatus(MoveStatus.CANCELLED);
         moveRequestRepository.save(moveRequest);
     }
 
@@ -95,23 +96,23 @@ public class MoveRequestService {
     //Get all active move request for the client
     public List<MoveRequestDto> findActiveByClientId(Long clientId)
     {
-        String [] activeStatuses = {"CREATED", "OFFER_AVAILABLE"};
+        List<MoveStatus> activeStatuses = Arrays.asList(MoveStatus.CREATED, MoveStatus.OFFER_AVAILABLE);
 
         List<MoveRequest> moveRequests = moveRequestRepository.findByClientId(clientId);
 
         // Filter move requests by active statuses
         moveRequests = moveRequests.stream()
-                .filter(mr -> Arrays.asList(activeStatuses).contains(mr.getStatus()))
+                .filter(mr -> activeStatuses.contains(mr.getStatus()))
                 .toList();
 
         return moveRequests.stream().map(Mapper::toMoveRequestDto).toList();
     }
 
     public List<MoveRequestDto> findAllActive() {
-        String [] activeStatuses = {"CREATED", "OFFER_AVAILABLE"};
+        List<MoveStatus> activeStatuses = Arrays.asList(MoveStatus.CREATED, MoveStatus.OFFER_AVAILABLE);
         List<MoveRequest> moveRequests = moveRequestRepository.findAll();
         return moveRequests.stream()
-                .filter(mr -> Arrays.asList(activeStatuses).contains(mr.getStatus()))
+                .filter(mr -> activeStatuses.contains(mr.getStatus()))
                 .map(Mapper::toMoveRequestDto)
                 .toList();
     }

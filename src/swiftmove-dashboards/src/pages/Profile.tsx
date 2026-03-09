@@ -6,14 +6,16 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { userService } from "@/services/userService";
 import type { UserForm } from "@/types";
+import { Loader2 } from "lucide-react";
 
 const Profile = () => {
-  const { userId, name, email } = useAuth();
+  const { userId } = useAuth();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [emailField, setEmailField] = useState(email ?? "");
+  const [emailField, setEmailField] = useState("");
   const [userName, setUserName] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -26,15 +28,27 @@ const Profile = () => {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-  // Pre-populate from auth context name (e.g. "John Doe")
   useEffect(() => {
-    if (name) {
-      const parts = name.trim().split(" ");
-      setFirstName(parts[0] ?? "");
-      setLastName(parts.slice(1).join(" ") ?? "");
-    }
-    if (email) setEmailField(email);
-  }, [name, email]);
+    const fetchUserData = async () => {
+      if (!userId) return;
+      try {
+        setIsLoading(true);
+        const userData = await userService.getUserById(userId);
+        if (userData) {
+          setFirstName(userData.firstName || "");
+          setLastName(userData.lastName || "");
+          setEmailField(userData.email || "");
+          setUserName(userData.username || "");
+        }
+      } catch (err) {
+        console.error("Failed to fetch user data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [userId]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +109,14 @@ const Profile = () => {
       setIsUpdatingPassword(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in max-w-2xl">

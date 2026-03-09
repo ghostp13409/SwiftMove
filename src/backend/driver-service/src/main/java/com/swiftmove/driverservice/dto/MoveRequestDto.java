@@ -19,4 +19,5 @@ public class MoveRequestDto {
     private Long fromAddressId;
     private Long toAddressId;
     private String status;
+    private Boolean hasFurniture;
 }

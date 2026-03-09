@@ -31,3 +31,6 @@ ALTER SEQUENCE move_requests_id_seq RESTART WITH 1;
 ALTER SEQUENCE move_offers_id_seq RESTART WITH 1;
 
 ALTER SEQUENCE move_trips_id_seq RESTART WITH 1;
+
+-- After Seeding
+-- SELECT setval( 'addresses_id_seq', ( SELECT MAX(id) FROM addresses ) );

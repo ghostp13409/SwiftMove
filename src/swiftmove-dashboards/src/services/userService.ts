@@ -29,7 +29,11 @@ export const userService = {
   // Create new user
   createUser: async (userData: UserForm): Promise<User> => {
     try {
-      const response = await apiClient.post(`${API_BASE}`, userData);
+      const formattedData = {
+        ...userData,
+        userName: userData.username,
+      };
+      const response = await apiClient.post(`${API_BASE}`, formattedData);
       return response.data.data || response.data;
     } catch (error) {
       console.error("Error creating user:", error);
@@ -40,10 +44,14 @@ export const userService = {
   // Update user profile (accepts partial data for partial updates)
   updateUserProfile: async (
     id: string | number,
-    data: Partial<UserForm>,
+    data: Partial<UserForm> & { username?: string },
   ): Promise<User> => {
     try {
-      const response = await apiClient.put(`${API_BASE}/${id}`, data);
+      const formattedData = {
+        ...data,
+        userName: data.username,
+      };
+      const response = await apiClient.put(`${API_BASE}/${id}`, formattedData);
       return response.data.data || response.data;
     } catch (error) {
       console.error("Error updating user profile:", error);
