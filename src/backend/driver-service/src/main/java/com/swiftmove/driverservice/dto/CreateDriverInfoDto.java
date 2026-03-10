@@ -15,4 +15,6 @@ public class CreateDriverInfoDto {
     private String drivingLicense;
     private Integer drivingExperience;
     private Double range;
+    private Double currentLatitude;
+    private Double currentLongitude;
 }

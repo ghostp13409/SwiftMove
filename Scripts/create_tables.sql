@@ -54,6 +54,8 @@ CREATE TABLE addresses (
     state_or_province VARCHAR(100),
     country VARCHAR(100),
     postal_or_zip_code VARCHAR(20),
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -99,6 +101,8 @@ CREATE TABLE driver_infos (
     range REAL,
     driving_license VARCHAR(50),
     user_id BIGINT NOT NULL,
+    current_latitude DOUBLE PRECISION,
+    current_longitude DOUBLE PRECISION,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -128,6 +132,11 @@ CREATE TABLE move_requests (
     client_id BIGINT NOT NULL,
     from_address_id BIGINT NOT NULL,
     to_address_id BIGINT NOT NULL,
+    distance DOUBLE PRECISION,
+    from_latitude DOUBLE PRECISION,
+    from_longitude DOUBLE PRECISION,
+    to_latitude DOUBLE PRECISION,
+    to_longitude DOUBLE PRECISION,
     status move_status_enum NOT NULL,
     has_furniture BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

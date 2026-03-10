@@ -72,13 +72,23 @@ public class MoveOfferService {
         try{
             validateCreateMoveOffer(newMoveOfferDto);
             validateVehicleForMoveRequest(newMoveOfferDto.getVehicleId(), newMoveOfferDto.getMoveRequestId());
+            
+            // Recalculate price based on distance and vehicle rate to ensure integrity
+            MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(newMoveOfferDto.getMoveRequestId());
+            VehicleDto vehicle = vehicleService.getById(newMoveOfferDto.getVehicleId());
+            
+            if (moveRequest != null && vehicle != null && moveRequest.getDistance() != null && vehicle.getPricePerKm() != null) {
+                double calculatedPrice = moveRequest.getDistance() * vehicle.getPricePerKm();
+                newMoveOfferDto.setPrice((long) Math.ceil(calculatedPrice));
+            }
+
+            validatePriceForMoveOffer(newMoveOfferDto.getPrice(), newMoveOfferDto.getVehicleId(), newMoveOfferDto.getMoveRequestId());
 
             MoveOffer newMoveOffer = Mapper.createMoveOfferEntity(newMoveOfferDto);
             newMoveOffer = moveOfferRepository.save(newMoveOffer);
 
             // Update Move Request Status if needed
             try {
-                MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(newMoveOffer.getMoveRequestId());
                 if ("CREATED".equals(moveRequest.getStatus())) {
                     moveRequest.setStatus("OFFER_AVAILABLE");
                     clientServiceClient.updateMoveRequest(moveRequest.getId(), moveRequest);
@@ -101,6 +111,17 @@ public class MoveOfferService {
         try{
             validateMoveOffer(moveOfferDto);
             validateVehicleForMoveRequest(moveOfferDto.getVehicleId(), moveOfferDto.getMoveRequestId());
+
+            // Recalculate price based on distance and vehicle rate
+            MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(moveOfferDto.getMoveRequestId());
+            VehicleDto vehicle = vehicleService.getById(moveOfferDto.getVehicleId());
+
+            if (moveRequest != null && vehicle != null && moveRequest.getDistance() != null && vehicle.getPricePerKm() != null) {
+                double calculatedPrice = moveRequest.getDistance() * vehicle.getPricePerKm();
+                moveOfferDto.setPrice((long) Math.ceil(calculatedPrice));
+            }
+
+            validatePriceForMoveOffer(moveOfferDto.getPrice(), moveOfferDto.getVehicleId(), moveOfferDto.getMoveRequestId());
 
             MoveOffer existingMoveOffer = moveOfferRepository.findById(id).orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
             existingMoveOffer.setOfferedDate(moveOfferDto.getOfferDate());
@@ -181,6 +202,26 @@ public class MoveOfferService {
             if (vehicle != null && !Boolean.TRUE.equals(vehicle.getCanCarryFurniture())) {
                 throw new IllegalArgumentException("This move request requires a vehicle that can carry furniture.");
             }
+        }
+    }
+
+    private void validatePriceForMoveOffer(Long price, Long vehicleId, Long moveRequestId) {
+        MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(moveRequestId);
+        VehicleDto vehicle = vehicleService.getById(vehicleId);
+
+        if (moveRequest != null && vehicle != null && moveRequest.getDistance() != null && vehicle.getPricePerKm() != null) {
+            double expectedPrice = moveRequest.getDistance() * vehicle.getPricePerKm();
+            // Allow a small margin (e.g., 5%) or just inform if it's too high
+            if (price > moveRequest.getMaxBudget()) {
+                throw new IllegalArgumentException("Offered price exceeds the move request's max budget.");
+            }
+            // Enforce the business rule: Price determined by distance * price_per_km
+            // If we want to be strict:
+            /*
+            if (Math.abs(price - expectedPrice) > 1.0) { // allowing $1 difference for rounding
+                 throw new IllegalArgumentException("Offered price must be " + expectedPrice + " based on distance and vehicle rate.");
+            }
+            */
         }
     }
 

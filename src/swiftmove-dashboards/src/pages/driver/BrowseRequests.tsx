@@ -19,16 +19,17 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import StatusBadge from "@/components/StatusBadge";
-import { Loader2, Armchair, Info } from "lucide-react";
+import { Loader2, Armchair, Info, MapPin, ExternalLink, Map as MapIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { moveRequestService } from "@/services/moveRequestService";
+import { tripService } from "@/services/tripService";
 import { moveOfferService } from "@/services/moveOfferService";
 import { driverService } from "@/services/driverService";
 import { vehicleService } from "@/services/vehicleService";
 import { populationFactory } from "@/services/populationFactory";
 import { useToast } from "@/hooks/use-toast";
 import type { MoveRequestPopulated, Vehicle, DriverInfo } from "@/types";
-import { getVehicleString } from "@/utils";
+import { getVehicleString, getGoogleMapsAddressLink, getGoogleMapsDirectionsLink } from "@/utils";
+import { DateTimePicker } from "@/components/DateTimePicker";
 
 const BrowseRequests = () => {
   const { userId } = useAuth();
@@ -46,26 +47,26 @@ const BrowseRequests = () => {
   // Offer form state
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [offerPrice, setOfferPrice] = useState("");
-  const [offeredDateTime, setOfferedDateTime] = useState("");
+  const [offeredDateTime, setOfferedDateTime] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!userId) return;
       try {
-        const [requests, driver] = await Promise.all([
-          moveRequestService.getAllMoveRequests(),
-          driverService.getDriverByUserId(userId),
-        ]);
-
-        const pending = requests.filter((r) => r.status === "CREATED");
-        const populatedPending = await Promise.all(
-          pending.map((req) => populationFactory.populateMoveRequest(req)),
-        );
-        setPendingRequests(populatedPending);
-
+        const driver = await driverService.getDriverByUserId(userId);
+        
         if (driver) {
           setDriverInfo(driver);
-          const vehicles = await vehicleService.getVehiclesByDriver(driver.id);
+          
+          const [requests, vehicles] = await Promise.all([
+            tripService.browseRequests(driver.userId),
+            vehicleService.getVehiclesByDriver(driver.id),
+          ]);
+          
+          const populatedPending = await Promise.all(
+            requests.map((req) => populationFactory.populateMoveRequest(req)),
+          );
+          setPendingRequests(populatedPending);
           setDriverVehicles(vehicles.filter((v) => v.isActive));
         }
       } catch (err) {
@@ -76,6 +77,19 @@ const BrowseRequests = () => {
     };
     fetchData();
   }, [userId]);
+
+  // Update offer price when vehicle changes
+  useEffect(() => {
+    if (selectedVehicleId && selected) {
+      const vehicle = driverVehicles.find(v => v.id === parseInt(selectedVehicleId));
+      if (vehicle && selected.distance) {
+        const calculatedPrice = selected.distance * vehicle.pricePerKm;
+        setOfferPrice(calculatedPrice.toFixed(2));
+      }
+    } else {
+      setOfferPrice("");
+    }
+  }, [selectedVehicleId, selected, driverVehicles]);
 
   const handleSubmitOffer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +114,7 @@ const BrowseRequests = () => {
         driverId: driverInfo.userId,
         vehicleId: parseInt(selectedVehicleId),
         price: parseFloat(offerPrice),
-        offerDate: new Date(offeredDateTime),
+        offerDate: offeredDateTime,
         status: "OFFER_SENT",
       });
       toast({
@@ -110,7 +124,7 @@ const BrowseRequests = () => {
       setOfferDialogOpen(false);
       setSelectedVehicleId("");
       setOfferPrice("");
-      setOfferedDateTime("");
+      setOfferedDateTime(undefined);
     } catch (err: any) {
       toast({
         title: "Error",
@@ -174,13 +188,12 @@ const BrowseRequests = () => {
                       <Armchair className="w-3 h-3 text-primary" />
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {(req.luggageEntries ?? []).reduce(
-                      (s, l) => s + l.quantity,
-                      0,
-                    )}{" "}
-                    items
-                  </p>
+                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-1">
+                    <MapPin className="w-3 h-3" />
+                    <span>{req.distance?.toFixed(1) || "0.0"} km</span>
+                    <span className="mx-1">·</span>
+                    <span>{(req.luggageEntries ?? []).reduce((s, l) => s + l.quantity, 0)} items</span>
+                  </div>
                 </CardContent>
               </Card>
             ))
@@ -196,14 +209,22 @@ const BrowseRequests = () => {
                     <CardTitle className="text-lg">
                       {selected.fromAddress.city} → {selected.toAddress.city}
                     </CardTitle>
-                    {selected.hasFurniture && (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {selected.hasFurniture && (
+                        <Badge
+                          variant="secondary"
+                          className="gap-1 bg-primary/10 text-primary border-0 rounded-lg px-2 text-[10px] h-5"
+                        >
+                          <Armchair className="w-3 h-3" /> Includes Furniture
+                        </Badge>
+                      )}
                       <Badge
-                        variant="secondary"
-                        className="gap-1 bg-primary/10 text-primary border-0 rounded-lg px-2 text-[10px] h-5"
+                        variant="outline"
+                        className="gap-1 border-primary/20 text-primary/80 rounded-lg px-2 text-[10px] h-5"
                       >
-                        <Armchair className="w-3 h-3" /> Includes Furniture
+                        <MapPin className="w-3 h-3" /> {selected.distance?.toFixed(2) || "0.00"} km
                       </Badge>
-                    )}
+                    </div>
                   </div>
                   <StatusBadge status={selected.status} />
                 </div>
@@ -211,13 +232,33 @@ const BrowseRequests = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-muted-foreground text-xs">From</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-muted-foreground text-xs">From</p>
+                      <a 
+                        href={getGoogleMapsAddressLink(selected.fromAddress)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-primary hover:underline flex items-center gap-1 font-medium"
+                      >
+                        Map <ExternalLink className="w-2 h-2" />
+                      </a>
+                    </div>
                     <p>
                       {selected.fromAddress.line1}, {selected.fromAddress.city}
                     </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">To</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-muted-foreground text-xs">To</p>
+                      <a 
+                        href={getGoogleMapsAddressLink(selected.toAddress)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-primary hover:underline flex items-center gap-1 font-medium"
+                      >
+                        Map <ExternalLink className="w-2 h-2" />
+                      </a>
+                    </div>
                     <p>
                       {selected.toAddress.line1}, {selected.toAddress.city}
                     </p>
@@ -228,7 +269,21 @@ const BrowseRequests = () => {
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Max Budget</p>
-                    <p className="font-semibold">${selected.maxBudget}</p>
+                    <p className="font-semibold text-primary">${selected.maxBudget}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Distance</p>
+                    <div className="flex items-center gap-2">
+                      <p>{selected.distance?.toFixed(2) || "0.00"} km</p>
+                      <a 
+                        href={getGoogleMapsDirectionsLink(selected.fromAddress, selected.toAddress)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-primary hover:underline flex items-center gap-1 font-medium"
+                      >
+                        View Route <MapIcon className="w-2 h-2" />
+                      </a>
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Client</p>
@@ -259,7 +314,14 @@ const BrowseRequests = () => {
 
                 <Dialog
                   open={offerDialogOpen}
-                  onOpenChange={setOfferDialogOpen}
+                  onOpenChange={(open) => {
+                    setOfferDialogOpen(open);
+                    if (!open) {
+                      setSelectedVehicleId("");
+                      setOfferPrice("");
+                      setOfferedDateTime(undefined);
+                    }
+                  }}
                 >
                   <DialogTrigger asChild>
                     <Button
@@ -314,7 +376,7 @@ const BrowseRequests = () => {
                             <SelectContent>
                               {filteredVehicles.map((v) => (
                                 <SelectItem key={v.id} value={String(v.id)}>
-                                  {getVehicleString(v)}
+                                  {getVehicleString(v)} (${v.pricePerKm}/km)
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -327,26 +389,37 @@ const BrowseRequests = () => {
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label>Price ($)</Label>
+                          <div className="flex justify-between">
+                            <Label>Calculated Price ($)</Label>
+                            {selectedVehicleId && (
+                              <span className="text-[10px] text-muted-foreground">
+                                {selected.distance?.toFixed(2)} km × ${driverVehicles.find(v => v.id === parseInt(selectedVehicleId))?.pricePerKm}/km
+                              </span>
+                            )}
+                          </div>
                           <Input
                             type="number"
-                            placeholder="Enter your price"
+                            placeholder="Price will be calculated automatically"
                             value={offerPrice}
-                            onChange={(e) => setOfferPrice(e.target.value)}
+                            readOnly
+                            className="bg-secondary/50 font-semibold"
                           />
+                          <p className="text-[10px] text-muted-foreground italic">
+                            Price is automatically calculated based on vehicle rate and distance.
+                          </p>
                         </div>
                         <div className="space-y-2">
                           <Label>Offer Date & Time</Label>
-                          <Input
-                            type="datetime-local"
-                            value={offeredDateTime}
-                            onChange={(e) => setOfferedDateTime(e.target.value)}
+                          <DateTimePicker 
+                            date={offeredDateTime} 
+                            setDate={setOfferedDateTime} 
+                            placeholder="Select offer date & time"
                           />
                         </div>
                         <Button
                           type="submit"
                           className="w-full gradient-brand text-primary-foreground border-0"
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || !offerPrice || !offeredDateTime}
                         >
                           {isSubmitting ? (
                             <>

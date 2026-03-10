@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.swiftmove.clientservice.client.LocationServiceClient;
+import com.swiftmove.clientservice.dto.AddressDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class MoveRequestService {
     private final MoveRequestRepository moveRequestRepository;
     private final LuggageEntryRepository luggageEntryRepository;
+    private final LocationServiceClient locationServiceClient;
 
 
 //    CRUD
@@ -40,11 +43,33 @@ public class MoveRequestService {
         assert moveRequest != null;
         return Mapper.toMoveRequestDto(moveRequest);
     }
+
+    private void updateDistanceAndCoordinates(MoveRequest moveRequest) {
+        if (moveRequest.getFromAddressId() != null && moveRequest.getToAddressId() != null) {
+            AddressDTO from = locationServiceClient.getAddressById(moveRequest.getFromAddressId());
+            AddressDTO to = locationServiceClient.getAddressById(moveRequest.getToAddressId());
+
+            if (from != null && to != null) {
+                moveRequest.setFromLatitude(from.getLatitude());
+                moveRequest.setFromLongitude(from.getLongitude());
+                moveRequest.setToLatitude(to.getLatitude());
+                moveRequest.setToLongitude(to.getLongitude());
+
+                double distance = DistanceUtils.calculateDistance(
+                        from.getLatitude(), from.getLongitude(),
+                        to.getLatitude(), to.getLongitude()
+                );
+                moveRequest.setDistance(distance);
+            }
+        }
+    }
+
     public void update(Long id,  MoveRequestDto moveRequestDto) {
             MoveRequest existingMoveRequest = moveRequestRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Move request not found"));
 
         Mapper.updateMoveRequest(existingMoveRequest, moveRequestDto);
+        updateDistanceAndCoordinates(existingMoveRequest);
 
         try{
             validateMoveRequest(existingMoveRequest);
@@ -57,12 +82,14 @@ public class MoveRequestService {
     public MoveRequestDto add(CreateMoveRequestDto createMoveRequestDto) {
         try{
             MoveRequest moveRequest = Mapper.createMoveRequestEntity(createMoveRequestDto);
+            updateDistanceAndCoordinates(moveRequest);
             validateMoveRequest(moveRequest);
             // Make move Request Status to "CREATED"
             moveRequest.setStatus(MoveStatus.CREATED);
             moveRequestRepository.save(moveRequest);
             return Mapper.toMoveRequestDto(moveRequest);
         }catch(Exception e){
+            System.err.println("Error adding move request: " + e.getMessage());
             return null;
         }
     }

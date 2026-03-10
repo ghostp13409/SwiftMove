@@ -41,6 +41,16 @@ public class MoveRequest {
     private Long fromAddressId;
     @Column(name = "to_address_id")
     private Long toAddressId;
+    @Column(name = "distance")
+    private Double distance;
+    @Column(name = "from_latitude")
+    private Double fromLatitude;
+    @Column(name = "from_longitude")
+    private Double fromLongitude;
+    @Column(name = "to_latitude")
+    private Double toLatitude;
+    @Column(name = "to_longitude")
+    private Double toLongitude;
     @Enumerated(EnumType.STRING)
     @Column(name = "status", columnDefinition = "move_status_enum")
     @JdbcType(PostgreSQLEnumJdbcType.class)
