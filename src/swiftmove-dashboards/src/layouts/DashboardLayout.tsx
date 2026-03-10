@@ -105,8 +105,8 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
     >
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
-        <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center shrink-0">
-          <Package className="w-4 h-4 text-primary-foreground" />
+        <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
+          <img src="/logo.jpg" alt="SwiftMove Logo" className="w-full h-full object-cover" />
         </div>
         {!collapsed && (
           <div className="overflow-hidden">

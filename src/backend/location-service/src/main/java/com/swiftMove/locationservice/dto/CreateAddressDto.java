@@ -17,4 +17,6 @@ public class CreateAddressDto {
     private String stateOrProvince;
     private String country;
     private String postalOrZipCode;
+    private Double latitude;
+    private Double longitude;
 }

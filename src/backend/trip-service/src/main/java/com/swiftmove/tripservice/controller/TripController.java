@@ -1,7 +1,8 @@
 package com.swiftmove.tripservice.controller;
 
-import com.swiftmove.tripservice.dto.CreateMoveTripDto;
-import com.swiftmove.tripservice.dto.MoveTripDto;
+import com.swiftmove.tripservice.dto.*;
+import com.swiftmove.tripservice.service.MoveMatchingService;
+import com.swiftmove.tripservice.service.MoveSuggestionService;
 import com.swiftmove.tripservice.service.MoveTripService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,8 @@ import java.util.List;
 class TripController {
 
     private final MoveTripService moveTripService;
+    private final MoveSuggestionService moveSuggestionService;
+    private final MoveMatchingService moveMatchingService;
 
     // For Admin: GET /trips - get all trips
     @GetMapping
@@ -49,9 +52,6 @@ class TripController {
 
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<MoveTripDto>> getByClientId(@PathVariable Long clientId) {
-        // For now, return all trips as we don't store clientId in move_trips table
-        // and would need to call client-service for each trip to filter.
-        // In a real app, we'd store clientId in the trip table or use a join.
         return ResponseEntity.ok(moveTripService.getAll());
     }
 
@@ -72,5 +72,19 @@ class TripController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @PostMapping("/suggest-budget")
+    public ResponseEntity<BudgetSuggestionResponse> suggestBudget(@RequestBody BudgetSuggestionRequest request) {
+        BudgetSuggestionResponse response = moveSuggestionService.suggestBudget(request);
+        if (response == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/browse-requests")
+    public ResponseEntity<List<MoveRequestDto>> browseRequests(@RequestParam Long driverId) {
+        return ResponseEntity.ok(moveMatchingService.getMatchingRequestsForDriver(driverId));
     }
 }

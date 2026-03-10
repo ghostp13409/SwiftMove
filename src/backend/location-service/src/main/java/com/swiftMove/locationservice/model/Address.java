@@ -41,6 +41,12 @@ public class Address {
     @Column(name = "postal_or_zip_code")
     private String postalOrZipCode;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

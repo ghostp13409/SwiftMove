@@ -63,8 +63,8 @@ const Login = () => {
       <div className="w-full max-w-md animate-fade-in">
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center">
-            <Package className="w-5 h-5 text-primary-foreground" />
+          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md">
+            <img src="/logo.jpg" alt="SwiftMove Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold">SwiftMove</h1>
         </div>

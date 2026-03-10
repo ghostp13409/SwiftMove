@@ -15,8 +15,9 @@ public class Mapper {
                 address.getCity(),
                 address.getStateOrProvince(),
                 address.getCountry(),
-                address.getPostalOrZipCode()
-
+                address.getPostalOrZipCode(),
+                address.getLatitude(),
+                address.getLongitude()
         );
     }
     // AddressDTO-> Address Entity
@@ -28,6 +29,8 @@ public class Mapper {
         address.setStateOrProvince(addressDTO.getStateOrProvince());
         address.setPostalOrZipCode(addressDTO.getPostalOrZipCode());
         address.setCountry(addressDTO.getCountry());
+        address.setLatitude(addressDTO.getLatitude());
+        address.setLongitude(addressDTO.getLongitude());
         return address;
     }
 
@@ -39,6 +42,8 @@ public class Mapper {
         address.setStateOrProvince(createAddressDto.getStateOrProvince());
         address.setPostalOrZipCode(createAddressDto.getPostalOrZipCode());
         address.setCountry(createAddressDto.getCountry());
+        address.setLatitude(createAddressDto.getLatitude());
+        address.setLongitude(createAddressDto.getLongitude());
         return address;
     }
 }

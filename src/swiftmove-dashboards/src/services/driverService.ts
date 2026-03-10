@@ -36,7 +36,17 @@ export const driverService = {
 
   // Create driver profile
   createDriverProfile: async (driverData: any): Promise<DriverInfo> => {
-    const response = await apiClient.post(`${API_BASE}/`, driverData);
+    const response = await apiClient.post(`${API_BASE}`, driverData);
+    const driverInfo: DriverInfo = response.data.data || response.data;
+    return driverInfo;
+  },
+
+  // Update driver profile
+  updateDriverInfo: async (
+    id: string | number,
+    driverData: any,
+  ): Promise<DriverInfo> => {
+    const response = await apiClient.put(`${API_BASE}/${id}`, driverData);
     const driverInfo: DriverInfo = response.data.data || response.data;
     return driverInfo;
   },

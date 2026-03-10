@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -19,20 +18,23 @@ import java.util.List;
 public class AddressService {
 
     private final AddressRepository addressRepository;
+    private final GeocodingService geocodingService;
 
     // Adding a new Address
     public AddressDTO addNewAddress(CreateAddressDto createAddressDto) {
 
         Address address = Mapper.createAddressDto(createAddressDto);
+        geocodingService.setCoordinates(address);
 
-        Address savedAddress= addressRepository.save(address);
+        Address savedAddress = addressRepository.save(address);
         return Mapper.toDTO(savedAddress);
 
     }
+
     //Update the existing address
     public AddressDTO updateAddress(Long addressId, AddressDTO addressDTO) {
         Address existingAddress = addressRepository.findById(addressId).orElse(null);
-        if (existingAddress==null)
+        if (existingAddress == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Address not found");
 
         existingAddress.setLine1(addressDTO.getLine1());
@@ -41,11 +43,20 @@ public class AddressService {
         existingAddress.setStateOrProvince(addressDTO.getStateOrProvince());
         existingAddress.setPostalOrZipCode(addressDTO.getPostalOrZipCode());
         existingAddress.setCountry(addressDTO.getCountry());
+        
+        // Update coordinates if they are provided in DTO or if address details changed
+        if (addressDTO.getLatitude() != null && addressDTO.getLongitude() != null) {
+            existingAddress.setLatitude(addressDTO.getLatitude());
+            existingAddress.setLongitude(addressDTO.getLongitude());
+        } else {
+            geocodingService.setCoordinates(existingAddress);
+        }
 
         Address updatedAddress = addressRepository.save(existingAddress);
         return Mapper.toDTO(updatedAddress);
 
     }
+
     // getting all addresses
     public List<AddressDTO> getAllAddresses() {
         return addressRepository
@@ -63,6 +74,7 @@ public class AddressService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Address not found");
         return Mapper.toDTO(address);
     }
+
     //Delete By ID
     public void deleteAddressById(Long id) {
         if (!addressRepository.existsById(id))

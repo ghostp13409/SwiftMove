@@ -10,6 +10,11 @@ export const MoveRequestSchema = z.object({
   clientId: z.number(),
   fromAddressId: z.number(),
   toAddressId: z.number(),
+  distance: z.number().optional(),
+  fromLatitude: z.number().optional(),
+  fromLongitude: z.number().optional(),
+  toLatitude: z.number().optional(),
+  toLongitude: z.number().optional(),
   status: z.enum(["CREATED", "OFFER_AVAILABLE", "ACCEPTED", "CANCELLED"]),
   hasFurniture: z.boolean().default(false),
 });
@@ -20,6 +25,11 @@ export const MoveRequestFormSchema = z.object({
   clientId: z.number(),
   fromAddressId: z.number(),
   toAddressId: z.number(),
+  distance: z.number().optional(),
+  fromLatitude: z.number().optional(),
+  fromLongitude: z.number().optional(),
+  toLatitude: z.number().optional(),
+  toLongitude: z.number().optional(),
   status: z.enum(["CREATED", "OFFER_AVAILABLE", "ACCEPTED", "CANCELLED"]),
   hasFurniture: z.boolean().default(false),
 });

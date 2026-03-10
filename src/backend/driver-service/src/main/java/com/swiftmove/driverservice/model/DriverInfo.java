@@ -23,6 +23,10 @@ public class DriverInfo {
     private String drivingLicense;
     @Column(name = "user_id")
     private Long userId;
+    @Column(name = "current_latitude")
+    private Double currentLatitude;
+    @Column(name = "current_longitude")
+    private Double currentLongitude;
     @Column(name = "created_at")
     private Instant createdAt;
     @Column(name = "updated_at")
