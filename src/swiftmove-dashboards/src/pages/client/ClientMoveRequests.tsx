@@ -9,6 +9,8 @@ import {
   ChevronLeft,
   Check,
   Armchair,
+  ExternalLink,
+  Map as MapIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +40,7 @@ import { moveOfferService } from "@/services/moveOfferService";
 import { moveRequestService } from "@/services/moveRequestService";
 import { addressService } from "@/services/addressService";
 import { luggageService } from "@/services/luggageService";
+import { tripService } from "@/services/tripService";
 import type {
   MoveRequest,
   MoveRequestPopulated,
@@ -45,8 +48,10 @@ import type {
   LuggageType,
 } from "@/types";
 import { populationFactory } from "@/services/populationFactory";
-import { getVehicleString } from "@/utils";
+import { getVehicleString, getGoogleMapsAddressLink, getGoogleMapsDirectionsLink } from "@/utils";
 import { Badge } from "@/components/ui/badge";
+import { AddressAutocomplete, AddressResult } from "@/components/AddressAutocomplete";
+import { DateTimePicker } from "@/components/DateTimePicker";
 
 const ClientMoveRequests = () => {
   const { userId } = useAuth();
@@ -77,6 +82,8 @@ const ClientMoveRequests = () => {
   const [fromState, setFromState] = useState("");
   const [fromCountry, setFromCountry] = useState("Canada");
   const [fromPostal, setFromPostal] = useState("");
+  const [fromLat, setFromLat] = useState<number | null>(null);
+  const [fromLon, setFromLon] = useState<number | null>(null);
 
   // Form state - Destination
   const [toLine1, setToLine1] = useState("");
@@ -85,11 +92,78 @@ const ClientMoveRequests = () => {
   const [toState, setToState] = useState("");
   const [toCountry, setToCountry] = useState("Canada");
   const [toPostal, setToPostal] = useState("");
+  const [toLat, setToLat] = useState<number | null>(null);
+  const [toLon, setToLon] = useState<number | null>(null);
 
-  const [moveDate, setMoveDate] = useState("");
+  const [moveDate, setMoveDate] = useState<Date | undefined>(undefined);
   const [maxBudget, setMaxBudget] = useState("");
   const [notes, setNotes] = useState("");
   const [hasFurniture, setHasFurniture] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+
+  const handleSuggestBudget = async () => {
+    if (!fromLine1 || !fromCity || !toLine1 || !toCity) {
+      toast({
+        title: "Missing Information",
+        description: "Please select both pick-up and destination addresses to get a budget suggestion.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      setIsSuggesting(true);
+      const addrDataFrom = {
+        line1: fromLine1,
+        line2: fromLine2,
+        city: fromCity,
+        stateOrProvince: fromState,
+        country: fromCountry,
+        postalOrZipCode: fromPostal,
+        latitude: fromLat,
+        longitude: fromLon
+      };
+
+      const addrDataTo = {
+        line1: toLine1,
+        line2: toLine2,
+        city: toCity,
+        stateOrProvince: toState,
+        country: toCountry,
+        postalOrZipCode: toPostal,
+        latitude: toLat,
+        longitude: toLon
+      };
+
+      const [fromAddr, toAddr] = await Promise.all([
+        addressService.createAddress(addrDataFrom),
+        addressService.createAddress(addrDataTo),
+      ]);
+
+      const response = await tripService.suggestBudget({
+        fromAddressId: fromAddr.id,
+        toAddressId: toAddr.id,
+        hasFurniture: hasFurniture
+      });
+
+      if (response && response.suggestedMaxBudget) {
+        setMaxBudget(Math.round(response.suggestedMaxBudget).toString());
+        toast({
+          title: "Budget Suggested",
+          description: `Suggested budget is $${Math.round(response.suggestedMaxBudget)} based on ${Math.round(response.distance)}km distance.`,
+        });
+      }
+    } catch (err: any) {
+      console.error(err);
+      const errorMessage = err?.response?.data?.message || err?.message || "Could not calculate budget. Please check your addresses.";
+      toast({
+        title: "Suggestion Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
 
   useEffect(() => {
     if (!userId) return;
@@ -202,6 +276,8 @@ const ClientMoveRequests = () => {
     setFromState(req.fromAddress.stateOrProvince);
     setFromCountry(req.fromAddress.country);
     setFromPostal(req.fromAddress.postalOrZipCode);
+    setFromLat(req.fromAddress.latitude || null);
+    setFromLon(req.fromAddress.longitude || null);
 
     setToLine1(req.toAddress.line1);
     setToLine2(req.toAddress.line2 || "");
@@ -209,18 +285,10 @@ const ClientMoveRequests = () => {
     setToState(req.toAddress.stateOrProvince);
     setToCountry(req.toAddress.country);
     setToPostal(req.toAddress.postalOrZipCode);
+    setToLat(req.toAddress.latitude || null);
+    setToLon(req.toAddress.longitude || null);
 
-    // Format date for datetime-local input
-    if (req.moveDate) {
-      const d = new Date(req.moveDate);
-      const formattedDate = new Date(
-        d.getTime() - d.getTimezoneOffset() * 60000,
-      )
-        .toISOString()
-        .slice(0, 16);
-      setMoveDate(formattedDate);
-    }
-
+    setMoveDate(req.moveDate);
     setMaxBudget(String(req.maxBudget));
     setHasFurniture(req.hasFurniture || false);
 
@@ -256,27 +324,9 @@ const ClientMoveRequests = () => {
   };
 
   const nextStep = () => {
-    console.log("nextStep validation:", {
-      fromLine1,
-      fromCity,
-      fromState,
-      fromPostal,
-      toLine1,
-      toCity,
-      toState,
-      toPostal,
-      moveDate,
-      maxBudget,
-    });
     const missing = [];
     if (!fromLine1) missing.push("Pick-up Address");
-    if (!fromCity) missing.push("Pick-up City");
-    if (!fromState) missing.push("Pick-up State/Province");
-    if (!fromPostal) missing.push("Pick-up Postal Code");
     if (!toLine1) missing.push("Destination Address");
-    if (!toCity) missing.push("Destination City");
-    if (!toState) missing.push("Destination State/Province");
-    if (!toPostal) missing.push("Destination Postal Code");
     if (!moveDate) missing.push("Move Date");
     if (!maxBudget) missing.push("Budget");
 
@@ -292,6 +342,7 @@ const ClientMoveRequests = () => {
   };
 
   const handleSubmitRequest = async () => {
+    if (!moveDate) return;
     setIsSubmitting(true);
     try {
       let reqId = currentRequestId;
@@ -303,6 +354,8 @@ const ClientMoveRequests = () => {
         stateOrProvince: fromState,
         country: fromCountry,
         postalOrZipCode: fromPostal,
+        latitude: fromLat,
+        longitude: fromLon
       };
 
       const addrDataTo = {
@@ -312,6 +365,8 @@ const ClientMoveRequests = () => {
         stateOrProvince: toState,
         country: toCountry,
         postalOrZipCode: toPostal,
+        latitude: toLat,
+        longitude: toLon
       };
 
       if (isEditing && selected) {
@@ -326,7 +381,7 @@ const ClientMoveRequests = () => {
           clientId: userId!,
           fromAddressId: selected.fromAddressId,
           toAddressId: selected.toAddressId,
-          moveDate: new Date(moveDate),
+          moveDate: moveDate,
           maxBudget: parseFloat(maxBudget),
           status: selected.status as any,
           hasFurniture: hasFurniture,
@@ -343,7 +398,7 @@ const ClientMoveRequests = () => {
           clientId: userId!,
           fromAddressId: fromAddr.id,
           toAddressId: toAddr.id,
-          moveDate: new Date(moveDate),
+          moveDate: moveDate,
           maxBudget: parseFloat(maxBudget),
           status: "CREATED",
           hasFurniture: hasFurniture,
@@ -412,13 +467,17 @@ const ClientMoveRequests = () => {
     setFromState("");
     setFromCountry("Canada");
     setFromPostal("");
+    setFromLat(null);
+    setFromLon(null);
     setToLine1("");
     setToLine2("");
     setToCity("");
     setToState("");
     setToCountry("Canada");
     setToPostal("");
-    setMoveDate("");
+    setToLat(null);
+    setToLon(null);
+    setMoveDate(undefined);
     setMaxBudget("");
     setNotes("");
     setHasFurniture(false);
@@ -429,6 +488,26 @@ const ClientMoveRequests = () => {
     });
     setLuggageQuantities(emptyQuantities);
     setStep(1);
+  };
+
+  const onFromAddressSelect = (res: AddressResult) => {
+    setFromLine1(res.line1);
+    setFromCity(res.city);
+    setFromState(res.stateOrProvince);
+    setFromCountry(res.country);
+    setFromPostal(res.postalOrZipCode);
+    setFromLat(res.latitude);
+    setFromLon(res.longitude);
+  };
+
+  const onToAddressSelect = (res: AddressResult) => {
+    setToLine1(res.line1);
+    setToCity(res.city);
+    setToState(res.stateOrProvince);
+    setToCountry(res.country);
+    setToPostal(res.postalOrZipCode);
+    setToLat(res.latitude);
+    setToLon(res.longitude);
   };
 
   return (
@@ -456,7 +535,7 @@ const ClientMoveRequests = () => {
             <DialogHeader className="p-6 border-b bg-background">
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-xl font-bold">
-                  Create Move Request
+                  {isEditing ? "Edit Move Request" : "Create Move Request"}
                 </DialogTitle>
                 <div className="flex gap-1.5">
                   <div
@@ -478,48 +557,11 @@ const ClientMoveRequests = () => {
                       <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest px-1">
                         Pick-up Location
                       </Label>
-                      <div className="grid grid-cols-1 gap-2">
-                        <Input
-                          placeholder="Address Line 1"
-                          value={fromLine1}
-                          onChange={(e) => setFromLine1(e.target.value)}
-                          className="h-11 rounded-xl bg-secondary/30"
-                        />
-                        <Input
-                          placeholder="Apartment, suite, etc. (optional)"
-                          value={fromLine2}
-                          onChange={(e) => setFromLine2(e.target.value)}
-                          className="h-11 rounded-xl bg-secondary/30"
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            placeholder="City"
-                            value={fromCity}
-                            onChange={(e) => setFromCity(e.target.value)}
-                            className="h-11 rounded-xl bg-secondary/30"
-                          />
-                          <Input
-                            placeholder="Province/State"
-                            value={fromState}
-                            onChange={(e) => setFromState(e.target.value)}
-                            className="h-11 rounded-xl bg-secondary/30"
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            placeholder="Postal/Zip Code"
-                            value={fromPostal}
-                            onChange={(e) => setFromPostal(e.target.value)}
-                            className="h-11 rounded-xl bg-secondary/30"
-                          />
-                          <Input
-                            placeholder="Country"
-                            value={fromCountry}
-                            onChange={(e) => setFromCountry(e.target.value)}
-                            className="h-11 rounded-xl bg-secondary/30"
-                          />
-                        </div>
-                      </div>
+                      <AddressAutocomplete 
+                        onAddressSelect={onFromAddressSelect} 
+                        defaultValue={fromLine1 ? `${fromLine1}, ${fromCity}` : ""}
+                        placeholder="Search pick-up address..."
+                      />
                     </div>
 
                     {/* Destination Address Section */}
@@ -527,70 +569,41 @@ const ClientMoveRequests = () => {
                       <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest px-1">
                         Destination
                       </Label>
-                      <div className="grid grid-cols-1 gap-2">
-                        <Input
-                          placeholder="Address Line 1"
-                          value={toLine1}
-                          onChange={(e) => setToLine1(e.target.value)}
-                          className="h-11 rounded-xl bg-secondary/30"
-                        />
-                        <Input
-                          placeholder="Apartment, suite, etc. (optional)"
-                          value={toLine2}
-                          onChange={(e) => setToLine2(e.target.value)}
-                          className="h-11 rounded-xl bg-secondary/30"
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            placeholder="City"
-                            value={toCity}
-                            onChange={(e) => setToCity(e.target.value)}
-                            className="h-11 rounded-xl bg-secondary/30"
-                          />
-                          <Input
-                            placeholder="Province/State"
-                            value={toState}
-                            onChange={(e) => setToState(e.target.value)}
-                            className="h-11 rounded-xl bg-secondary/30"
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            placeholder="Postal/Zip Code"
-                            value={toPostal}
-                            onChange={(e) => setToPostal(e.target.value)}
-                            className="h-11 rounded-xl bg-secondary/30"
-                          />
-                          <Input
-                            placeholder="Country"
-                            value={toCountry}
-                            onChange={(e) => setToCountry(e.target.value)}
-                            className="h-11 rounded-xl bg-secondary/30"
-                          />
-                        </div>
-                      </div>
+                      <AddressAutocomplete 
+                        onAddressSelect={onToAddressSelect} 
+                        defaultValue={toLine1 ? `${toLine1}, ${toCity}` : ""}
+                        placeholder="Search destination address..."
+                      />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-4 pt-2">
                     <div className="space-y-2">
                       <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest px-1">
                         Move Date
                       </Label>
-                      <Input
-                        type="datetime-local"
-                        value={moveDate}
-                        onChange={(e) => {
-                          console.log("Move Date Changed:", e.target.value);
-                          setMoveDate(e.target.value);
-                        }}
-                        className="h-11 rounded-xl bg-secondary/30"
+                      <DateTimePicker 
+                        date={moveDate} 
+                        setDate={setMoveDate} 
+                        placeholder="Select move date"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest px-1">
-                        Budget ($)
-                      </Label>
+                      <div className="flex items-center justify-between px-1">
+                        <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">
+                          Budget ($)
+                        </Label>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={handleSuggestBudget}
+                          disabled={isSuggesting}
+                          className="h-6 text-[10px] gap-1 text-primary hover:text-primary hover:bg-primary/5"
+                        >
+                          {isSuggesting ? <Loader2 className="w-3 h-3 animate-spin" /> : "Suggest"}
+                        </Button>
+                      </div>
                       <Input
                         type="number"
                         placeholder="500"
@@ -876,9 +889,19 @@ const ClientMoveRequests = () => {
                 <CardContent className="space-y-8 p-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                      <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
-                        Origin
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
+                          Origin
+                        </p>
+                        <a 
+                          href={getGoogleMapsAddressLink(selected.fromAddress)} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-primary hover:underline flex items-center gap-1 font-bold"
+                        >
+                          Google Maps <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                      </div>
                       <div className="p-4 rounded-2xl bg-secondary/20 border border-border/50">
                         <p className="text-sm font-bold">
                           {selected.fromAddress?.line1}
@@ -899,9 +922,19 @@ const ClientMoveRequests = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
-                        Destination
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
+                          Destination
+                        </p>
+                        <a 
+                          href={getGoogleMapsAddressLink(selected.toAddress)} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-primary hover:underline flex items-center gap-1 font-bold"
+                        >
+                          Google Maps <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                      </div>
                       <div className="p-4 rounded-2xl bg-secondary/20 border border-border/50">
                         <p className="text-sm font-bold">
                           {selected.toAddress?.line1}
@@ -934,20 +967,36 @@ const ClientMoveRequests = () => {
                     </div>
                     <div className="space-y-1 flex flex-col">
                       <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
-                        Estimated Budget
+                        Estimated Budget & Route
                       </p>
-                      <div className="flex items-center gap-3">
-                        <p className="text-2xl font-black text-primary tracking-tight">
-                          ${selected.maxBudget}
-                        </p>
-                        {selected.hasFurniture && (
-                          <Badge
-                            variant="secondary"
-                            className="h-6 gap-1 bg-primary/10 text-primary border-0 rounded-lg px-2"
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-3">
+                          <p className="text-2xl font-black text-primary tracking-tight">
+                            ${selected.maxBudget}
+                          </p>
+                          {selected.hasFurniture && (
+                            <Badge
+                              variant="secondary"
+                              className="h-6 gap-1 bg-primary/10 text-primary border-0 rounded-lg px-2"
+                            >
+                              <Armchair className="w-3 h-3" /> Includes Furniture
+                            </Badge>
+                          )}
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-fit h-8 text-[10px] font-bold gap-2 rounded-xl border-primary/20 hover:bg-primary/5"
+                          asChild
+                        >
+                          <a 
+                            href={getGoogleMapsDirectionsLink(selected.fromAddress, selected.toAddress)} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
                           >
-                            <Armchair className="w-3 h-3" /> Includes Furniture
-                          </Badge>
-                        )}
+                            <MapIcon className="w-3 h-3" /> View Route on Google Maps
+                          </a>
+                        </Button>
                       </div>
                     </div>
                   </div>

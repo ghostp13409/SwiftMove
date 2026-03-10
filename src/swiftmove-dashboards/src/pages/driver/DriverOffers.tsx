@@ -10,13 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, Info } from "lucide-react";
 import { moveOfferService } from "@/services/moveOfferService";
 import { driverService } from "@/services/driverService";
 import { populationFactory } from "@/services/populationFactory";
 import { useToast } from "@/hooks/use-toast";
 import type { MoveOfferPopulated, DriverInfo } from "@/types";
 import { getVehicleString } from "@/utils";
+import { DateTimePicker } from "@/components/DateTimePicker";
 
 const DriverOffers = () => {
   const { toast } = useToast();
@@ -29,7 +30,7 @@ const DriverOffers = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<MoveOfferPopulated | null>(null);
   const [editPrice, setEditPrice] = useState("");
-  const [editDate, setEditDate] = useState("");
+  const [editDate, setEditDate] = useState<Date | undefined>(undefined);
 
   const fetchOffers = async () => {
     try {
@@ -59,22 +60,19 @@ const DriverOffers = () => {
   const handleEditClick = (offer: MoveOfferPopulated) => {
     setSelectedOffer(offer);
     setEditPrice(String(offer.price));
-    // Format for datetime-local
-    const d = new Date(offer.offerDate);
-    const formattedDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    setEditDate(formattedDate);
+    setEditDate(new Date(offer.offerDate));
     setEditDialogOpen(true);
   };
 
   const handleUpdateOffer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedOffer) return;
+    if (!selectedOffer || !editDate) return;
     
     setIsSubmitting(true);
     try {
       await moveOfferService.updateMoveOffer(selectedOffer.id, {
         price: parseFloat(editPrice),
-        offerDate: new Date(editDate),
+        offerDate: editDate,
         status: selectedOffer.status as any,
         moveRequestId: selectedOffer.moveRequestId,
         driverId: selectedOffer.driverId,
@@ -127,7 +125,7 @@ const DriverOffers = () => {
 
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          <Loader2 className="animate-spin h-8 w-8 text-primary" />
         </div>
       )}
 
@@ -160,13 +158,13 @@ const DriverOffers = () => {
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {getVehicleString(offer.vehicle)} · 
-                      Offer date: {offer.offerDate.toLocaleDateString()}
+                      Offer date: {new Date(offer.offerDate).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold">${offer.price}</p>
                     <p className="text-xs text-muted-foreground">
-                      {offer.moveRequest.moveDate.toLocaleDateString()}
+                      {new Date(offer.moveRequest.moveDate).toLocaleDateString()}
                     </p>
                   </div>
                   {offer.status === "OFFER_SENT" && (
@@ -209,24 +207,25 @@ const DriverOffers = () => {
                 id="price"
                 type="number"
                 value={editPrice}
-                onChange={(e) => setEditPrice(e.target.value)}
-                required
+                readOnly
+                className="bg-secondary/50 font-semibold"
               />
+              <p className="text-[10px] text-muted-foreground italic flex items-center gap-1">
+                <Info className="w-3 h-3" /> Price is fixed based on vehicle rate and distance.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="date">Offer Date & Time</Label>
-              <Input
-                id="date"
-                type="datetime-local"
-                value={editDate}
-                onChange={(e) => setEditDate(e.target.value)}
-                required
+              <DateTimePicker 
+                date={editDate} 
+                setDate={setEditDate} 
+                placeholder="Select offer date & time"
               />
             </div>
             <Button 
               type="submit" 
               className="w-full gradient-brand text-primary-foreground border-0"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !editDate}
             >
               {isSubmitting ? (
                 <>
