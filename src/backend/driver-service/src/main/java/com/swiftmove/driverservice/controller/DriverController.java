@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/drivers")
-class DriverController {
+public class DriverController {
     private final DriverService driverService;
     private final DriverInfoService driverInfoService;
     private final MoveOfferService moveOfferService;

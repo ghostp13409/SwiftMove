@@ -9,22 +9,28 @@ import com.swiftmove.driverservice.model.VehicleType;
 
 public class Mapper {
     public static DriverInfoDto toDriverInfoDto(DriverInfo driverInfo) {
+        if (driverInfo == null) return null;
         DriverInfoDto driverInfoDto = new DriverInfoDto();
         driverInfoDto.setId(driverInfo.getId());
         driverInfoDto.setUserId(driverInfo.getUserId());
         driverInfoDto.setDrivingLicense(driverInfo.getDrivingLicense());
         driverInfoDto.setDrivingExperience(driverInfo.getDrivingExperience());
         driverInfoDto.setRange(driverInfo.getRange());
+        driverInfoDto.setCurrentLatitude(driverInfo.getCurrentLatitude());
+        driverInfoDto.setCurrentLongitude(driverInfo.getCurrentLongitude());
         return driverInfoDto;
     }
 
     public static DriverInfo toDriverInfoEntity(DriverInfoDto driverInfoDto) {
+        if (driverInfoDto == null) return null;
         DriverInfo driverInfo = new DriverInfo();
         driverInfo.setId(driverInfoDto.getId());
         driverInfo.setUserId(driverInfoDto.getUserId());
         driverInfo.setDrivingLicense(driverInfoDto.getDrivingLicense());
         driverInfo.setDrivingExperience(driverInfoDto.getDrivingExperience());
         driverInfo.setRange(driverInfoDto.getRange());
+        driverInfo.setCurrentLatitude(driverInfoDto.getCurrentLatitude());
+        driverInfo.setCurrentLongitude(driverInfoDto.getCurrentLongitude());
         return driverInfo;
     }
 
@@ -103,15 +109,19 @@ public class Mapper {
     }
 
     public static DriverInfo toDriverInfoEntityFromCreateDto(CreateDriverInfoDto createDriverInfoDto) {
+        if (createDriverInfoDto == null) return null;
         DriverInfo driverInfo = new DriverInfo();
         driverInfo.setUserId(createDriverInfoDto.getUserId());
         driverInfo.setDrivingLicense(createDriverInfoDto.getDrivingLicense());
         driverInfo.setDrivingExperience(createDriverInfoDto.getDrivingExperience());
         driverInfo.setRange(createDriverInfoDto.getRange());
+        driverInfo.setCurrentLatitude(createDriverInfoDto.getCurrentLatitude());
+        driverInfo.setCurrentLongitude(createDriverInfoDto.getCurrentLongitude());
         return driverInfo;
     }
 
     public static MoveOffer createMoveOfferEntity(CreateMoveOfferDto createMoveOfferDto) {
+        if (createMoveOfferDto == null) return null;
         MoveOffer offer = new MoveOffer();
 
         offer.setPrice(createMoveOfferDto.getPrice());
@@ -126,6 +136,7 @@ public class Mapper {
         return offer;
     }
     public  static Vehicle createVehicleEntity(CreateVehicleDto createVehicleDto) {
+        if (createVehicleDto == null) return null;
         Vehicle vehicle = new Vehicle();
 
         vehicle.setModel(createVehicleDto.getModel());

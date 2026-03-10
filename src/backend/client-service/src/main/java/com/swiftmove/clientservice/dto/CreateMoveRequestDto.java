@@ -17,6 +17,11 @@ public class CreateMoveRequestDto {
     private Long clientId;
     private Long fromAddressId;
     private Long toAddressId;
+    private Double distance;
+    private Double fromLatitude;
+    private Double fromLongitude;
+    private Double toLatitude;
+    private Double toLongitude;
     private String status;
     private Boolean hasFurniture;
 }
