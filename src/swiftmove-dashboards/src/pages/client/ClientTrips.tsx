@@ -53,7 +53,37 @@ const ClientTrips = () => {
         description: "Your trip has been cancelled successfully.",
       });
       // Refresh list
-      if (!userId) return;
+      refreshTrips();
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to cancel trip.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteTrip = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this trip record? This will also delete the associated request and offer.")) return;
+    try {
+      await tripService.deleteTrip(id);
+      toast({
+        title: "Trip Deleted",
+        description: "The trip record has been removed.",
+      });
+      refreshTrips();
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to delete trip.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const refreshTrips = async () => {
+    if (!userId) return;
+    try {
       const data = await tripService.getTripsByClient(userId);
       const populated = await Promise.all(
         data.map((t) => populationFactory.populateMoveTripDetailed(t)),
@@ -62,11 +92,7 @@ const ClientTrips = () => {
         populated.filter((t) => t.moveRequestPopulated.clientId === userId),
       );
     } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to cancel trip.",
-        variant: "destructive",
-      });
+      console.error("Failed to refresh trips:", err);
     }
   };
 
@@ -97,11 +123,19 @@ const ClientTrips = () => {
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
-                  variant="destructive"
+                  variant="outline"
                   onClick={() => handleCancelTrip(activeTrip.id)}
                   className="h-7 px-3 text-xs"
                 >
                   Cancel Trip
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleDeleteTrip(activeTrip.id)}
+                  className="h-7 px-3 text-xs"
+                >
+                  Delete Trip
                 </Button>
                 <StatusBadge status={activeTrip.status} />
               </div>
@@ -173,7 +207,20 @@ const ClientTrips = () => {
                       {trip.moveOfferPopulated.driver.user.lastName}
                     </p>
                   </div>
-                  <StatusBadge status={trip.status} />
+                  <div className="flex flex-col items-end gap-2">
+                    <StatusBadge status={trip.status} />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 px-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTrip(trip.id);
+                      }}
+                    >
+                      Delete Record
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex justify-between items-center text-sm pt-2 border-t">
                   <span className="text-muted-foreground text-xs font-medium">

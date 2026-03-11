@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.swiftmove.tripservice.client.ClientServiceClient;
 import com.swiftmove.tripservice.client.DriverServiceClient;
 import com.swiftmove.tripservice.dto.DriverInfoDto;
+import com.swiftmove.tripservice.dto.MoveOfferDto;
 import com.swiftmove.tripservice.dto.MoveRequestDto;
 import com.swiftmove.tripservice.dto.VehicleDto;
 import com.swiftmove.tripservice.service.matching.MoveRequestMatcher;
@@ -30,8 +31,18 @@ public class MoveMatchingService {
 
         List<VehicleDto> vehicles = driverServiceClient.getVehiclesByDriverId(driverInfo.getId());
         List<MoveRequestDto> allRequests = clientServiceClient.getAllMoveRequests();
+        List<MoveOfferDto> driverOffers = driverServiceClient.getMoveOffersByDriverId(driverId);
+
+        if (vehicles == null || allRequests == null) {
+            return new ArrayList<>();
+        }
+
+        List<Long> alreadyOfferedRequestIds = (driverOffers != null) 
+                ? driverOffers.stream().map(MoveOfferDto::getMoveRequestId).collect(Collectors.toList())
+                : new ArrayList<>();
 
         return allRequests.stream()
+                .filter(request -> !alreadyOfferedRequestIds.contains(request.getId()))
                 .filter(request -> "CREATED".equals(request.getStatus())
                         || "OFFER_AVAILABLE".equals(request.getStatus()))
                 .filter(request -> vehicles.stream()

@@ -5,35 +5,56 @@ import { tripService } from "@/services/tripService";
 import { driverService } from "@/services/driverService";
 import { populationFactory } from "@/services/populationFactory";
 import type { MoveTripDetailed, DriverInfo } from "@/types";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 const DriverTrips = () => {
   const [myTrips, setMyTrips] = useState<MoveTripDetailed[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchTrips = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const driver: DriverInfo = await driverService.getCurrentDriver();
+      const trips = await tripService.getTripsByDriver(driver.id);
+      const populatedTrips = await Promise.all(
+        trips.map((trip) => populationFactory.populateMoveTripDetailed(trip))
+      );
+      setMyTrips(populatedTrips);
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message ??
+          err?.message ??
+          "Failed to load trips.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const driver: DriverInfo = await driverService.getCurrentDriver();
-        const trips = await tripService.getTripsByDriver(driver.id);
-        const populatedTrips = await Promise.all(
-          trips.map((trip) => populationFactory.populateMoveTripDetailed(trip))
-        );
-        setMyTrips(populatedTrips);
-      } catch (err: any) {
-        setError(
-          err?.response?.data?.message ??
-            err?.message ??
-            "Failed to load trips.",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchTrips();
   }, []);
+
+  const handleDeleteTrip = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this trip record? This will also delete the associated request and offer.")) return;
+    try {
+      await tripService.deleteTrip(id);
+      toast({
+        title: "Trip Deleted",
+        description: "The trip record has been removed.",
+      });
+      fetchTrips();
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to delete trip.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const activeTrip = myTrips.find(
     (t) => t.status === "SCHEDULED" || t.status === "IN_PROGRESS",
@@ -67,7 +88,17 @@ const DriverTrips = () => {
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Active Trip</CardTitle>
-                  <StatusBadge status={activeTrip.status} />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDeleteTrip(activeTrip.id)}
+                      className="h-7 px-3 text-xs"
+                    >
+                      Delete Trip
+                    </Button>
+                    <StatusBadge status={activeTrip.status} />
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -121,7 +152,20 @@ const DriverTrips = () => {
                         <span className="font-semibold">
                           ${trip.moveOfferPopulated.price}
                         </span>
-                        <StatusBadge status={trip.status} />
+                        <div className="flex flex-col items-end gap-1">
+                          <StatusBadge status={trip.status} />
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 px-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTrip(trip.id);
+                            }}
+                          >
+                            Delete Record
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

@@ -1,6 +1,7 @@
 package com.swiftmove.tripservice.client;
 
 import com.swiftmove.tripservice.dto.DriverInfoDto;
+import com.swiftmove.tripservice.dto.MoveOfferDto;
 import com.swiftmove.tripservice.dto.VehicleDto;
 import com.swiftmove.tripservice.dto.VehicleTypeDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -20,4 +21,16 @@ public interface DriverServiceClient {
 
     @GetMapping("/drivers/vehicle-types/by-vehicle")
     VehicleTypeDto getVehicleTypeByVehicleId(@RequestParam("vehicleId") Long vehicleId);
+
+    @GetMapping("/drivers/move-offers")
+    List<MoveOfferDto> getMoveOffersByDriverId(@RequestParam("driverId") Long driverId);
+
+    @GetMapping("/drivers/move-offers/{id}")
+    MoveOfferDto getMoveOfferById(@PathVariable("id") Long id);
+
+    @GetMapping("/drivers/vehicles/{id}")
+    VehicleDto getVehicleById(@PathVariable("id") Long id);
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/drivers/move-offers/{id}")
+    void deleteMoveOffer(@PathVariable("id") Long id);
 }

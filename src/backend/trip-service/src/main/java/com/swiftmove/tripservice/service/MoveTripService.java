@@ -6,12 +6,18 @@ import org.springframework.stereotype.Service;
 
 import com.swiftmove.tripservice.dto.CreateMoveTripDto;
 import com.swiftmove.tripservice.dto.MoveTripDto;
+import com.swiftmove.tripservice.dto.MoveRequestDto;
+import com.swiftmove.tripservice.dto.MoveOfferDto;
 import com.swiftmove.tripservice.mapper.Mapper;
 import com.swiftmove.tripservice.model.MoveStatus;
 import com.swiftmove.tripservice.model.MoveTrip;
 import com.swiftmove.tripservice.repository.MoveTripRepository;
+import com.swiftmove.tripservice.client.ClientServiceClient;
+import com.swiftmove.tripservice.client.DriverServiceClient;
+import com.swiftmove.tripservice.client.UserServiceClient;
 
-import jakarta.ws.rs.NotFoundException;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -19,18 +25,67 @@ import lombok.RequiredArgsConstructor;
 public class MoveTripService {
 
     private final MoveTripRepository moveTripRepository;
+    private final ClientServiceClient clientServiceClient;
+    private final DriverServiceClient driverServiceClient;
+    private final UserServiceClient userServiceClient;
 
     public List<MoveTripDto> getAll(){
         return moveTripRepository
                 .findAll()
                 .stream()
-                .map(Mapper::toMoveTripDto)
+                .map(this::toDetailedDto)
                 .toList();
     }
+
+    public List<MoveTripDto> getByClientId(Long clientId) {
+        List<MoveRequestDto> requests = clientServiceClient.getMoveRequestsByClientId(clientId);
+        if (requests == null || requests.isEmpty()) return List.of();
+        
+        List<Long> requestIds = requests.stream().map(MoveRequestDto::getId).toList();
+        return moveTripRepository.findByMoveRequestIdIn(requestIds).stream()
+                .map(this::toDetailedDto)
+                .toList();
+    }
+
+    public List<MoveTripDto> getByDriverId(Long driverId) {
+        List<MoveOfferDto> offers = driverServiceClient.getMoveOffersByDriverId(driverId);
+        if (offers == null || offers.isEmpty()) return List.of();
+
+        List<Long> offerIds = offers.stream().map(MoveOfferDto::getId).toList();
+        return moveTripRepository.findByMoveOfferIdIn(offerIds).stream()
+                .map(this::toDetailedDto)
+                .toList();
+    }
+
     public MoveTripDto getById(Long id) {
         MoveTrip moveTrip=moveTripRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Move Trip Not Found"));
-        return Mapper.toMoveTripDto(moveTrip);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Move Trip Not Found"));
+        return toDetailedDto(moveTrip);
+    }
+
+    private MoveTripDto toDetailedDto(MoveTrip moveTrip) {
+        MoveTripDto dto = Mapper.toMoveTripDto(moveTrip);
+        
+        try {
+            dto.setMoveRequest(clientServiceClient.getMoveRequestById(moveTrip.getMoveRequestId()));
+            if (dto.getMoveRequest() != null) {
+                dto.setClient(userServiceClient.getUserById(dto.getMoveRequest().getClientId()));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to fetch MoveRequest or Client info: " + e.getMessage());
+        }
+
+        try {
+            dto.setMoveOffer(driverServiceClient.getMoveOfferById(moveTrip.getMoveOfferId()));
+            if (dto.getMoveOffer() != null) {
+                dto.setDriver(userServiceClient.getUserById(dto.getMoveOffer().getDriverId()));
+                dto.setVehicle(driverServiceClient.getVehicleById(dto.getMoveOffer().getVehicleId()));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to fetch MoveOffer, Driver or Vehicle info: " + e.getMessage());
+        }
+
+        return dto;
     }
 
     public MoveTripDto add(CreateMoveTripDto newMoveTripDto) {
@@ -48,11 +103,43 @@ public class MoveTripService {
 
     public MoveTripDto updateStatus(Long id, String status) {
         MoveTrip trip = moveTripRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Move Trip Not Found"));
-        if (status != null) {
-            trip.setStatus(MoveStatus.valueOf(status));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Move Trip Not Found"));
+        
+        MoveStatus newStatus = MoveStatus.valueOf(status);
+
+        // Enforce flow: only if status is changing to COMPLETED
+        if (newStatus == MoveStatus.COMPLETED) {
+            if (trip.getStatus() != MoveStatus.COMPLETED_BY_DRIVER) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Move must be marked as completed by driver first.");
+            }
         }
-        return Mapper.toMoveTripDto(moveTripRepository.save(trip));
+        
+        if (status != null) {
+            trip.setStatus(newStatus);
+        }
+        return toDetailedDto(moveTripRepository.save(trip));
+    }
+
+    public void delete(Long id) {
+        MoveTrip trip = moveTripRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Move Trip Not Found"));
+        
+        // 1. Delete Move Offer
+        try {
+            driverServiceClient.deleteMoveOffer(trip.getMoveOfferId());
+        } catch (Exception e) {
+            System.err.println("Failed to delete MoveOffer: " + e.getMessage());
+        }
+
+        // 2. Delete Move Request
+        try {
+            clientServiceClient.deleteMoveRequest(trip.getMoveRequestId());
+        } catch (Exception e) {
+            System.err.println("Failed to delete MoveRequest: " + e.getMessage());
+        }
+
+        // 3. Delete the Trip itself
+        moveTripRepository.delete(trip);
     }
 
 

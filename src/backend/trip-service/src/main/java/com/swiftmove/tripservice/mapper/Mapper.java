@@ -8,12 +8,13 @@ import com.swiftmove.tripservice.model.MoveTrip;
 public class Mapper {
     public static MoveTripDto toMoveTripDto(MoveTrip moveTrip)
     {
-        return  new MoveTripDto(
-                moveTrip.getId(),
-                moveTrip.getMoveRequestId(),
-                moveTrip.getMoveOfferId(),
-                moveTrip.getStatus() != null ? moveTrip.getStatus().name() : null
-        );
+        if (moveTrip == null) return null;
+        MoveTripDto dto = new MoveTripDto();
+        dto.setId(moveTrip.getId());
+        dto.setMoveRequestId(moveTrip.getMoveRequestId());
+        dto.setMoveOfferId(moveTrip.getMoveOfferId());
+        dto.setStatus(moveTrip.getStatus() != null ? moveTrip.getStatus().name() : null);
+        return dto;
     }
     public static MoveTrip createMoveTripEntity(CreateMoveTripDto moveTripDto)
     {

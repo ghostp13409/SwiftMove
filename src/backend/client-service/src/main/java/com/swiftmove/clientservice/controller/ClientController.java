@@ -95,6 +95,15 @@ public class ClientController {
             return ResponseEntity.status(500).body(null);
         }
     }
+
+    @GetMapping("/move-requests/by-client")
+    public ResponseEntity<List<MoveRequestDto>> getMoveRequestsByClientId(@RequestParam Long clientId) {
+        try {
+            return ResponseEntity.ok(moveRequestService.findByClientId(clientId));
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 //  Get MoveRequest by Id
     @GetMapping("/move-requests/{id}")
     public ResponseEntity<MoveRequestDto> getMoveRequestById(@PathVariable Long id) {
