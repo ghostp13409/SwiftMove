@@ -181,8 +181,7 @@ const BrowseRequests = () => {
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>
-                      {req.moveDate.toLocaleDateString()} · Budget: $
-                      {req.maxBudget}
+                      {req.moveDate.toLocaleDateString()}
                     </span>
                     {req.hasFurniture && (
                       <Armchair className="w-3 h-3 text-primary" />
@@ -266,10 +265,6 @@ const BrowseRequests = () => {
                   <div>
                     <p className="text-muted-foreground text-xs">Move Date</p>
                     <p>{selected.moveDate.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-xs">Max Budget</p>
-                    <p className="font-semibold text-primary">${selected.maxBudget}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Distance</p>
