@@ -66,6 +66,10 @@ public class MoveSuggestionService {
     }
 
     public BudgetSuggestionResponse suggestBudget(BudgetSuggestionRequest request) {
+        if (request == null || request.getFromAddressId() == null || request.getToAddressId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required fields: fromAddressId or toAddressId.");
+        }
+
         System.out.println("Suggesting budget for request: " + request);
         
         AddressDTO from = locationServiceClient.getAddressById(request.getFromAddressId());

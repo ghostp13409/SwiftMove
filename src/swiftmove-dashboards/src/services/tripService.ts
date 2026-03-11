@@ -57,4 +57,9 @@ export const tripService = {
     const response = await apiClient.get(`${API_BASE}/browse-requests?driverId=${driverId}`);
     return response.data.data || response.data || [];
   },
+
+  // Delete a trip (including associated offer and request)
+  deleteTrip: async (id: string | number): Promise<void> => {
+    await apiClient.delete(`${API_BASE}/${id}`);
+  },
 };

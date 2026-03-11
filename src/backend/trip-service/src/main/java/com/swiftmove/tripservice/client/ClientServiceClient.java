@@ -18,9 +18,15 @@ public interface ClientServiceClient {
     @GetMapping("/clients/move-requests/all")
     List<MoveRequestDto> getAllMoveRequests();
 
+    @GetMapping("/clients/move-requests/by-client")
+    List<MoveRequestDto> getMoveRequestsByClientId(@RequestParam("clientId") Long clientId);
+
     @GetMapping("/clients/move-requests/luggage")
     List<LuggageEntryDto> getLuggageForMoveRequest(@RequestParam("moveRequestId") Long moveRequestId);
 
     @GetMapping("/clients/move-requests/luggage/types/{id}")
     LuggageTypeDto getLuggageTypeById(@PathVariable("id") Long id);
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/clients/move-requests/{id}")
+    void deleteMoveRequest(@PathVariable("id") Long id);
 }

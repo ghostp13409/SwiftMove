@@ -9,6 +9,7 @@ public enum MoveStatus {
     CANCELLED,
     SCHEDULED,
     IN_PROGRESS,
+    COMPLETED_BY_DRIVER,
     COMPLETED,
     PENDING,
     CONFIRMED,

@@ -1,15 +1,18 @@
 package com.swiftmove.driverservice.service;
 
 import com.swiftmove.driverservice.client.AuthClient;
+import com.swiftmove.driverservice.client.TripServiceClient;
+import com.swiftmove.driverservice.client.UserClient;
 import com.swiftmove.driverservice.dto.CreateDriverInfoDto;
 import com.swiftmove.driverservice.dto.DriverInfoDto;
+import com.swiftmove.driverservice.dto.MoveTripDto;
+import com.swiftmove.driverservice.dto.UserResponseDto;
 import com.swiftmove.driverservice.mapper.Mapper;
 import com.swiftmove.driverservice.model.DriverInfo;
 import com.swiftmove.driverservice.repository.DriverInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.sql.Driver;
 import java.util.List;
 
 @Service
@@ -17,43 +20,64 @@ import java.util.List;
 public class DriverInfoService {
     private final DriverInfoRepository driverInfoRepository;
     private final AuthClient authClient;
+    private final TripServiceClient tripServiceClient;
+    private final UserClient userClient;
 
     public List<DriverInfoDto> getAll() {
-        List<DriverInfoDto> driverInfoDtos = driverInfoRepository.findAll().stream().map(info -> {
-            DriverInfoDto dto = Mapper.toDriverInfoDto(info);
-            return dto;
-        }).toList();
-        return driverInfoDtos;
+        return driverInfoRepository.findAll().stream()
+                .map(this::toDetailedDto)
+                .toList();
     }
 
     public DriverInfoDto getCurrent(String authHeader) {
         try{
             Long driverId = authClient.getCurrentUser(authHeader).getBody().getId();
             DriverInfo driverInfo = driverInfoRepository.findByUserId(driverId);
-            return Mapper.toDriverInfoDto(driverInfo);
+            return toDetailedDto(driverInfo);
         }
         catch (Exception ex){
-            throw new RuntimeException("Failed to retrieve current driver info from auth service: " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to retrieve current driver info: " + ex.getMessage(), ex);
         }
     }
     public DriverInfoDto getById(Long id) {
         try{
             DriverInfo driverInfo = driverInfoRepository.findById(id).orElse(null);
-            return Mapper.toDriverInfoDto(driverInfo);
+            return toDetailedDto(driverInfo);
         }
         catch (Exception ex){
-            throw new RuntimeException("Failed to retrieve driver info from auth service: " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to retrieve driver info: " + ex.getMessage(), ex);
         }
     }
 
     public DriverInfoDto getByDriverId(Long driverId) {
         try{
             DriverInfo driverInfo = driverInfoRepository.findByUserId(driverId);
-            return Mapper.toDriverInfoDto(driverInfo);
+            return toDetailedDto(driverInfo);
         }
         catch (Exception ex){
-            throw new RuntimeException("Failed to retrieve current driver info from auth service: " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to retrieve driver info: " + ex.getMessage(), ex);
         }
+    }
+
+    private DriverInfoDto toDetailedDto(DriverInfo driverInfo) {
+        if (driverInfo == null) return null;
+        DriverInfoDto dto = Mapper.toDriverInfoDto(driverInfo);
+        
+        // Populate metrics
+        try {
+            List<MoveTripDto> trips = tripServiceClient.getTripsByDriverId(driverInfo.getUserId());
+            if (trips != null) {
+                long completedCount = trips.stream()
+                        .filter(t -> "COMPLETED".equals(t.getStatus()))
+                        .count();
+                dto.setTotalTripsCompleted((int) completedCount);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to fetch trips for metrics: " + e.getMessage());
+            dto.setTotalTripsCompleted(0);
+        }
+
+        return dto;
     }
 
     public DriverInfoDto add(CreateDriverInfoDto driverInfoDto) {
@@ -126,13 +150,4 @@ public class DriverInfoService {
 
         return true; // Placeholder for actual validation logic
     }
-
-
-
-
-
-
-
-
-
 }

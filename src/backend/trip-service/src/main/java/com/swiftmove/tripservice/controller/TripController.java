@@ -52,12 +52,12 @@ class TripController {
 
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<MoveTripDto>> getByClientId(@PathVariable Long clientId) {
-        return ResponseEntity.ok(moveTripService.getAll());
+        return ResponseEntity.ok(moveTripService.getByClientId(clientId));
     }
 
     @GetMapping("/driver/{driverId}")
     public ResponseEntity<List<MoveTripDto>> getByDriverId(@PathVariable Long driverId) {
-        return ResponseEntity.ok(moveTripService.getAll());
+        return ResponseEntity.ok(moveTripService.getByDriverId(driverId));
     }
 
     @GetMapping("/allTrips")
@@ -74,17 +74,37 @@ class TripController {
         }
     }
 
-    @PostMapping("/suggest-budget")
-    public ResponseEntity<BudgetSuggestionResponse> suggestBudget(@RequestBody BudgetSuggestionRequest request) {
-        BudgetSuggestionResponse response = moveSuggestionService.suggestBudget(request);
-        if (response == null) {
-            return ResponseEntity.badRequest().build();
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTrip(@PathVariable Long id) {
+        try {
+            moveTripService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/browse-requests")
     public ResponseEntity<List<MoveRequestDto>> browseRequests(@RequestParam Long driverId) {
-        return ResponseEntity.ok(moveMatchingService.getMatchingRequestsForDriver(driverId));
+        try {
+            return ResponseEntity.ok(moveMatchingService.getMatchingRequestsForDriver(driverId));
+        } catch (Exception e) {
+            System.err.println("Error browsing requests for driver " + driverId + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(null);
+        }
+    }
+
+    @PostMapping("/suggest-budget")
+    public ResponseEntity<BudgetSuggestionResponse> suggestBudget(@RequestBody BudgetSuggestionRequest request) {
+        try {
+            BudgetSuggestionResponse response = moveSuggestionService.suggestBudget(request);
+            if (response == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("Error suggesting budget: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(null);
+        }
     }
 }

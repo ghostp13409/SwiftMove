@@ -17,4 +17,7 @@ public class DriverInfoDto {
     private Double range;
     private Double currentLatitude;
     private Double currentLongitude;
+    
+    private Integer totalTripsCompleted;
+    private Float averageRating;
 }

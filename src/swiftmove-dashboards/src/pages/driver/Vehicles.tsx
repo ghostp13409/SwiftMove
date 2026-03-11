@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Truck, Loader2, Trash2 } from "lucide-react";
+import { Plus, Truck, Loader2, Trash2, Car, HardHat, Disc, UtilityPole, Bus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +57,31 @@ const Vehicles = () => {
     setCanCarryFurniture(false);
     setIsEditing(false);
     setCurrentVehicleId(null);
+  };
+
+  const getVehicleTypeName = (typeId: number) => {
+    const vt = vehicleTypes.find(t => t.id === typeId);
+    return vt ? vt.type : `Type #${typeId}`;
+  };
+
+  const getVehicleIcon = (typeId: number) => {
+    const vt = vehicleTypes.find(t => t.id === typeId);
+    if (!vt) return <Truck className="w-5 h-5 text-primary" />;
+    
+    switch (vt.type) {
+      case "SEDAN":
+      case "HATCHBACK":
+        return <Car className="w-5 h-5 text-primary" />;
+      case "SUV":
+        return <UtilityPole className="w-5 h-5 text-primary" />; // SUV-like
+      case "MINIVAN":
+      case "VAN":
+        return <Bus className="w-5 h-5 text-primary" />;
+      case "TRUCK":
+        return <Truck className="w-5 h-5 text-primary" />;
+      default:
+        return <Truck className="w-5 h-5 text-primary" />;
+    }
   };
 
   useEffect(() => {
@@ -340,7 +365,7 @@ const Vehicles = () => {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Truck className="w-5 h-5 text-primary" />
+                    {getVehicleIcon(vehicle.vehicleTypeId)}
                   </div>
                   <Badge variant={vehicle.isActive ? "default" : "secondary"}>
                     {vehicle.isActive ? "Active" : "Inactive"}
@@ -350,7 +375,7 @@ const Vehicles = () => {
                   {vehicle.year} {vehicle.make} {vehicle.model}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {vehicle.vehicleType || `Type #${vehicle.vehicleTypeId}`} ·{" "}
+                  {getVehicleTypeName(vehicle.vehicleTypeId)} ·{" "}
                   {vehicle.color}
                 </p>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t">
