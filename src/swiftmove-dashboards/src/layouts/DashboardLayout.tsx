@@ -104,8 +104,9 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       className={`flex flex-col h-full bg-sidebar text-sidebar-foreground transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}
     >
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
+      <div className="flex items-center gap-3 px-4 h-14 border-b border-sidebar-border shrink-0">
         <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
+
           <img src="/logo.jpg" alt="SwiftMove Logo" className="w-full h-full object-cover" />
         </div>
         {!collapsed && (
@@ -118,6 +119,8 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
             </p>
           </div>
         )}
+
+
       </div>
 
       {/* Nav */}
@@ -173,8 +176,12 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       {/* Collapse Toggle - Desktop */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="hidden lg:flex absolute -right-3 top-7 w-6 h-6 rounded-full bg-card border border-border items-center justify-center shadow-sm hover:bg-secondary transition-colors"
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className="hidden lg:flex absolute -right-4 top-10 w-8 h-8 rounded-full bg-card border border-border items-center justify-center shadow-sm hover:bg-secondary transition-colors"
       >
+
+
+
         {collapsed ? (
           <ChevronRight className="w-3 h-3" />
         ) : (
@@ -194,6 +201,8 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
         />
       )}
 
+
+
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex relative shrink-0">{sidebar}</aside>
 
@@ -207,20 +216,27 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-14 border-b border-border bg-card flex items-center px-4 gap-4 shrink-0">
-          <button className="lg:hidden" onClick={() => setMobileOpen(true)}>
+        <header className="h-14 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-30 flex items-center px-4 gap-4 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
+          >
             <Menu className="w-5 h-5 text-muted-foreground" />
-          </button>
+          </Button>
           <div className="flex-1" />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             <span className="text-xs text-muted-foreground hidden sm:inline">
               {displayName}
             </span>
-            <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
+            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
               {initials}
             </div>
           </div>
+
         </header>
 
         {/* Content */}
