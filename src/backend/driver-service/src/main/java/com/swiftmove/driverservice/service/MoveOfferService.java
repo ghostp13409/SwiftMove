@@ -71,7 +71,20 @@ public class MoveOfferService {
     public MoveOfferDto add(CreateMoveOfferDto newMoveOfferDto){
         try{
             validateCreateMoveOffer(newMoveOfferDto);
+            
+            // Check if driver already has an offer for this request
+            List<MoveOffer> existingOffers = moveOfferRepository.findMoveOfferByMoveRequestId(newMoveOfferDto.getMoveRequestId());
+            boolean alreadyOffered = existingOffers.stream()
+                    .anyMatch(o -> o.getDriverId().equals(newMoveOfferDto.getDriverId()) && 
+                                  o.getStatus() != MoveStatus.CANCELLED && 
+                                  o.getStatus() != MoveStatus.REJECTED);
+            
+            if (alreadyOffered) {
+                throw new IllegalArgumentException("You have already submitted an offer for this move request.");
+            }
+
             validateVehicleForMoveRequest(newMoveOfferDto.getVehicleId(), newMoveOfferDto.getMoveRequestId());
+
             
             // Recalculate price based on distance and vehicle rate to ensure integrity
             MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(newMoveOfferDto.getMoveRequestId());

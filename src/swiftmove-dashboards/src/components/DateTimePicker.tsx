@@ -12,12 +12,14 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DateTimePickerProps {
-  date?: Date;
+  date: Date | undefined;
   setDate: (date: Date | undefined) => void;
   placeholder?: string;
+  trigger?: React.ReactNode;
 }
 
-export function DateTimePicker({ date, setDate, placeholder = "Pick a date" }: DateTimePickerProps) {
+export function DateTimePicker({ date, setDate, placeholder = "Pick a date", trigger }: DateTimePickerProps) {
+
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(date);
   
   // Hours (1-12), minutes, and period (AM/PM)
@@ -83,19 +85,22 @@ export function DateTimePicker({ date, setDate, placeholder = "Pick a date" }: D
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal h-11 rounded-xl bg-secondary/30 px-3 overflow-hidden",
-            !date && "text-muted-foreground"
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-          <span className="truncate">
-            {date ? format(date, "PPp") : <span>{placeholder}</span>}
-          </span>
-        </Button>
+        {trigger || (
+          <Button
+            variant={"outline"}
+            className={cn(
+              "w-full justify-start text-left font-normal h-11 rounded-xl bg-secondary/30 px-3 overflow-hidden",
+              !date && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <span className="truncate">
+              {date ? format(date, "PPp") : <span>{placeholder}</span>}
+            </span>
+          </Button>
+        )}
       </PopoverTrigger>
+
       <PopoverContent className="w-auto p-0 rounded-2xl" align="start">
         <Calendar
           mode="single"
