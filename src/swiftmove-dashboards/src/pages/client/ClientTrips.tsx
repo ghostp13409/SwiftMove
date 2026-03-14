@@ -1,242 +1,300 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { 
+  Route, 
+  Phone, 
+  MessageSquare, 
+  Clock, 
+  Truck, 
+  ExternalLink,
+  Trash2,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "@/components/StatusBadge";
-import { Loader2, Route } from "lucide-react";
+import LoadingDelight from "@/components/LoadingDelight";
+import EmptyState from "@/components/EmptyState";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { tripService } from "@/services/tripService";
 import { populationFactory } from "@/services/populationFactory";
+import { getVehicleString, getGoogleMapsAddressLink } from "@/utils";
+import { useToast } from "@/hooks/use-toast";
 import type { MoveTripDetailed } from "@/types";
-import { toast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
 
 const ClientTrips = () => {
   const { userId } = useAuth();
-  const [myTrips, setMyTrips] = useState<MoveTripDetailed[]>([]);
-  const [selected, setSelected] = useState<MoveTripDetailed | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!userId) return;
-    const fetchTrips = async () => {
-      try {
-        setIsLoading(true);
-        const data = await tripService.getTripsByClient(userId);
-
-        // Populate and filter for current client
-        const populated = await Promise.all(
-          data.map((t) => populationFactory.populateMoveTripDetailed(t)),
-        );
-
-        const filtered = populated.filter(
-          (t) => t.moveRequestPopulated.clientId === userId,
-        );
-        setMyTrips(filtered);
-      } catch (err) {
-        console.error("Failed to load trips:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchTrips();
-  }, [userId]);
-
-  const activeTrip = myTrips.find(
-    (t) => t.status === "SCHEDULED" || t.status === "IN_PROGRESS",
-  );
-
-  const handleCancelTrip = async (id: string) => {
-    if (!confirm("Are you sure you want to cancel this trip?")) return;
-    try {
-      await tripService.updateTripStatus(id, "CANCELLED");
-      toast({
-        title: "Trip Cancelled",
-        description: "Your trip has been cancelled successfully.",
-      });
-      // Refresh list
-      refreshTrips();
-    } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to cancel trip.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteTrip = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this trip record? This will also delete the associated request and offer.")) return;
-    try {
-      await tripService.deleteTrip(id);
-      toast({
-        title: "Trip Deleted",
-        description: "The trip record has been removed.",
-      });
-      refreshTrips();
-    } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to delete trip.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const refreshTrips = async () => {
-    if (!userId) return;
-    try {
+  const { data: trips = [], isLoading } = useQuery({
+    queryKey: ["clientTrips", userId],
+    queryFn: async () => {
+      if (!userId) return [];
       const data = await tripService.getTripsByClient(userId);
       const populated = await Promise.all(
-        data.map((t) => populationFactory.populateMoveTripDetailed(t)),
+        data.map((t) => populationFactory.populateMoveTripDetailed(t))
       );
-      setMyTrips(
-        populated.filter((t) => t.moveRequestPopulated.clientId === userId),
+      return populated.sort((a, b) => 
+        new Date(b.moveRequestPopulated.moveDate).getTime() - 
+        new Date(a.moveRequestPopulated.moveDate).getTime()
       );
-    } catch (err) {
-      console.error("Failed to refresh trips:", err);
-    }
-  };
+    },
+    enabled: !!userId,
+  });
 
-  if (isLoading) {
+  // Set default selection when data loads
+  useEffect(() => {
+    if (trips.length > 0 && selectedId === null) {
+      setSelectedId(trips[0].id);
+    }
+  }, [trips, selectedId]);
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => tripService.deleteTrip(String(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clientTrips"] });
+      toast({ title: "Trip Deleted", description: "The trip record has been removed." });
+      setSelectedId(null);
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: (id: number) => tripService.updateTripStatus(String(id), "CANCELLED"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clientTrips"] });
+      toast({ title: "Trip Cancelled", description: "Your trip has been cancelled." });
+    },
+  });
+
+  const selectedTrip = trips.find(t => t.id === selectedId);
+
+  if (isLoading) return <LoadingDelight label="Loading your move history..." />;
+
+  if (trips.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      <div className="h-[80vh] flex items-center justify-center">
+        <EmptyState
+          icon={Route}
+          title="No trips found"
+          description="Your scheduled and completed moves will appear here once you accept a driver's offer."
+          action={{
+            label: "View Move Requests",
+            onClick: () => window.location.href = "/client/requests"
+          }}
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold">Move Trips</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Track your confirmed moves
-        </p>
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tighter text-foreground">Move Trips</h1>
+          <p className="text-muted-foreground text-sm mt-1 font-medium">Manage your active and past moving experiences</p>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10">
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+            {trips.filter(t => t.status === "IN_PROGRESS").length > 0 ? "Trip in progress" : "All systems normal"}
+          </span>
+        </div>
       </div>
 
-      {activeTrip && (
-        <Card className="shadow-card border-l-4 border-l-primary overflow-hidden">
-          <CardHeader className="pb-2 bg-primary/5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Route className="w-4 h-4 text-primary" /> Active Trip
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleCancelTrip(activeTrip.id)}
-                  className="h-7 px-3 text-xs"
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left: Trip List */}
+        <div className="lg:col-span-1 space-y-4">
+          <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.2em] px-1">Move History</p>
+          <div className="space-y-3">
+            {trips.map((trip) => {
+              const isActive = selectedId === trip.id;
+              return (
+                <button
+                  key={trip.id}
+                  onClick={() => setSelectedId(trip.id)}
+                  className={`w-full text-left p-4 rounded-xl transition-all duration-200 border group ${
+                    isActive 
+                      ? "bg-card border-primary/30 shadow-md ring-1 ring-primary/10" 
+                      : "bg-background border-border/50 hover:border-primary/20 hover:bg-card/50 shadow-sm"
+                  }`}
                 >
-                  Cancel Trip
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => handleDeleteTrip(activeTrip.id)}
-                  className="h-7 px-3 text-xs"
-                >
-                  Delete Trip
-                </Button>
-                <StatusBadge status={activeTrip.status} />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
-                  From
-                </p>
-                <p className="font-medium">
-                  {activeTrip.moveRequestPopulated.fromAddress.city}
-                </p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
-                  To
-                </p>
-                <p className="font-medium">
-                  {activeTrip.moveRequestPopulated.toAddress.city}
-                </p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
-                  Driver
-                </p>
-                <p className="font-medium">
-                  {activeTrip.moveOfferPopulated.driver.user.firstName}{" "}
-                  {activeTrip.moveOfferPopulated.driver.user.lastName}
-                </p>
-              </div>
-              <div>
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
-                  Price
-                </p>
-                <p className="font-bold text-primary text-lg">
-                  ${activeTrip.moveOfferPopulated.price}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {myTrips.length === 0 ? (
-        <div className="text-center py-12 bg-secondary/10 rounded-3xl border border-dashed border-border/60">
-          <p className="text-sm font-medium text-muted-foreground">
-            No trips yet. Accept a move offer to schedule your first trip!
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {myTrips.map((trip) => (
-            <Card
-              key={trip.id}
-              className={`shadow-card cursor-pointer hover:shadow-card-lg transition-all border-2 ${selected?.id === trip.id ? "border-primary bg-primary/5" : "border-transparent"}`}
-              onClick={() => setSelected(trip)}
-            >
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className="font-bold text-sm">
-                      {trip.moveRequestPopulated.fromAddress.city} →{" "}
-                      {trip.moveRequestPopulated.toAddress.city}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1 font-medium">
-                      Driver: {trip.moveOfferPopulated.driver.user.firstName}{" "}
-                      {trip.moveOfferPopulated.driver.user.lastName}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
+                  <div className="flex justify-between items-start mb-3">
                     <StatusBadge status={trip.status} />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 px-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteTrip(trip.id);
+                    <span className="text-[10px] font-black text-primary tracking-tighter">
+                      ${trip.moveOfferPopulated?.price ?? 0}
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
+                      <p className="text-xs font-bold text-foreground truncate">
+                        {trip.moveRequestPopulated?.fromAddress?.city ?? 'Unknown'} → {trip.moveRequestPopulated?.toAddress?.city ?? 'Unknown'}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3 h-3" />
+                        {trip.moveRequestPopulated?.moveDate ? new Date(trip.moveRequestPopulated.moveDate).toLocaleDateString() : 'TBD'}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Truck className="w-3 h-3" />
+                        {trip.moveOfferPopulated?.driver?.user?.firstName ?? 'Driver'}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right: Detailed View */}
+        <div className="lg:col-span-2">
+          {selectedTrip ? (
+            <Card className="shadow-md border-border/50 rounded-xl overflow-hidden bg-card/50 backdrop-blur-md sticky top-24">
+              <CardHeader className="p-6 border-b bg-muted/20 flex flex-row items-center justify-between space-y-0">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20 shrink-0 shadow-sm">
+                    <Route className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-bold tracking-tight">Trip Details</CardTitle>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">ID: SM-{selectedTrip?.id?.toString().padStart(5, '0')}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {selectedTrip?.status === "SCHEDULED" && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-9 px-4 text-xs font-bold text-destructive hover:bg-destructive/5"
+                      onClick={() => {
+                        if(confirm("Cancel this trip?")) cancelMutation.mutate(selectedTrip.id);
                       }}
                     >
-                      Delete Record
+                      Cancel Trip
+                    </Button>
+                  )}
+                  <StatusBadge status={selectedTrip?.status ?? "TBD"} />
+                </div>
+              </CardHeader>
+
+              <CardContent className="p-0 divide-y divide-border/40">
+                {/* Driver & Vehicle Quick Info */}
+                <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-2xl bg-secondary/50 flex items-center justify-center text-lg font-black text-muted-foreground border border-border/50">
+                      {selectedTrip?.moveOfferPopulated?.driver?.user?.firstName?.[0] ?? '?'}{selectedTrip?.moveOfferPopulated?.driver?.user?.lastName?.[0] ?? '?'}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Your Driver</p>
+                      <p className="text-base font-bold text-foreground">
+                        {selectedTrip?.moveOfferPopulated?.driver?.user?.firstName ?? 'Unknown'} {selectedTrip?.moveOfferPopulated?.driver?.user?.lastName ?? 'Driver'}
+                      </p>
+                      <div className="flex gap-2 mt-2">
+                        <Button variant="outline" size="sm" className="h-7 px-2 text-[10px] font-bold gap-1.5 rounded-lg border-primary/20 text-primary">
+                          <Phone className="w-3 h-3" /> Call
+                        </Button>
+                        <Button variant="outline" size="sm" className="h-7 px-2 text-[10px] font-bold gap-1.5 rounded-lg border-primary/20 text-primary">
+                          <MessageSquare className="w-3 h-3" /> Chat
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-2xl bg-primary/5 text-primary flex items-center justify-center border border-primary/10">
+                      <Truck className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Vehicle Details</p>
+                      <p className="text-base font-bold text-foreground">
+                        {selectedTrip?.moveOfferPopulated?.vehicle ? getVehicleString(selectedTrip.moveOfferPopulated.vehicle) : 'No vehicle info'}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-medium mt-1">
+                        Plate: {selectedTrip?.moveOfferPopulated?.vehicle?.licensePlate ?? 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Route Timeline */}
+                <div className="p-8 bg-background/30">
+                  <div className="relative flex flex-col gap-10 pl-10 before:absolute before:left-[15px] before:top-2 before:bottom-10 before:w-[2px] before:bg-border/60 before:rounded-full">
+                    <div className="relative">
+                      <div className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-primary/10 ring-offset-2 ring-offset-background z-10" />
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <p className="text-[10px] font-bold uppercase text-primary tracking-widest leading-none mb-1.5">Pick-up</p>
+                          <p className="text-sm font-bold text-foreground leading-tight">{selectedTrip?.moveRequestPopulated?.fromAddress?.line1 ?? 'TBD'}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 font-medium">{selectedTrip?.moveRequestPopulated?.fromAddress?.city ?? 'Unknown city'}</p>
+                        </div>
+                        {selectedTrip?.moveRequestPopulated?.fromAddress && (
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-bold text-primary opacity-60 hover:opacity-100" asChild>
+                            <a href={getGoogleMapsAddressLink(selectedTrip.moveRequestPopulated.fromAddress)} target="_blank" rel="noopener noreferrer">
+                              Maps <ExternalLink className="ml-1 w-2.5 h-2.5" />
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-foreground/80 ring-4 ring-foreground/5 ring-offset-2 ring-offset-background z-10" />
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest leading-none mb-1.5">Destination</p>
+                          <p className="text-sm font-bold text-foreground leading-tight">{selectedTrip?.moveRequestPopulated?.toAddress?.line1 ?? 'TBD'}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 font-medium">{selectedTrip?.moveRequestPopulated?.toAddress?.city ?? 'Unknown city'}</p>
+                        </div>
+                        {selectedTrip?.moveRequestPopulated?.toAddress && (
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-bold text-primary opacity-60 hover:opacity-100" asChild>
+                            <a href={getGoogleMapsAddressLink(selectedTrip.moveRequestPopulated.toAddress)} target="_blank" rel="noopener noreferrer">
+                              Maps <ExternalLink className="ml-1 w-2.5 h-2.5" />
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Final Stats & Actions */}
+                <div className="p-8 bg-muted/10 flex flex-wrap items-center justify-between gap-6">
+                  <div className="flex gap-10">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Price</p>
+                      <p className="text-3xl font-black text-primary tracking-tighter">${selectedTrip?.moveOfferPopulated?.price ?? 0}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Move Date</p>
+                      <p className="text-lg font-bold text-foreground tracking-tight">
+                        {selectedTrip?.moveRequestPopulated?.moveDate ? new Date(selectedTrip.moveRequestPopulated.moveDate).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'TBD'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-10 px-4 rounded-xl text-xs font-bold gap-2 text-destructive border-destructive/20 hover:bg-destructive/5"
+                      onClick={() => {
+                        if(confirm("Delete this trip record?")) deleteMutation.mutate(selectedTrip.id);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" /> Delete Record
                     </Button>
                   </div>
                 </div>
-                <div className="flex justify-between items-center text-sm pt-2 border-t">
-                  <span className="text-muted-foreground text-xs font-medium">
-                    {new Date(
-                      trip.moveRequestPopulated.moveDate,
-                    ).toLocaleDateString()}
-                  </span>
-                  <span className="font-bold text-primary">
-                    ${trip.moveOfferPopulated.price}
-                  </span>
-                </div>
               </CardContent>
             </Card>
-          ))}
+          ) : (
+            <div className="h-full flex items-center justify-center border-2 border-dashed rounded-2xl bg-muted/10 border-border/50 text-muted-foreground">
+              Select a trip to view details
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

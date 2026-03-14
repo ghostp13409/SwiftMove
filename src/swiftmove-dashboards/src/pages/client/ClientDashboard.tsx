@@ -1,9 +1,10 @@
-import { FileText, Route, Clock, Loader2, Plus, MessageSquare } from "lucide-react";
+import { FileText, Route, Clock, Plus, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import StatsCard from "@/components/StatsCard";
 import StatusBadge from "@/components/StatusBadge";
 import EmptyState from "@/components/EmptyState";
+import LoadingDelight from "@/components/LoadingDelight";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { moveOfferService } from "@/services/moveOfferService";
@@ -30,7 +31,6 @@ const ClientDashboard = () => {
     enabled: !!userId,
   });
 
-
   // Fetch client trips
   const { data: myTrips = [], isLoading: isLoadingTrips } = useQuery({
     queryKey: ["clientTrips", userId],
@@ -49,7 +49,7 @@ const ClientDashboard = () => {
       const allOffers = offersResults
         .filter((r) => r.status === "fulfilled")
         .flatMap((r) => (r as PromiseFulfilledResult<MoveOffer[]>).value);
-      
+
       return Promise.all(
         allOffers.map((offer) => populationFactory.populateMoveOffer(offer))
       );
@@ -64,12 +64,9 @@ const ClientDashboard = () => {
   const scheduledTrips = myTrips.filter((t) => t.status === "SCHEDULED").length;
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      </div>
-    );
+    return <LoadingDelight />;
   }
+
 
   return (
     <div className="space-y-6">

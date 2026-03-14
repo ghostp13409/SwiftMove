@@ -6,7 +6,6 @@ import {
   DollarSign,
   TrendingUp,
   Activity,
-  Loader2,
   UserPlus,
   PlusCircle,
 } from "lucide-react";
@@ -14,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import StatsCard from "@/components/StatsCard";
 import EmptyState from "@/components/EmptyState";
+import LoadingDelight from "@/components/LoadingDelight";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { userService } from "@/services/userService";
 import { moveRequestService } from "@/services/moveRequestService";
@@ -23,7 +23,6 @@ import { vehicleService } from "@/services/vehicleService";
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { data: stats, isLoading } = useQuery({
-
     queryKey: ["adminStats"],
     queryFn: async () => {
       const [usersData, requestsData, tripsData, vehiclesData] = await Promise.all([
@@ -42,7 +41,7 @@ const AdminDashboard = () => {
       const completedTrips = tripsData.filter(
         (t) => t.status === "COMPLETED",
       );
-      
+
       const revenue = completedTrips.reduce(
         (sum, t) => sum + ((t as any).price ?? 0),
         0,
@@ -62,12 +61,9 @@ const AdminDashboard = () => {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      </div>
-    );
+    return <LoadingDelight label="Analyzing platform health..." />;
   }
+
 
   if (!stats) return null;
 

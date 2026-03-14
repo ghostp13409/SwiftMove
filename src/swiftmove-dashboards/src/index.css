@@ -4,16 +4,16 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 240 5% 98%;
     --foreground: 240 10% 3.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 240 10% 15%; /* Softer black/zinc for text */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 240 10% 15%;
 
-    --primary: 158 94% 30%; /* Emerald 700-ish */
+    --primary: 162 84% 28%; /* Deeper, less 'neon' Emerald */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4.8% 95.9%;
@@ -30,18 +30,20 @@
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 158 94% 30%;
+    --ring: 162 84% 28%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 100%;
+
+    --sidebar-background: 0 0% 100%; /* Keep sidebar white or slightly different */
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 158 94% 30%;
+    --sidebar-primary: 162 84% 35%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 240 5.9% 90%;
-    --sidebar-ring: 158 94% 30%;
+    --sidebar-ring: 162 84% 35%;
+
 
     /* SwiftMove custom tokens */
     --success: 158 94% 30%;
@@ -62,16 +64,17 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 240 10% 2%;
+    --foreground: 240 5% 85%; /* Softer white for dark mode text */
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 240 10% 6%;
+    --card-foreground: 240 5% 85%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 240 10% 6%;
+    --popover-foreground: 240 5% 85%;
 
-    --primary: 158 94% 30%;
+
+    --primary: 162 84% 35%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 3.7% 15.9%;
@@ -88,17 +91,18 @@
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 158 94% 30%;
+    --ring: 162 84% 35%;
 
-    --sidebar-background: 240 10% 3.9%;
+    --sidebar-background: 240 10% 4%; /* Distinct sidebar background */
     --sidebar-foreground: 240 5% 64.9%;
-    --sidebar-primary: 158 94% 30%;
+    --sidebar-primary: 162 84% 35%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 158 94% 30%;
+    --sidebar-ring: 162 84% 35%;
   }
+
 }
 
 @layer base {
@@ -137,7 +141,14 @@
     animation: float 3s ease-in-out infinite;
   }
 
+  .btn-active-press:active {
+    transform: scale(0.96);
+    transition: transform 0.1s var(--ease-out-quart);
+  }
+
   @keyframes slide-up {
+
+
     from {
       opacity: 0;
       transform: translateY(20px);

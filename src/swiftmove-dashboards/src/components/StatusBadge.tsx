@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type {
   MoveRequestStatus,
   MoveOfferStatus,
@@ -36,7 +37,14 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
     label: status,
     variant: "secondary" as const,
   };
-  return <Badge variant={config.variant}>{config.label}</Badge>;
+
+  return (
+    <Badge variant={config.variant}>
+      {config.label}
+    </Badge>
+  );
 };
+
+
 
 export default StatusBadge;
