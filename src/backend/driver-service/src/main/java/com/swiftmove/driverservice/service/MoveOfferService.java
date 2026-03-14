@@ -71,7 +71,20 @@ public class MoveOfferService {
     public MoveOfferDto add(CreateMoveOfferDto newMoveOfferDto){
         try{
             validateCreateMoveOffer(newMoveOfferDto);
+            
+            // Check if driver already has an offer for this request
+            List<MoveOffer> existingOffers = moveOfferRepository.findMoveOfferByMoveRequestId(newMoveOfferDto.getMoveRequestId());
+            boolean alreadyOffered = existingOffers.stream()
+                    .anyMatch(o -> o.getDriverId().equals(newMoveOfferDto.getDriverId()) && 
+                                  o.getStatus() != MoveStatus.CANCELLED && 
+                                  o.getStatus() != MoveStatus.REJECTED);
+            
+            if (alreadyOffered) {
+                throw new IllegalArgumentException("You have already submitted an offer for this move request.");
+            }
+
             validateVehicleForMoveRequest(newMoveOfferDto.getVehicleId(), newMoveOfferDto.getMoveRequestId());
+
             
             // Recalculate price based on distance and vehicle rate to ensure integrity
             MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(newMoveOfferDto.getMoveRequestId());
@@ -141,27 +154,37 @@ public class MoveOfferService {
 
     @Transactional
     public MoveOfferDto accept(Long id) {
-        MoveOffer offer = moveOfferRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
+        try {
+            MoveOffer offer = moveOfferRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Move offer not found with id: " + id));
 
-        // Update Offer Status
-        offer.setStatus(MoveStatus.ACCEPTED);
-        moveOfferRepository.save(offer);
+            // Update Offer Status
+            offer.setStatus(MoveStatus.ACCEPTED);
+            moveOfferRepository.save(offer);
 
-        // Update Move Request Status
-        MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(offer.getMoveRequestId());
-        moveRequest.setStatus("ACCEPTED");
-        clientServiceClient.updateMoveRequest(moveRequest.getId(), moveRequest);
+            // Update Move Request Status
+            MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(offer.getMoveRequestId());
+            if (moveRequest == null) {
+                throw new RuntimeException("Move request not found with id: " + offer.getMoveRequestId());
+            }
+            moveRequest.setStatus("ACCEPTED");
+            clientServiceClient.updateMoveRequest(moveRequest.getId(), moveRequest);
 
-        // Create Move Trip
-        CreateMoveTripDto tripDto = new CreateMoveTripDto();
-        tripDto.setMoveRequestId(offer.getMoveRequestId());
-        tripDto.setMoveOfferId(offer.getId());
-        tripDto.setStatus("SCHEDULED");
-        tripServiceClient.createTrip(tripDto);
+            // Create Move Trip
+            CreateMoveTripDto tripDto = new CreateMoveTripDto();
+            tripDto.setMoveRequestId(offer.getMoveRequestId());
+            tripDto.setMoveOfferId(offer.getId());
+            tripDto.setStatus("SCHEDULED");
+            tripServiceClient.createTrip(tripDto);
 
-        return Mapper.toMoveOfferDto(offer);
+            return Mapper.toMoveOfferDto(offer);
+        } catch (Exception e) {
+            System.err.println("Error in MoveOfferService.accept: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
+
 
     @Transactional
     public MoveOfferDto reject(Long id) {

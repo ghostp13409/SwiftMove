@@ -331,7 +331,7 @@ const Profile = () => {
 
                 <Button
                   type="submit"
-                  className="w-full gradient-brand text-primary-foreground border-0"
+                  className="w-full"
                   disabled={isSaving}
                 >
                   {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : "Save Changes"}
@@ -433,7 +433,7 @@ const Profile = () => {
 
                 <Button
                   type="submit"
-                  className="w-full gradient-brand text-primary-foreground border-0"
+                  className="w-full"
                   disabled={isSavingAddress}
                 >
                   {isSavingAddress ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : "Save Address"}
@@ -488,7 +488,7 @@ const Profile = () => {
 
                   <Button
                     type="submit"
-                    className="w-full gradient-brand text-primary-foreground border-0"
+                    className="w-full"
                     disabled={isSavingDriver}
                   >
                     {isSavingDriver ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : "Save Driver Details"}

@@ -11,7 +11,9 @@ import Register from "@/pages/auth/Register";
 import ClientDashboard from "@/pages/client/ClientDashboard";
 import ClientMoveRequests from "@/pages/client/ClientMoveRequests";
 import ClientTrips from "@/pages/client/ClientTrips";
+import HistoryPage from "@/pages/shared/History";
 import DriverDashboard from "@/pages/driver/DriverDashboard";
+
 import BrowseRequests from "@/pages/driver/BrowseRequests";
 import Vehicles from "@/pages/driver/Vehicles";
 import DriverOffers from "@/pages/driver/DriverOffers";
@@ -45,6 +47,7 @@ const App = () => (
                 <Route index element={<ClientDashboard />} />
                 <Route path="requests" element={<ClientMoveRequests />} />
                 <Route path="trips" element={<ClientTrips />} />
+                <Route path="history" element={<HistoryPage />} />
                 <Route path="profile" element={<Profile />} />
               </Route>
 
@@ -55,8 +58,10 @@ const App = () => (
                 <Route path="vehicles" element={<Vehicles />} />
                 <Route path="offers" element={<DriverOffers />} />
                 <Route path="trips" element={<DriverTrips />} />
+                <Route path="history" element={<HistoryPage />} />
                 <Route path="profile" element={<Profile />} />
               </Route>
+
 
               {/* Admin Routes */}
               <Route path="/admin" element={<DashboardLayout role="ADMIN" />}>

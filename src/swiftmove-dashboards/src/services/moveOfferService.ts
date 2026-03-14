@@ -38,17 +38,16 @@ export const moveOfferService = {
     }));
   },
 
-  // Get offers by driver
-  getOffersByDriver: async (
-    driverId: string | number,
-  ): Promise<MoveOffer[]> => {
-    const response = await apiClient.get(`${API_BASE}?driverId=${driverId}`);
+  // Get offers by current driver
+  getOffersByDriver: async (): Promise<MoveOffer[]> => {
+    const response = await apiClient.get(`${API_BASE}/me`);
     const data = response.data.data || response.data || [];
     return data.map((offer: any) => ({
       ...offer,
       offerDate: new Date(offer.offerDate)
     }));
   },
+
 
   // Create move offer
   createMoveOffer: async (data: MoveOfferForm): Promise<MoveOffer> => {

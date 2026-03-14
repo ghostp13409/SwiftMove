@@ -1,14 +1,11 @@
-import { useEffect, useState } from "react";
-import {
-  FileText,
-  Truck,
-  Route,
-  DollarSign,
-  HandCoins,
-  Loader2,
-} from "lucide-react";
+import { FileText, Truck, Route, DollarSign, HandCoins, Search, Plus, BarChart3, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import StatsCard from "@/components/StatsCard";
 import StatusBadge from "@/components/StatusBadge";
+import EmptyState from "@/components/EmptyState";
+import LoadingDelight from "@/components/LoadingDelight";
+import { SimpleBarChart, StatusPieChart } from "@/components/MoveCharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { driverService } from "@/services/driverService";
@@ -17,105 +14,116 @@ import { moveOfferService } from "@/services/moveOfferService";
 import { tripService } from "@/services/tripService";
 import { vehicleService } from "@/services/vehicleService";
 import { populationFactory } from "@/services/populationFactory";
-import type {
-  MoveRequest,
-  MoveOfferPopulated,
-  MoveTripDetailed,
-  Vehicle,
-  DriverWithInfo,
-} from "@/types";
 import { getVehicleString } from "@/utils";
 
 const DriverDashboard = () => {
-  const { userId, name } = useAuth();
-  const [driver, setDriver] = useState<DriverWithInfo | null>(null);
-  const [pendingRequests, setPendingRequests] = useState<MoveRequest[]>([]);
-  const [myOffers, setMyOffers] = useState<MoveOfferPopulated[]>([]);
-  const [myTrips, setMyTrips] = useState<MoveTripDetailed[]>([]);
-  const [myVehicles, setMyVehicles] = useState<Vehicle[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const { name, userId } = useAuth();
+  const navigate = useNavigate();
   const displayName = name?.split(" ")[0] || "there";
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [driverRes, requestsRes] = await Promise.allSettled([
-          driverService.getCurrentDriver(),
-          moveRequestService.getAllMoveRequests(),
-        ]);
+  // Fetch driver info
+  const { data: driver, isLoading: isLoadingDriver } = useQuery({
+    queryKey: ["driverInfo", userId],
+    queryFn: () => driverService.getCurrentDriver(),
+    enabled: !!userId,
+  });
 
-        const driverData =
-          driverRes.status === "fulfilled" ? driverRes.value : null;
-        setDriver(driverData);
 
-        const requestsData =
-          requestsRes.status === "fulfilled" ? requestsRes.value : [];
-        setPendingRequests(
-          (requestsData as MoveRequest[]).filter((r) => r.status === "CREATED"),
-        );
+  const driverInfoId = driver?.id;
+  const driverUserId = driver?.userId;
 
-        if (driverData) {
-          // Use driverInfo.id as the driverInfoId for vehicle/offer/trip lookups
-          const driverInfoId = driverData.driverInfo.id;
+  // Fetch available requests
+  const { data: pendingRequests = [], isLoading: isLoadingRequests } = useQuery({
+    queryKey: ["allRequests"],
+    queryFn: async () => {
+      const data = await moveRequestService.getAllMoveRequests();
+      return data.filter((r) => r.status === "CREATED");
+    },
+  });
 
-          const [offersRes, driverTripsRes, vehiclesRes] =
-            await Promise.allSettled([
-              moveOfferService.getOffersByDriver(driverInfoId),
-              tripService.getTripsByDriver(driverInfoId),
-              vehicleService.getVehiclesByDriver(driverInfoId),
-            ]);
+  // Fetch driver offers
+  const { data: myOffers = [], isLoading: isLoadingOffers } = useQuery({
+    queryKey: ["driverOffers", driverUserId],
+    queryFn: async () => {
+      if (!driverUserId) return [];
+      const data = await moveOfferService.getOffersByDriver();
+      return Promise.all(
+        data.map((o) => populationFactory.populateMoveOffer(o))
+      );
+    },
+    enabled: !!driverUserId,
+  });
 
-          if (offersRes.status === "fulfilled") {
-             const populatedOffers = await Promise.all(
-               offersRes.value.map(o => populationFactory.populateMoveOffer(o))
-             );
-             setMyOffers(populatedOffers);
-          }
+  // Fetch driver trips
+  const { data: myTrips = [], isLoading: isLoadingTrips } = useQuery({
+    queryKey: ["driverTrips", driverUserId],
+    queryFn: async () => {
+      if (!driverUserId) return [];
+      const data = await tripService.getTripsByDriver(driverUserId);
+      const results = await Promise.allSettled(
+        data.map((t) => populationFactory.populateMoveTripDetailed(t))
+      );
+      return results
+        .filter((r): r is PromiseFulfilledResult<MoveTripDetailed> => r.status === "fulfilled")
+        .map((r) => r.value);
+    },
+    enabled: !!driverUserId,
+  });
 
-          if (driverTripsRes.status === "fulfilled") {
-             const populatedTrips = await Promise.all(
-               driverTripsRes.value.map(t => populationFactory.populateMoveTripDetailed(t))
-             );
-             setMyTrips(populatedTrips);
-          }
 
-          const vehiclesData =
-            vehiclesRes.status === "fulfilled" ? vehiclesRes.value : [];
-          setMyVehicles(vehiclesData);
-        }
-      } catch (err) {
-        console.error("Failed to load driver dashboard:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [userId]);
+  // Fetch driver vehicles
+  const { data: myVehicles = [], isLoading: isLoadingVehicles } = useQuery({
+    queryKey: ["driverVehicles", driverInfoId],
+    queryFn: () => driverInfoId ? vehicleService.getVehiclesByDriver(driverInfoId) : [],
+    enabled: !!driverInfoId,
+  });
+
+  const isLoading = isLoadingDriver || isLoadingRequests || isLoadingOffers || isLoadingTrips || isLoadingVehicles;
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      </div>
-    );
+    return <LoadingDelight label="Mapping your move routes..." />;
   }
 
-  const activeTrips = myTrips.filter((t) => t.status === "SCHEDULED");
-  const earnings = myTrips
-    .filter((t) => t.status === "COMPLETED")
-    .reduce((s, t) => s + t.moveOfferPopulated.price, 0);
+
+  const activeTripsCount = myTrips.filter((t) => t.status === "SCHEDULED").length;
+  const completedTrips = myTrips.filter((t) => t.status === "COMPLETED");
+  const earnings = completedTrips.reduce((s, t) => s + (t.moveOfferPopulated?.price ?? 0), 0);
+
+  // Group trips by status for charts
+  const tripStatusData = myTrips.reduce((acc: any, t) => {
+    acc[t.status] = (acc[t.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const statusPieData = Object.keys(tripStatusData).map(status => ({
+    name: status,
+    value: tripStatusData[status]
+  }));
+
+  // Dummy weekly earnings data
+  const weeklyEarningsData = [
+    { name: "Mon", value: 450 },
+    { name: "Tue", value: 320 },
+    { name: "Wed", value: 680 },
+    { name: "Thu", value: 210 },
+    { name: "Fri", value: 890 },
+    { name: "Sat", value: 1200 },
+    { name: "Sun", value: 540 },
+  ];
+
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold">Welcome back, {displayName} 👋</h1>
+    <div className="space-y-6">
+      <div className="animate-slide-up animate-stagger-1">
+        <h1 className="text-2xl font-bold tracking-tight">Welcome back, {displayName} 👋</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Your driver overview
+          {pendingRequests.length > 0 
+            ? `There are ${pendingRequests.length} new move request${pendingRequests.length > 1 ? 's' : ''} available for offers.`
+            : "You're all caught up. Check back soon for new move requests."}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-slide-up animate-stagger-2">
         <StatsCard
           title="Available Requests"
           value={pendingRequests.length}
@@ -130,8 +138,9 @@ const DriverDashboard = () => {
         />
         <StatsCard
           title="Active Trips"
-          value={activeTrips.length}
+          value={activeTripsCount}
           icon={<Route className="w-4 h-4" />}
+          description="Upcoming moves"
         />
         <StatsCard
           title="Vehicles"
@@ -147,67 +156,102 @@ const DriverDashboard = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="text-base">Upcoming Trips</CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-3">
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary/80" /> Earnings Performance
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="p-6">
+            <SimpleBarChart data={weeklyEarningsData} title="Daily Earnings (Current Week)" />
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary/80" /> Job Success Rate
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <StatusPieChart data={statusPieData} title="Assignment Status Breakdown" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-4">
+
+
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold">Upcoming Trips</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
             {myTrips.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No trips yet</p>
+              <EmptyState
+                icon={Search}
+                title="No upcoming trips"
+                description="Browse available move requests and make offers to start earning."
+                action={{
+                  label: "Browse Requests",
+                  onClick: () => navigate("/driver/browse"),
+                }}
+              />
             ) : (
-              myTrips.slice(0, 4).map((trip) => (
-                <div
-                  key={trip.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
-                >
-                  <div>
-                    <p className="text-sm font-medium">
-                      {trip.moveRequestPopulated.fromAddress.city} → {trip.moveRequestPopulated.toAddress.city}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Client: {trip.moveRequestPopulated.client.firstName} {trip.moveRequestPopulated.client.lastName}
-                    </p>
+              <div className="divide-y">
+                {myTrips.slice(0, 4).map((trip) => (
+                  <div key={trip.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">
+                        {trip.moveRequestPopulated?.fromAddress?.city ?? 'Unknown'} → {trip.moveRequestPopulated?.toAddress?.city ?? 'Unknown'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Client: {trip.moveRequestPopulated?.client?.firstName} {trip.moveRequestPopulated?.client?.lastName}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-sm">
+                        ${trip.moveOfferPopulated?.price ?? 0}
+                      </span>
+                      <StatusBadge status={trip.status} />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm">
-                      ${trip.moveOfferPopulated.price}
-                    </span>
-                    <StatusBadge status={trip.status} />
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="text-base">Recent Offers</CardTitle>
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold">Recent Offers</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="p-0">
             {myOffers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No offers submitted yet
-              </p>
+              <EmptyState
+                icon={Plus}
+                title="No offers yet"
+                description="You haven't made any offers yet. Add a vehicle to get started."
+                action={{
+                  label: "Add Vehicle",
+                  onClick: () => navigate("/driver/vehicles"),
+                }}
+              />
             ) : (
-              myOffers.slice(0, 4).map((offer) => (
-                <div
-                  key={offer.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
-                >
-                  <div>
-                    <p className="text-sm font-medium">
-                      Request #{offer.moveRequestId}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {getVehicleString(offer.vehicle)} · $
-                      {offer.price}
-                    </p>
+              <div className="divide-y">
+                {myOffers.slice(0, 4).map((offer) => (
+                  <div key={offer.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">Request #{offer.moveRequestId}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {getVehicleString(offer.vehicle)} · <span className="font-semibold text-foreground">${offer.price}</span>
+                      </p>
+                    </div>
+                    <StatusBadge status={offer.status} />
                   </div>
-                  <StatusBadge status={offer.status} />
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>

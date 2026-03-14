@@ -228,34 +228,35 @@ public class DriverController {
     }
 
     @PatchMapping("/move-offers/{id}/accept")
-    public ResponseEntity<MoveOfferDto> acceptMoveOffer(@PathVariable Long id) {
+    public ResponseEntity<?> acceptMoveOffer(@PathVariable Long id) {
         try {
             MoveOfferDto acceptedOffer = moveOfferService.accept(id);
             return ResponseEntity.ok(acceptedOffer);
         } catch (Exception ex) {
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(500).body(ex.getMessage());
         }
     }
 
     @PatchMapping("/move-offers/{id}/reject")
-    public ResponseEntity<MoveOfferDto> rejectMoveOffer(@PathVariable Long id) {
+    public ResponseEntity<?> rejectMoveOffer(@PathVariable Long id) {
         try {
             MoveOfferDto rejectedOffer = moveOfferService.reject(id);
             return ResponseEntity.ok(rejectedOffer);
         } catch (Exception ex) {
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(500).body(ex.getMessage());
         }
     }
 
     @PatchMapping("/move-offers/{id}/cancel")
-    public ResponseEntity<MoveOfferDto> cancelMoveOffer(@PathVariable Long id) {
+    public ResponseEntity<?> cancelMoveOffer(@PathVariable Long id) {
         try {
             MoveOfferDto cancelledOffer = moveOfferService.cancel(id);
             return ResponseEntity.ok(cancelledOffer);
         } catch (Exception ex) {
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(500).body(ex.getMessage());
         }
     }
+
 
 //    Vehicle Endpoints
 
