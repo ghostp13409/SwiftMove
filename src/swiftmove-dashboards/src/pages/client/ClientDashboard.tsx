@@ -1,82 +1,67 @@
-import { useEffect, useState } from "react";
-import { FileText, Route, DollarSign, Clock } from "lucide-react";
+import { FileText, Route, Clock, Loader2, Plus, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import StatsCard from "@/components/StatsCard";
 import StatusBadge from "@/components/StatusBadge";
+import EmptyState from "@/components/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { clientService } from "@/services/clientService";
 import { moveOfferService } from "@/services/moveOfferService";
 import { tripService } from "@/services/tripService";
-import type {
-  MoveRequest,
-  MoveOffer,
-  MoveTrip,
-  MoveRequestPopulated,
-  MoveOfferPopulated,
-} from "@/types";
 import { moveRequestService } from "@/services/moveRequestService";
 import { populationFactory } from "@/services/populationFactory";
 import { getVehicleString } from "@/utils";
+import type { MoveOffer } from "@/types";
 
 const ClientDashboard = () => {
   const { userId, name } = useAuth();
-  const [myRequests, setMyRequests] = useState<MoveRequestPopulated[]>([]);
-  const [myOffers, setMyOffers] = useState<MoveOfferPopulated[]>([]);
-  const [myTrips, setMyTrips] = useState<MoveTrip[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const navigate = useNavigate();
   const displayName = name?.split(" ")[0] || "there";
 
-  useEffect(() => {
-    if (!userId) return;
-    const fetchData = async () => {
-      try {
-        // Fetch client's move requests and trips in parallel
-        const [reqData, tripData] = await Promise.all([
-          moveRequestService.getActiveRequests(),
-          tripService.getTripsByClient(userId),
-        ]);
+  // Fetch active requests
+  const { data: myRequests = [], isLoading: isLoadingRequests } = useQuery({
+    queryKey: ["clientRequests", userId],
+    queryFn: async () => {
+      const reqData = await moveRequestService.getActiveRequests();
+      return Promise.all(
+        reqData.map((req) => populationFactory.populateMoveRequest(req))
+      );
+    },
+    enabled: !!userId,
+  });
 
-        const populatedReqData = await Promise.all(
-          reqData.map((req) => populationFactory.populateMoveRequest(req)),
-        );
-        setMyRequests(populatedReqData);
-        setMyTrips(tripData);
 
-        // Fetch offers for each request
-        if (reqData.length > 0) {
-          const offersResults = await Promise.allSettled(
-            reqData.map((r) => moveOfferService.getOffersByMoveRequest(r.id)),
-          );
-          const allOffers = offersResults
-            .filter((r) => r.status === "fulfilled")
-            .flatMap(
-              (r) => (r as PromiseFulfilledResult<MoveOffer[]>).value,
-            );
-          const populatedOffers = await Promise.all(
-            allOffers.map((offer) => populationFactory.populateMoveOffer(offer)),
-          );
-          setMyOffers(populatedOffers);
-        }
-      } catch (err) {
-        console.error("Failed to load client dashboard data:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [userId]);
+  // Fetch client trips
+  const { data: myTrips = [], isLoading: isLoadingTrips } = useQuery({
+    queryKey: ["clientTrips", userId],
+    queryFn: () => tripService.getTripsByClient(userId!),
+    enabled: !!userId,
+  });
 
-  const pendingRequests = myRequests.filter(
-    (r) => r.status === "CREATED",
-  ).length;
-  // MoveOffer status is OFFER_SENT (not PENDING)
+  // Fetch offers for active requests
+  const { data: myOffers = [], isLoading: isLoadingOffers } = useQuery({
+    queryKey: ["clientOffers", myRequests.map(r => r.id)],
+    queryFn: async () => {
+      if (myRequests.length === 0) return [];
+      const offersResults = await Promise.allSettled(
+        myRequests.map((r) => moveOfferService.getOffersByMoveRequest(r.id))
+      );
+      const allOffers = offersResults
+        .filter((r) => r.status === "fulfilled")
+        .flatMap((r) => (r as PromiseFulfilledResult<MoveOffer[]>).value);
+      
+      return Promise.all(
+        allOffers.map((offer) => populationFactory.populateMoveOffer(offer))
+      );
+    },
+    enabled: myRequests.length > 0,
+  });
+
+  const isLoading = isLoadingRequests || isLoadingTrips || (myRequests.length > 0 && isLoadingOffers);
+
+  const pendingRequests = myRequests.filter((r) => r.status === "CREATED").length;
   const activeOffers = myOffers.filter((o) => o.status === "OFFER_SENT").length;
   const scheduledTrips = myTrips.filter((t) => t.status === "SCHEDULED").length;
-  // const totalSpent = myTrips
-  //   .filter((t) => t.status === "COMPLETED")
-  //   .reduce((s, t) => s + (t.price ?? 0), 0);
 
   if (isLoading) {
     return (
@@ -85,16 +70,23 @@ const ClientDashboard = () => {
       </div>
     );
   }
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold">Welcome back, {displayName} 👋</h1>
+    <div className="space-y-6">
+      <div className="animate-slide-up animate-stagger-1">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Welcome back, {displayName} 👋
+        </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Here's what's happening with your moves
+          {pendingRequests > 0 
+            ? `You have ${pendingRequests} active move request${pendingRequests > 1 ? 's' : ''} in progress.`
+            : "Ready for your next move? Create a request to get started."}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up animate-stagger-2">
+
+
         <StatsCard
           title="Active Requests"
           value={pendingRequests}
@@ -113,76 +105,72 @@ const ClientDashboard = () => {
           icon={<Route className="w-4 h-4" />}
           description="Scheduled moves"
         />
-        {/* <StatsCard
-          title="Total Spent"
-          value={`$${totalSpent.toLocaleString()}`}
-          icon={<DollarSign className="w-4 h-4" />}
-          description="Completed trips"
-        /> */}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="text-base">Recent Move Requests</CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-3">
+
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold">Recent Move Requests</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="p-0">
             {myRequests.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No active move requests.
-              </p>
+              <EmptyState
+                icon={Plus}
+                title="No active requests"
+                description="Create your first move request to start receiving offers from drivers."
+                action={{
+                  label: "Create Request",
+                  onClick: () => navigate("/client/requests"),
+                }}
+              />
             ) : (
-              myRequests.slice(0, 3).map((req) => (
-                <div
-                  key={req.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
-                >
-                  <div>
-                    <p className="text-sm font-medium">
-                      {req.fromAddress?.city || "—"} →{" "}
-                      {req.toAddress?.city || "—"}
-                    </p>
-                    {/* <p className="text-xs text-muted-foreground">
-                      {req.moveDate?.toLocaleDateString()} · Budget: $
-                      {req.maxBudget}
-                    </p> */}
-                  </div>
-                  <div className="flex items-center gap-2">
+              <div className="divide-y">
+                {myRequests.slice(0, 5).map((req) => (
+                  <div key={req.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">
+                        {req.fromAddress?.city || "—"} → {req.toAddress?.city || "—"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {req.moveDate ? new Date(req.moveDate).toLocaleDateString() : "Date TBD"}
+                      </p>
+                    </div>
                     <StatusBadge status={req.status} />
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="text-base">Latest Offers</CardTitle>
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold">Latest Offers</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="p-0">
             {myOffers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No offers yet.</p>
+              <EmptyState
+                icon={MessageSquare}
+                title="No offers yet"
+                description="Once you create a request, drivers will send you their offers here."
+              />
             ) : (
-              myOffers.slice(0, 3).map((offer) => (
-                <div
-                  key={offer.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
-                >
-                  <div>
-                    <p className="text-sm font-medium">
-                      {offer.driver.user.firstName ||
-                        `Driver #${offer.driverId}`}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {getVehicleString(offer.vehicle) ||
-                        `Vehicle #${offer.vehicleId}`}{" "}
-                      · ${offer.price}
-                    </p>
+              <div className="divide-y">
+                {myOffers.slice(0, 5).map((offer) => (
+                  <div key={offer.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">
+                        {offer.driver.user.firstName || `Driver #${offer.driverId}`}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {getVehicleString(offer.vehicle)} · <span className="font-semibold text-foreground">${offer.price}</span>
+                      </p>
+                    </div>
+                    <StatusBadge status={offer.status} />
                   </div>
-                  <StatusBadge status={offer.status} />
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -192,3 +180,4 @@ const ClientDashboard = () => {
 };
 
 export default ClientDashboard;
+

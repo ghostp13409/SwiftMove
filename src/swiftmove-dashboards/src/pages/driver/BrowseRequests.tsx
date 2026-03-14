@@ -320,7 +320,6 @@ const BrowseRequests = () => {
                 >
                   <DialogTrigger asChild>
                     <Button
-                      className="gradient-brand text-primary-foreground border-0"
                       disabled={driverVehicles.length === 0}
                     >
                       {driverVehicles.length === 0
@@ -413,7 +412,7 @@ const BrowseRequests = () => {
                         </div>
                         <Button
                           type="submit"
-                          className="w-full gradient-brand text-primary-foreground border-0"
+                          className="w-full"
                           disabled={isSubmitting || !offerPrice || !offeredDateTime}
                         >
                           {isSubmitting ? (

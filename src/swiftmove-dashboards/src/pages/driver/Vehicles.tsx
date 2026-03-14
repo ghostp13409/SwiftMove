@@ -247,7 +247,7 @@ const Vehicles = () => {
           if (!val) resetForm();
         }}>
           <DialogTrigger asChild>
-            <Button className="gradient-brand text-primary-foreground border-0 gap-2">
+            <Button className="gap-2">
               <Plus className="w-4 h-4" /> Add Vehicle
             </Button>
           </DialogTrigger>
@@ -334,7 +334,7 @@ const Vehicles = () => {
               </div>
               <Button
                 type="submit"
-                className="w-full gradient-brand text-primary-foreground border-0"
+                className="w-full"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

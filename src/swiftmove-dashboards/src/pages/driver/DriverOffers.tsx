@@ -224,7 +224,7 @@ const DriverOffers = () => {
             </div>
             <Button 
               type="submit" 
-              className="w-full gradient-brand text-primary-foreground border-0"
+              className="w-full"
               disabled={isSubmitting || !editDate}
             >
               {isSubmitting ? (

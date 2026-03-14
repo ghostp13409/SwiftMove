@@ -527,7 +527,7 @@ const ClientMoveRequests = () => {
           }}
         >
           <DialogTrigger asChild>
-            <Button className="gradient-brand text-primary-foreground border-0 gap-2 shadow-lg h-10 px-6 font-semibold">
+            <Button className="gap-2 shadow-lg h-10 px-6 font-semibold">
               <Plus className="w-4 h-4" /> New Request
             </Button>
           </DialogTrigger>
@@ -725,14 +725,14 @@ const ClientMoveRequests = () => {
               )}
               {step === 1 ? (
                 <Button
-                  className="flex-1 gradient-brand text-primary-foreground h-12 rounded-xl font-bold shadow-lg"
+                  className="flex-1 h-12 rounded-xl font-bold shadow-lg"
                   onClick={nextStep}
                 >
                   Continue <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
                 <Button
-                  className="flex-1 gradient-brand text-primary-foreground h-12 rounded-xl font-bold shadow-lg"
+                  className="flex-1 h-12 rounded-xl font-bold shadow-lg"
                   onClick={handleSubmitRequest}
                   disabled={isSubmitting}
                 >
@@ -1090,7 +1090,7 @@ const ClientMoveRequests = () => {
                                       onClick={() =>
                                         handleAcceptOffer(offer.id)
                                       }
-                                      className="h-10 px-6 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-md transition-transform active:scale-95"
+                                      className="h-10 px-6 rounded-xl font-bold shadow-md transition-transform active:scale-95"
                                     >
                                       Accept
                                     </Button>

@@ -303,8 +303,9 @@ const Register = () => {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        tabIndex={-1}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                       >
+
                         {showPassword ? (
                           <EyeOff className="w-4 h-4" />
                         ) : (
@@ -316,9 +317,10 @@ const Register = () => {
 
                   <Button
                     type="submit"
-                    className="w-full gradient-brand text-primary-foreground border-0"
+                    className="w-full"
                     disabled={isLoading}
                   >
+
                     {isLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating
