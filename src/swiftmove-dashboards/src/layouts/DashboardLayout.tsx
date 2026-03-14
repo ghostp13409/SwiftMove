@@ -20,7 +20,9 @@ import {
   Menu,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import ThemeSettings from "@/components/ThemeSettings";
 import { Button } from "@/components/ui/button";
+
 import type { UserRole } from "@/types";
 import { useAuth } from "@/context/AuthContext";
 
@@ -108,8 +110,9 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
 
   const sidebar = (
     <div
-      className={`flex flex-col h-full bg-sidebar text-sidebar-foreground transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}
+      className={`flex flex-col h-full bg-sidebar-background text-sidebar-foreground transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}
     >
+
       {/* Header */}
       <div className="flex items-center gap-3 px-4 h-14 border-b border-sidebar-border shrink-0">
         <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
@@ -238,8 +241,12 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
           </Button>
           <div className="flex-1" />
           <div className="flex items-center gap-4">
-            <ThemeToggle />
+            <div className="flex items-center gap-1.5">
+              <ThemeSettings />
+              <ThemeToggle />
+            </div>
             <div className="h-8 w-[1px] bg-border/50 mx-1 hidden sm:block" />
+
             <div className="flex items-center gap-3">
               <span className="text-xs font-semibold text-foreground hidden sm:inline">
                 {displayName}
