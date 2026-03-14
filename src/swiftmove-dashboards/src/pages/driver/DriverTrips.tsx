@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Route, 
@@ -13,7 +13,9 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "@/components/StatusBadge";
+import SortToggle, { SortOrder } from "@/components/SortToggle";
 import LoadingDelight from "@/components/LoadingDelight";
+
 import EmptyState from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -29,6 +31,7 @@ const DriverTrips = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const { data: trips = [], isLoading } = useQuery({
     queryKey: ["driverTrips", userId],
@@ -38,20 +41,26 @@ const DriverTrips = () => {
       const populated = await Promise.all(
         data.map((t) => populationFactory.populateMoveTripDetailed(t))
       );
-      return populated.sort((a, b) => 
-        new Date(b.moveRequestPopulated.moveDate).getTime() - 
-        new Date(a.moveRequestPopulated.moveDate).getTime()
-      );
+      return populated;
     },
     enabled: !!userId,
   });
 
+  const sortedTrips = React.useMemo(() => {
+    return [...trips].sort((a, b) => {
+      const dateA = new Date(a.moveRequestPopulated?.moveDate).getTime();
+      const dateB = new Date(b.moveRequestPopulated?.moveDate).getTime();
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+  }, [trips, sortOrder]);
+
   // Set default selection when data loads
   useEffect(() => {
-    if (trips.length > 0 && selectedId === null) {
-      setSelectedId(trips[0].id);
+    if (sortedTrips.length > 0 && selectedId === null) {
+      setSelectedId(sortedTrips[0].id);
     }
-  }, [trips, selectedId]);
+  }, [sortedTrips, selectedId]);
+
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => tripService.deleteTrip(String(id)),
@@ -109,10 +118,14 @@ const DriverTrips = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Trip List */}
         <div className="lg:col-span-1 space-y-4">
-          <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.2em] px-1">Assignment List</p>
+          <div className="flex items-center justify-between px-1">
+            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.2em]">Assignment List</p>
+            <SortToggle order={sortOrder} setOrder={setSortOrder} />
+          </div>
           <div className="space-y-3">
-            {trips.map((trip) => {
+            {sortedTrips.map((trip) => {
               const isActive = selectedId === trip.id;
+
               return (
                 <button
                   key={trip.id}
