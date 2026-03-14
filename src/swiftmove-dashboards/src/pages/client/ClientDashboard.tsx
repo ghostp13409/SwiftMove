@@ -1,10 +1,11 @@
-import { FileText, Route, Clock, Plus, MessageSquare } from "lucide-react";
+import { FileText, Route, Clock, Plus, MessageSquare, LineChart as ChartIcon, PieChart as PieIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import StatsCard from "@/components/StatsCard";
 import StatusBadge from "@/components/StatusBadge";
 import EmptyState from "@/components/EmptyState";
 import LoadingDelight from "@/components/LoadingDelight";
+import { SimpleLineChart, StatusPieChart } from "@/components/MoveCharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { moveOfferService } from "@/services/moveOfferService";
@@ -59,13 +60,35 @@ const ClientDashboard = () => {
 
   const isLoading = isLoadingRequests || isLoadingTrips || (myRequests.length > 0 && isLoadingOffers);
 
+  if (isLoading) {
+    return <LoadingDelight />;
+  }
+
   const pendingRequests = myRequests.filter((r) => r.status === "CREATED").length;
   const activeOffers = myOffers.filter((o) => o.status === "OFFER_SENT").length;
   const scheduledTrips = myTrips.filter((t) => t.status === "SCHEDULED").length;
 
-  if (isLoading) {
-    return <LoadingDelight />;
-  }
+  // Status distribution for pie chart
+  const statusCounts = myRequests.reduce((acc: any, req) => {
+    acc[req.status] = (acc[req.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const statusData = Object.keys(statusCounts).map(status => ({
+    name: status,
+    value: statusCounts[status]
+  }));
+
+  // Dummy spending trend data
+  const spendTrendData = [
+    { date: "Oct", amount: 0 },
+    { date: "Nov", amount: 450 },
+    { date: "Dec", amount: 1200 },
+    { date: "Jan", amount: 800 },
+    { date: "Feb", amount: 2100 },
+    { date: "Mar", amount: 1500 },
+  ];
+
 
 
   return (
@@ -105,6 +128,31 @@ const ClientDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-3">
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <ChartIcon className="w-4 h-4 text-primary/80" /> Spending Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <SimpleLineChart data={spendTrendData} title="Monthly Moving Expenses" />
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <PieIcon className="w-4 h-4 text-primary/80" /> Request Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <StatusPieChart data={statusData} title="Move Request Distribution" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-4">
+
 
         <Card className="shadow-card overflow-hidden">
           <CardHeader className="border-b bg-muted/30 py-4">

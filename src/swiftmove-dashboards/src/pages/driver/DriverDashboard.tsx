@@ -1,10 +1,11 @@
-import { FileText, Truck, Route, DollarSign, HandCoins, Search, Plus } from "lucide-react";
+import { FileText, Truck, Route, DollarSign, HandCoins, Search, Plus, BarChart3, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import StatsCard from "@/components/StatsCard";
 import StatusBadge from "@/components/StatusBadge";
 import EmptyState from "@/components/EmptyState";
 import LoadingDelight from "@/components/LoadingDelight";
+import { SimpleBarChart, StatusPieChart } from "@/components/MoveCharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { driverService } from "@/services/driverService";
@@ -80,9 +81,31 @@ const DriverDashboard = () => {
 
 
   const activeTripsCount = myTrips.filter((t) => t.status === "SCHEDULED").length;
-  const earnings = myTrips
-    .filter((t) => t.status === "COMPLETED")
-    .reduce((s, t) => s + t.moveOfferPopulated.price, 0);
+  const completedTrips = myTrips.filter((t) => t.status === "COMPLETED");
+  const earnings = completedTrips.reduce((s, t) => s + t.moveOfferPopulated.price, 0);
+
+  // Group trips by status for charts
+  const tripStatusData = myTrips.reduce((acc: any, t) => {
+    acc[t.status] = (acc[t.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const statusPieData = Object.keys(tripStatusData).map(status => ({
+    name: status,
+    value: tripStatusData[status]
+  }));
+
+  // Dummy weekly earnings data
+  const weeklyEarningsData = [
+    { name: "Mon", value: 450 },
+    { name: "Tue", value: 320 },
+    { name: "Wed", value: 680 },
+    { name: "Thu", value: 210 },
+    { name: "Fri", value: 890 },
+    { name: "Sat", value: 1200 },
+    { name: "Sun", value: 540 },
+  ];
+
 
   return (
     <div className="space-y-6">
@@ -129,6 +152,31 @@ const DriverDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-3">
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary/80" /> Earnings Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <SimpleBarChart data={weeklyEarningsData} title="Daily Earnings (Current Week)" />
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary/80" /> Job Success Rate
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <StatusPieChart data={statusPieData} title="Assignment Status Breakdown" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-4">
+
 
         <Card className="shadow-card overflow-hidden">
           <CardHeader className="border-b bg-muted/30 py-4">
