@@ -11,7 +11,9 @@ import {
   Armchair,
   ExternalLink,
   Map as MapIcon,
+  Clock,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "@/components/StatusBadge";
@@ -851,254 +853,182 @@ const ClientMoveRequests = () => {
 
           <div className="lg:col-span-2">
             {selected ? (
-              <Card className="shadow-card overflow-hidden border-0 rounded-[2rem] bg-background">
-                <CardHeader className="bg-secondary/10 border-b px-8 py-6">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-xl flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-primary/10">
-                        <Package className="w-6 h-6 text-primary" />
-                      </div>
-                      Move Details
-                    </CardTitle>
-                    <div className="flex items-center gap-3">
-                      {(selected.status === "CREATED" ||
-                        selected.status === "OFFER_AVAILABLE") && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditRequest(selected)}
-                            className="h-8 px-3 rounded-lg text-xs font-semibold border-primary/30 hover:bg-primary/5"
-                          >
-                            Edit Request
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleCancelRequest(selected.id)}
-                            className="h-8 px-3 rounded-lg text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5"
-                          >
-                            Cancel Request
-                          </Button>
-                        </>
-                      )}
-                      <StatusBadge status={selected.status} />
+              <Card className="shadow-sm border-border/50 rounded-xl bg-card overflow-hidden h-full flex flex-col">
+                <CardHeader className="py-4 px-6 border-b bg-muted/20 flex flex-row items-center justify-between space-y-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20 shrink-0">
+                      <Package className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-bold tracking-tight">Move Details</CardTitle>
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Request #{selected.id}</p>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-8 p-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
-                          Origin
-                        </p>
-                        <a 
-                          href={getGoogleMapsAddressLink(selected.fromAddress)} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-primary hover:underline flex items-center gap-1 font-bold"
-                        >
-                          Google Maps <ExternalLink className="w-2.5 h-2.5" />
-                        </a>
-                      </div>
-                      <div className="p-4 rounded-2xl bg-secondary/20 border border-border/50">
-                        <p className="text-sm font-bold">
-                          {selected.fromAddress?.line1}
-                        </p>
-                        {selected.fromAddress?.line2 && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {selected.fromAddress.line2}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-1 font-medium">
-                          {selected.fromAddress?.city},{" "}
-                          {selected.fromAddress?.stateOrProvince}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground/60 mt-0.5">
-                          {selected.fromAddress?.postalOrZipCode},{" "}
-                          {selected.fromAddress?.country}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
-                          Destination
-                        </p>
-                        <a 
-                          href={getGoogleMapsAddressLink(selected.toAddress)} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-primary hover:underline flex items-center gap-1 font-bold"
-                        >
-                          Google Maps <ExternalLink className="w-2.5 h-2.5" />
-                        </a>
-                      </div>
-                      <div className="p-4 rounded-2xl bg-secondary/20 border border-border/50">
-                        <p className="text-sm font-bold">
-                          {selected.toAddress?.line1}
-                        </p>
-                        {selected.toAddress?.line2 && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {selected.toAddress.line2}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-1 font-medium">
-                          {selected.toAddress?.city},{" "}
-                          {selected.toAddress?.stateOrProvince}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground/60 mt-0.5">
-                          {selected.toAddress?.postalOrZipCode},{" "}
-                          {selected.toAddress?.country}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" className="h-8 px-2 text-[10px] font-bold text-primary hover:bg-primary/5 gap-1.5" asChild title="View Route on Google Maps">
+                      <a 
+                        href={getGoogleMapsDirectionsLink(selected.fromAddress, selected.toAddress)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        <MapIcon className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">View Route</span>
+                      </a>
+                    </Button>
+                    {(selected.status === "CREATED" || selected.status === "OFFER_AVAILABLE") && (
 
-                  <div className="grid grid-cols-2 gap-8 py-2">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
-                        Scheduled For
-                      </p>
-                      <p className="text-base font-bold text-foreground">
-                        {selected.moveDate.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="space-y-1 flex flex-col">
-                      <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
-                        Estimated Budget & Route
-                      </p>
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center gap-3">
-                          <p className="text-2xl font-black text-primary tracking-tight">
-                            ${selected.maxBudget}
-                          </p>
-                          {selected.hasFurniture && (
-                            <Badge
-                              variant="secondary"
-                              className="h-6 gap-1 bg-primary/10 text-primary border-0 rounded-lg px-2"
-                            >
-                              <Armchair className="w-3 h-3" /> Includes Furniture
-                            </Badge>
-                          )}
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-fit h-8 text-[10px] font-bold gap-2 rounded-xl border-primary/20 hover:bg-primary/5"
-                          asChild
-                        >
-                          <a 
-                            href={getGoogleMapsDirectionsLink(selected.fromAddress, selected.toAddress)} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                          >
-                            <MapIcon className="w-3 h-3" /> View Route on Google Maps
-                          </a>
+                      <div className="hidden sm:flex items-center gap-2 mr-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleEditRequest(selected)} className="h-8 text-xs font-semibold hover:bg-primary/5 hover:text-primary">
+                          Edit
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleCancelRequest(selected.id)} className="h-8 text-xs font-semibold text-destructive hover:bg-destructive/5">
+                          Cancel
                         </Button>
                       </div>
+                    )}
+                    <StatusBadge status={selected.status} />
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="flex-1 overflow-auto p-0 divide-y divide-border/40 text-foreground/90 font-medium">
+                  {/* Route Timeline Section - High Density */}
+                  <div className="p-6 bg-background/50">
+                    <div className="relative flex flex-col gap-10 pl-10 before:absolute before:left-[15px] before:top-2 before:bottom-10 before:w-[2px] before:bg-border/60 before:rounded-full">
+                      {/* Origin */}
+                      <div className="relative">
+                        <div className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-primary/10 ring-offset-2 ring-offset-background z-10" />
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] font-bold uppercase text-primary tracking-widest leading-none mb-1.5">Pick-up</p>
+                            <p className="text-sm font-bold text-foreground leading-tight">{selected.fromAddress?.line1}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{selected.fromAddress?.city}, {selected.fromAddress?.stateOrProvince}</p>
+                          </div>
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-bold text-primary opacity-60 hover:opacity-100" asChild>
+                            <a href={getGoogleMapsAddressLink(selected.fromAddress)} target="_blank" rel="noopener noreferrer">
+                              Maps <ExternalLink className="ml-1 w-2.5 h-2.5" />
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Destination */}
+                      <div className="relative">
+                        <div className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-foreground/80 ring-4 ring-foreground/5 ring-offset-2 ring-offset-background z-10" />
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest leading-none mb-1.5">Destination</p>
+                            <p className="text-sm font-bold text-foreground leading-tight">{selected.toAddress?.line1}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{selected.toAddress?.city}, {selected.toAddress?.stateOrProvince}</p>
+                          </div>
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-bold text-primary opacity-60 hover:opacity-100" asChild>
+                            <a href={getGoogleMapsAddressLink(selected.toAddress)} target="_blank" rel="noopener noreferrer">
+                              Maps <ExternalLink className="ml-1 w-2.5 h-2.5" />
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.15em]">
-                      Luggage Inventory
-                    </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+
+
+                  {/* Move Stats Row - High Density Chips */}
+                  <div className="px-6 py-4 flex flex-wrap gap-6 bg-muted/10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-background border border-border/50 flex items-center justify-center shadow-sm text-muted-foreground">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Scheduled</p>
+                        <p className="text-xs font-bold mt-0.5">{new Date(selected.moveDate).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-background border border-border/50 flex items-center justify-center shadow-sm text-primary">
+                        <span className="text-xs font-black">$</span>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Budget</p>
+                        <p className="text-xs font-bold mt-0.5">${selected.maxBudget}</p>
+                      </div>
+                    </div>
+                    {selected.hasFurniture && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shadow-sm text-primary">
+                          <Armchair className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Furniture</p>
+                          <p className="text-xs font-bold mt-0.5 text-primary">Included</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Inventory Section - Compact Badges */}
+                  <div className="p-6">
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">Luggage Inventory</p>
+                    <div className="flex flex-wrap gap-2">
                       {selected.luggageEntries?.length ? (
                         selected.luggageEntries.map((l, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-3 p-3 rounded-2xl bg-background border border-border/50 shadow-sm transition-hover hover:border-primary/20"
-                          >
-                            <div className="bg-primary text-primary-foreground w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold shadow-sm">
-                              {l.quantity}
-                            </div>
-                            <span className="text-xs font-bold tracking-tight">
-                              {l.luggageType?.name}
-                            </span>
+                          <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-background border border-border/50 shadow-sm ring-1 ring-black/5">
+                            <span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary rounded-md text-[10px] font-black">{l.quantity}</span>
+                            <span className="text-[11px] font-bold text-foreground/80">{l.luggageType?.name}</span>
                           </div>
                         ))
                       ) : (
-                        <p className="text-xs text-muted-foreground italic col-span-full">
-                          No items listed
-                        </p>
+                        <p className="text-xs text-muted-foreground italic">No items listed</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="pt-8 border-t border-border/50">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-bold text-lg tracking-tight">
-                        Driver Offers{" "}
-                        <span className="text-primary/50 text-sm ml-1 font-medium">
-                          ({offersForRequest.length})
-                        </span>
+
+                  {/* Driver Offers - Compact Cards */}
+                  <div className="p-6 bg-muted/5 flex-1">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-bold tracking-tight text-foreground flex items-center gap-2">
+                        Driver Offers 
+                        <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-black">{offersForRequest.length}</span>
                       </h3>
                     </div>
                     {offersForRequest.length === 0 ? (
-                      <div className="text-center py-12 bg-secondary/10 rounded-3xl border border-dashed border-border/60">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Looking for available drivers...
-                        </p>
-                        <p className="text-[10px] text-muted-foreground/60 mt-1">
-                          Offers will appear here automatically
-                        </p>
+                      <div className="text-center py-8 bg-background border border-dashed border-border/60 rounded-xl">
+                        <p className="text-xs font-semibold text-muted-foreground/60">Waiting for driver offers...</p>
                       </div>
                     ) : (
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         {offersForRequest.map((offer) => (
-                          <div
-                            key={offer.id}
-                            className="flex items-center justify-between p-5 rounded-2xl bg-background border shadow-sm hover:border-primary/40 transition-all hover:shadow-lg group"
-                          >
-                            <div className="space-y-1">
-                              <p className="text-sm font-bold group-hover:text-primary transition-colors">
-                                {offer.driver.user.firstName}{" "}
-                                {offer.driver.user.lastName}
-                              </p>
-                              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                                {getVehicleString(offer.vehicle)}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-6">
-                              <div className="text-right">
-                                <p className="text-lg font-black text-primary tracking-tighter">
-                                  ${offer.price}
-                                </p>
-                                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                                  Fixed Price
-                                </p>
+                          <div key={offer.id} className="p-4 rounded-xl bg-card border border-border/50 shadow-sm flex items-center justify-between group hover:border-primary/30 transition-all">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center text-xs font-bold text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors uppercase">
+                                {offer.driver.user.firstName[0]}{offer.driver.user.lastName[0]}
                               </div>
-                              {(selected.status === "CREATED" ||
-                                selected.status === "OFFER_AVAILABLE") &&
-                                offer.status === "OFFER_SENT" && (
-                                  <div className="flex gap-2">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() =>
-                                        handleRejectOffer(offer.id)
-                                      }
-                                      className="h-10 px-4 rounded-xl border-destructive text-destructive hover:bg-destructive/5 font-bold shadow-sm"
-                                    >
+                              <div>
+                                <p className="text-xs font-bold text-foreground">{offer.driver.user.firstName} {offer.driver.user.lastName}</p>
+                                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{getVehicleString(offer.vehicle)}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <p className="text-base font-black text-primary tracking-tighter leading-none">${offer.price}</p>
+                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Fixed</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {offer.status === "OFFER_SENT" && (selected.status === "CREATED" || selected.status === "OFFER_AVAILABLE") ? (
+                                  <div className="flex items-center gap-2">
+                                    <Button size="sm" variant="ghost" onClick={() => handleRejectOffer(offer.id)} className="h-8 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider text-destructive hover:bg-destructive/5 hover:text-destructive">
                                       Reject
                                     </Button>
-                                    <Button
-                                      size="sm"
-                                      onClick={() =>
-                                        handleAcceptOffer(offer.id)
-                                      }
-                                      className="h-10 px-6 rounded-xl font-bold shadow-md transition-transform active:scale-95"
-                                    >
+                                    <Button size="sm" onClick={() => handleAcceptOffer(offer.id)} className="h-8 px-4 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
                                       Accept
                                     </Button>
                                   </div>
+                                ) : (
+                                  <StatusBadge status={offer.status} />
                                 )}
-                              {offer.status !== "OFFER_SENT" && (
-                                <StatusBadge status={offer.status} />
-                              )}
+                              </div>
+
                             </div>
                           </div>
                         ))}
@@ -1108,16 +1038,16 @@ const ClientMoveRequests = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="h-full min-h-[500px] flex flex-col items-center justify-center border-2 border-dashed rounded-[3rem] opacity-40 bg-secondary/5 border-muted-foreground/20">
-                <div className="p-6 rounded-3xl bg-secondary/10 mb-4">
-                  <Package className="w-16 h-16 text-muted-foreground/30" />
+              <div className="h-full min-h-[500px] flex flex-col items-center justify-center border border-dashed rounded-xl opacity-60 bg-muted/20 border-border/60">
+                <div className="p-6 rounded-2xl bg-primary/5 mb-4 text-primary/40 ring-1 ring-primary/10 animate-float">
+                  <Package className="w-16 h-16" />
                 </div>
-                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
-                  Select a move to inspect
-                </p>
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Select a move to inspect</p>
               </div>
             )}
           </div>
+
+
         </div>
       )}
     </div>

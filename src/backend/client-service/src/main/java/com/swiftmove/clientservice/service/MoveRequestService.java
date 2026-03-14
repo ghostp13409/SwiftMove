@@ -155,12 +155,9 @@ public class MoveRequestService {
         if(moveRequest.getMoveDate() == null){
             errors.append("Move Date is null.");
         }
-        // Move date cannot be in the past
-        if(moveRequest.getMoveDate() != null && moveRequest.getMoveDate().isBefore(Instant.now())){
-            errors.append("Move Date cannot be in the past.");
-        }
-
+        
         // Max Budget
+
         if(moveRequest.getMaxBudget() == null){
             errors.append("Max Budget is null.");
         }

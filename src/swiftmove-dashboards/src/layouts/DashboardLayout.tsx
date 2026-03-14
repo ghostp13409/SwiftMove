@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
+
   FileText,
   Truck,
   User,
@@ -10,8 +12,10 @@ import {
   Users,
   HandCoins,
   Route,
+  History,
   LogOut,
   ChevronLeft,
+
   ChevronRight,
   Menu,
 } from "lucide-react";
@@ -30,6 +34,7 @@ const clientNav: NavItem[] = [
   { title: "Dashboard", url: "/client", icon: LayoutDashboard },
   { title: "Move Requests", url: "/client/requests", icon: FileText },
   { title: "Move Trips", url: "/client/trips", icon: Route },
+  { title: "History", url: "/client/history", icon: History },
   { title: "Profile", url: "/client/profile", icon: User },
 ];
 
@@ -39,8 +44,10 @@ const driverNav: NavItem[] = [
   { title: "Vehicles", url: "/driver/vehicles", icon: Truck },
   { title: "Move Offers", url: "/driver/offers", icon: HandCoins },
   { title: "Move Trips", url: "/driver/trips", icon: Route },
+  { title: "History", url: "/driver/history", icon: History },
   { title: "Profile", url: "/driver/profile", icon: User },
 ];
+
 
 const adminNav: NavItem[] = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
@@ -135,13 +142,14 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
               key={item.url}
               to={item.url}
               end={item.url === `/${role.toLowerCase()}`}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"}`}
-              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
+              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${isActive ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"}`}
+              activeClassName="bg-primary/10 text-primary"
               onClick={() => setMobileOpen(false)}
             >
-              <item.icon className="w-4 h-4 shrink-0" />
+              <item.icon className={cn("w-4 h-4 shrink-0 transition-transform duration-200", isActive && "scale-110")} />
               {!collapsed && <span>{item.title}</span>}
             </NavLink>
+
           );
         })}
       </nav>
@@ -177,8 +185,9 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       <button
         onClick={() => setCollapsed(!collapsed)}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className="hidden lg:flex absolute -right-4 top-10 w-8 h-8 rounded-full bg-card border border-border items-center justify-center shadow-sm hover:bg-secondary transition-colors"
+        className="hidden lg:flex absolute -right-4 top-10 w-8 h-8 rounded-full bg-card border border-border items-center justify-center shadow-sm hover:bg-secondary transition-colors z-40"
       >
+
 
 
 
@@ -204,40 +213,44 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
 
 
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex relative shrink-0">{sidebar}</aside>
+      <aside className="hidden lg:flex relative shrink-0 border-r border-border/50 shadow-sm">{sidebar}</aside>
 
       {/* Sidebar - Mobile */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 lg:hidden transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-50 lg:hidden transition-transform duration-300 shadow-2xl ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {sidebar}
       </aside>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-background/50">
+
         {/* Top bar */}
-        <header className="h-14 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-30 flex items-center px-4 gap-4 shrink-0">
+        <header className="h-14 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-30 flex items-center px-6 gap-4 shrink-0">
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden -ml-2"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
             <Menu className="w-5 h-5 text-muted-foreground" />
           </Button>
           <div className="flex-1" />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <ThemeToggle />
-            <span className="text-xs text-muted-foreground hidden sm:inline">
-              {displayName}
-            </span>
-            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
-              {initials}
+            <div className="h-8 w-[1px] bg-border/50 mx-1 hidden sm:block" />
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-foreground hidden sm:inline">
+                {displayName}
+              </span>
+              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center text-xs font-bold shadow-sm">
+                {initials}
+              </div>
             </div>
           </div>
-
         </header>
+
 
         {/* Content */}
         <main className="flex-1 overflow-auto p-4 md:p-6">

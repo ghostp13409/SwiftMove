@@ -1,9 +1,10 @@
-import { FileText, Truck, Route, DollarSign, HandCoins, Loader2, Search, Plus } from "lucide-react";
+import { FileText, Truck, Route, DollarSign, HandCoins, Search, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import StatsCard from "@/components/StatsCard";
 import StatusBadge from "@/components/StatusBadge";
 import EmptyState from "@/components/EmptyState";
+import LoadingDelight from "@/components/LoadingDelight";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { driverService } from "@/services/driverService";
@@ -71,16 +72,12 @@ const DriverDashboard = () => {
     enabled: !!driverId,
   });
 
-
   const isLoading = isLoadingDriver || isLoadingRequests || isLoadingOffers || isLoadingTrips || isLoadingVehicles;
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      </div>
-    );
+    return <LoadingDelight label="Mapping your move routes..." />;
   }
+
 
   const activeTripsCount = myTrips.filter((t) => t.status === "SCHEDULED").length;
   const earnings = myTrips
