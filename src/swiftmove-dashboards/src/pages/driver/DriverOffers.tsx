@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import StatusBadge from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,21 +11,20 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Info } from "lucide-react";
+import { Loader2, Info, HandCoins, Clock, Truck, ChevronRight } from "lucide-react";
 import { moveOfferService } from "@/services/moveOfferService";
 import { driverService } from "@/services/driverService";
 import { populationFactory } from "@/services/populationFactory";
 import { useToast } from "@/hooks/use-toast";
-import type { MoveOfferPopulated, DriverInfo } from "@/types";
+import LoadingDelight from "@/components/LoadingDelight";
+import EmptyState from "@/components/EmptyState";
 import { getVehicleString } from "@/utils";
 import { DateTimePicker } from "@/components/DateTimePicker";
+import type { MoveOfferPopulated } from "@/types";
 
 const DriverOffers = () => {
   const { toast } = useToast();
-  const [myOffers, setMyOffers] = useState<MoveOfferPopulated[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   
   // Edit state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -32,30 +32,40 @@ const DriverOffers = () => {
   const [editPrice, setEditPrice] = useState("");
   const [editDate, setEditDate] = useState<Date | undefined>(undefined);
 
-  const fetchOffers = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const driver: DriverInfo = await driverService.getCurrentDriver();
-      const offers = await moveOfferService.getOffersByDriver(driver.id);
-      const populatedOffers = await Promise.all(
-        offers.map((offer) => populationFactory.populateMoveOffer(offer))
+  const { data: offers = [], isLoading } = useQuery({
+    queryKey: ["driverOffers"],
+    queryFn: async () => {
+      const data = await moveOfferService.getOffersByDriver();
+      return Promise.all(
+        data.map((offer) => populationFactory.populateMoveOffer(offer))
       );
-      setMyOffers(populatedOffers);
-    } catch (err: any) {
-      setError(
-        err?.response?.data?.message ??
-          err?.message ??
-          "Failed to load offers.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  useEffect(() => {
-    fetchOffers();
-  }, []);
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: any }) => moveOfferService.updateMoveOffer(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["driverOffers"] });
+      toast({ title: "Offer Updated", description: "Your offer has been updated successfully." });
+      setEditDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error?.response?.data?.message || "Failed to update offer.", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: (id: number) => moveOfferService.cancelMoveOffer(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["driverOffers"] });
+      toast({ title: "Offer Cancelled", description: "Your offer has been cancelled." });
+    },
+  });
 
   const handleEditClick = (offer: MoveOfferPopulated) => {
     setSelectedOffer(offer);
@@ -68,125 +78,104 @@ const DriverOffers = () => {
     e.preventDefault();
     if (!selectedOffer || !editDate) return;
     
-    setIsSubmitting(true);
-    try {
-      await moveOfferService.updateMoveOffer(selectedOffer.id, {
+    updateMutation.mutate({
+      id: selectedOffer.id,
+      data: {
         price: parseFloat(editPrice),
         offerDate: editDate,
         status: selectedOffer.status as any,
         moveRequestId: selectedOffer.moveRequestId,
         driverId: selectedOffer.driverId,
         vehicleId: selectedOffer.vehicleId,
-      });
-      
-      toast({
-        title: "Offer Updated",
-        description: "Your offer has been updated successfully.",
-      });
-      setEditDialogOpen(false);
-      fetchOffers();
-    } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to update offer.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+      }
+    });
   };
 
-  const handleCancelOffer = async (offerId: number) => {
-    if (!confirm("Are you sure you want to cancel this offer?")) return;
-    try {
-      await moveOfferService.cancelMoveOffer(offerId);
-      toast({
-        title: "Offer Cancelled",
-        description: "Your offer has been cancelled.",
-      });
-      fetchOffers();
-    } catch (err: any) {
-      toast({
-        title: "Error",
-        description: "Failed to cancel offer.",
-        variant: "destructive",
-      });
-    }
-  };
+  if (isLoading) return <LoadingDelight label="Loading your move offers..." />;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold">My Offers</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Track your submitted move offers
+        <h1 className="text-3xl font-black tracking-tighter text-foreground flex items-center gap-3">
+          <HandCoins className="w-8 h-8 text-primary" />
+          My Move Offers
+        </h1>
+        <p className="text-muted-foreground text-sm mt-1 font-medium text-foreground/60">
+          Manage and track offers you've sent to potential clients
         </p>
       </div>
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="animate-spin h-8 w-8 text-primary" />
-        </div>
-      )}
-
-      {error && (
-        <div className="rounded-md bg-destructive/10 text-destructive px-4 py-3 text-sm">
-          {error}
-        </div>
-      )}
-
-      {!isLoading && !error && myOffers.length === 0 && (
-        <Card className="shadow-card">
-          <CardContent className="flex items-center justify-center h-32 text-muted-foreground">
-            No offers submitted yet.
-          </CardContent>
-        </Card>
-      )}
-
-      {!isLoading && !error && (
-        <div className="space-y-3">
-          {myOffers.map((offer) => (
-            <Card key={offer.id} className="shadow-card">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <p className="font-medium">
-                        Request #{offer.moveRequestId} ({offer.moveRequest.fromAddress.city} → {offer.moveRequest.toAddress.city})
+      {offers.length === 0 ? (
+        <EmptyState
+          icon={HandCoins}
+          title="No offers sent"
+          description="You haven't submitted any offers yet. Head over to browse requests to find your next job."
+          action={{
+            label: "Browse Requests",
+            onClick: () => window.location.href = "/driver/browse"
+          }}
+        />
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {offers.map((offer) => (
+            <Card key={offer.id} className="hover:border-primary/20 transition-all duration-300 group bg-card/50 backdrop-blur-sm border-border/50 shadow-sm overflow-hidden">
+              <CardContent className="p-0">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 gap-6">
+                  <div className="flex items-center gap-5 flex-1">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary/10 transition-colors ring-1 ring-primary/10">
+                      <Truck className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h4 className="text-sm font-bold text-foreground tracking-tight">
+                          {offer.moveRequest.fromAddress.city} → {offer.moveRequest.toAddress.city}
+                        </h4>
+                        <StatusBadge status={offer.status} />
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium flex items-center gap-2">
+                        <span>{getVehicleString(offer.vehicle)}</span>
+                        <span className="w-1 h-1 rounded-full bg-border" />
+                        <span>Offered on {new Date(offer.offerDate).toLocaleDateString()}</span>
                       </p>
-                      <StatusBadge status={offer.status} />
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {getVehicleString(offer.vehicle)} · 
-                      Offer date: {new Date(offer.offerDate).toLocaleDateString()}
-                    </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold">${offer.price}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(offer.moveRequest.moveDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  {offer.status === "OFFER_SENT" && (
-                    <div className="ml-4 flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs border-primary/30 text-primary hover:bg-primary/5"
-                        onClick={() => handleEditClick(offer)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="text-xs"
-                        onClick={() => handleCancelOffer(offer.id)}
-                      >
-                        Cancel
-                      </Button>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-10 border-t sm:border-0 pt-4 sm:pt-0">
+                    <div className="text-right">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Move Date</p>
+                      <p className="text-xs font-bold text-foreground flex items-center justify-end gap-1.5 leading-none">
+                        <Clock className="w-3 h-3 opacity-50" />
+                        {new Date(offer.moveRequest.moveDate).toLocaleDateString()}
+                      </p>
                     </div>
-                  )}
+                    <div className="text-right">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Offer Price</p>
+                      <p className="text-xl font-black text-primary tracking-tighter leading-none">${offer.price}</p>
+                    </div>
+                    
+                    {offer.status === "OFFER_SENT" && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-9 px-4 rounded-xl text-xs font-bold border-primary/20 text-primary hover:bg-primary/5"
+                          onClick={() => handleEditClick(offer)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-9 w-9 rounded-xl text-destructive hover:bg-destructive/5"
+                          onClick={() => cancelMutation.mutate(offer.id)}
+                          title="Cancel Offer"
+                        >
+                          <Loader2 className={cancelMutation.isPending ? "animate-spin w-4 h-4" : "hidden"} />
+                          {!cancelMutation.isPending && <span className="text-lg">×</span>}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -196,26 +185,26 @@ const DriverOffers = () => {
 
       {/* Edit Offer Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-2xl border-border/50">
           <DialogHeader>
-            <DialogTitle>Edit Move Offer</DialogTitle>
+            <DialogTitle className="text-xl font-black tracking-tight">Edit Move Offer</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleUpdateOffer} className="space-y-4">
+          <form onSubmit={handleUpdateOffer} className="space-y-6 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Price ($)</Label>
+              <Label htmlFor="price" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Price ($)</Label>
               <Input
                 id="price"
                 type="number"
                 value={editPrice}
                 readOnly
-                className="bg-secondary/50 font-semibold"
+                className="h-12 bg-secondary/30 border-border/50 font-bold text-lg rounded-xl"
               />
-              <p className="text-[10px] text-muted-foreground italic flex items-center gap-1">
-                <Info className="w-3 h-3" /> Price is fixed based on vehicle rate and distance.
+              <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1.5 px-1">
+                <Info className="w-3.5 h-3.5 text-primary" /> Price is fixed based on vehicle rate and distance.
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="date">Offer Date & Time</Label>
+              <Label htmlFor="date" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Offer Date & Time</Label>
               <DateTimePicker 
                 date={editDate} 
                 setDate={setEditDate} 
@@ -224,10 +213,10 @@ const DriverOffers = () => {
             </div>
             <Button 
               type="submit" 
-              className="w-full gradient-brand text-primary-foreground border-0"
-              disabled={isSubmitting || !editDate}
+              className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-md"
+              disabled={updateMutation.isPending || !editDate}
             >
-              {isSubmitting ? (
+              {updateMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Updating...
                 </>

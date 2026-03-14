@@ -33,7 +33,7 @@ public class MoveTripService {
         return moveTripRepository
                 .findAll()
                 .stream()
-                .map(this::toDetailedDto)
+                .map(Mapper::toMoveTripDto)
                 .toList();
     }
 
@@ -43,7 +43,7 @@ public class MoveTripService {
         
         List<Long> requestIds = requests.stream().map(MoveRequestDto::getId).toList();
         return moveTripRepository.findByMoveRequestIdIn(requestIds).stream()
-                .map(this::toDetailedDto)
+                .map(Mapper::toMoveTripDto)
                 .toList();
     }
 
@@ -53,39 +53,14 @@ public class MoveTripService {
 
         List<Long> offerIds = offers.stream().map(MoveOfferDto::getId).toList();
         return moveTripRepository.findByMoveOfferIdIn(offerIds).stream()
-                .map(this::toDetailedDto)
+                .map(Mapper::toMoveTripDto)
                 .toList();
     }
 
     public MoveTripDto getById(Long id) {
         MoveTrip moveTrip=moveTripRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Move Trip Not Found"));
-        return toDetailedDto(moveTrip);
-    }
-
-    private MoveTripDto toDetailedDto(MoveTrip moveTrip) {
-        MoveTripDto dto = Mapper.toMoveTripDto(moveTrip);
-        
-        try {
-            dto.setMoveRequest(clientServiceClient.getMoveRequestById(moveTrip.getMoveRequestId()));
-            if (dto.getMoveRequest() != null) {
-                dto.setClient(userServiceClient.getUserById(dto.getMoveRequest().getClientId()));
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to fetch MoveRequest or Client info: " + e.getMessage());
-        }
-
-        try {
-            dto.setMoveOffer(driverServiceClient.getMoveOfferById(moveTrip.getMoveOfferId()));
-            if (dto.getMoveOffer() != null) {
-                dto.setDriver(userServiceClient.getUserById(dto.getMoveOffer().getDriverId()));
-                dto.setVehicle(driverServiceClient.getVehicleById(dto.getMoveOffer().getVehicleId()));
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to fetch MoveOffer, Driver or Vehicle info: " + e.getMessage());
-        }
-
-        return dto;
+        return Mapper.toMoveTripDto(moveTrip);
     }
 
     public MoveTripDto add(CreateMoveTripDto newMoveTripDto) {
@@ -117,8 +92,9 @@ public class MoveTripService {
         if (status != null) {
             trip.setStatus(newStatus);
         }
-        return toDetailedDto(moveTripRepository.save(trip));
+        return Mapper.toMoveTripDto(moveTripRepository.save(trip));
     }
+
 
     public void delete(Long id) {
         MoveTrip trip = moveTripRepository.findById(id)

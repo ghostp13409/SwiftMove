@@ -14,12 +14,4 @@ public class MoveTripDto {
     private Long moveRequestId;
     private Long moveOfferId;
     private String status;
-
-    // TODO: Needs to be removed. the frontend should make additional calls to get
-    // details.
-    private MoveRequestDto moveRequest;
-    private MoveOfferDto moveOffer;
-    private UserResponseDto client;
-    private UserResponseDto driver;
-    private VehicleDto vehicle;
 }

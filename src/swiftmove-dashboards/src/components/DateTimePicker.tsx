@@ -12,23 +12,27 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DateTimePickerProps {
-  date?: Date;
+  date: Date | undefined;
   setDate: (date: Date | undefined) => void;
   placeholder?: string;
+  trigger?: React.ReactNode;
 }
 
-export function DateTimePicker({ date, setDate, placeholder = "Pick a date" }: DateTimePickerProps) {
+export function DateTimePicker({ date, setDate, placeholder = "Pick a date", trigger }: DateTimePickerProps) {
+
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(date);
   
-  // Hours and minutes
-  const [hour, setHour] = React.useState<string>(date ? format(date, "HH") : "12");
+  // Hours (1-12), minutes, and period (AM/PM)
+  const [hour12, setHour12] = React.useState<string>(date ? format(date, "h") : "12");
   const [minute, setMinute] = React.useState<string>(date ? format(date, "mm") : "00");
+  const [period, setPeriod] = React.useState<string>(date ? format(date, "aa") : "AM");
 
   React.useEffect(() => {
     if (date) {
       setSelectedDate(date);
-      setHour(format(date, "HH"));
+      setHour12(format(date, "h"));
       setMinute(format(date, "mm"));
+      setPeriod(format(date, "aa"));
     }
   }, [date]);
 
@@ -36,46 +40,67 @@ export function DateTimePicker({ date, setDate, placeholder = "Pick a date" }: D
     setSelectedDate(newDate);
     if (newDate) {
       const updatedDate = new Date(newDate);
-      updatedDate.setHours(parseInt(hour), parseInt(minute));
+      const hours24 = calculate24Hour(hour12, period);
+      updatedDate.setHours(hours24, parseInt(minute));
       setDate(updatedDate);
     } else {
       setDate(undefined);
     }
   };
 
-  const handleTimeChange = (type: "hour" | "minute", value: string) => {
-    if (type === "hour") setHour(value);
-    else setMinute(value);
+  const calculate24Hour = (h12: string, p: string) => {
+    let h = parseInt(h12);
+    if (p === "PM" && h < 12) h += 12;
+    if (p === "AM" && h === 12) h = 0;
+    return h;
+  };
+
+  const handleTimeChange = (type: "hour" | "minute" | "period", value: string) => {
+    let newHour12 = hour12;
+    let newMinute = minute;
+    let newPeriod = period;
+
+    if (type === "hour") {
+      setHour12(value);
+      newHour12 = value;
+    } else if (type === "minute") {
+      setMinute(value);
+      newMinute = value;
+    } else {
+      setPeriod(value);
+      newPeriod = value;
+    }
 
     if (selectedDate) {
       const updatedDate = new Date(selectedDate);
-      updatedDate.setHours(
-        type === "hour" ? parseInt(value) : parseInt(hour),
-        type === "minute" ? parseInt(value) : parseInt(minute)
-      );
+      const hours24 = calculate24Hour(newHour12, newPeriod);
+      updatedDate.setHours(hours24, parseInt(newMinute));
       setDate(updatedDate);
     }
   };
 
-  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
+  const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
   const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal h-11 rounded-xl bg-secondary/30 px-3 overflow-hidden",
-            !date && "text-muted-foreground"
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-          <span className="truncate">
-            {date ? format(date, "PPp") : <span>{placeholder}</span>}
-          </span>
-        </Button>
+        {trigger || (
+          <Button
+            variant={"outline"}
+            className={cn(
+              "w-full justify-start text-left font-normal h-11 rounded-xl bg-secondary/30 px-3 overflow-hidden",
+              !date && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <span className="truncate">
+              {date ? format(date, "PPp") : <span>{placeholder}</span>}
+            </span>
+          </Button>
+        )}
       </PopoverTrigger>
+
       <PopoverContent className="w-auto p-0 rounded-2xl" align="start">
         <Calendar
           mode="single"
@@ -89,8 +114,8 @@ export function DateTimePicker({ date, setDate, placeholder = "Pick a date" }: D
             <span className="text-xs font-medium">Time</span>
           </div>
           <div className="flex items-center gap-1">
-            <Select value={hour} onValueChange={(v) => handleTimeChange("hour", v)}>
-              <SelectTrigger className="h-8 w-[70px] text-xs">
+            <Select value={hour12} onValueChange={(v) => handleTimeChange("hour", v)}>
+              <SelectTrigger className="h-8 w-[55px] text-xs">
                 <SelectValue placeholder="HH" />
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
@@ -101,7 +126,7 @@ export function DateTimePicker({ date, setDate, placeholder = "Pick a date" }: D
             </Select>
             <span className="text-xs">:</span>
             <Select value={minute} onValueChange={(v) => handleTimeChange("minute", v)}>
-              <SelectTrigger className="h-8 w-[70px] text-xs">
+              <SelectTrigger className="h-8 w-[60px] text-xs">
                 <SelectValue placeholder="mm" />
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
@@ -110,9 +135,19 @@ export function DateTimePicker({ date, setDate, placeholder = "Pick a date" }: D
                 ))}
               </SelectContent>
             </Select>
+            <Select value={period} onValueChange={(v) => handleTimeChange("period", v)}>
+              <SelectTrigger className="h-8 w-[65px] text-xs">
+                <SelectValue placeholder="AM/PM" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="AM">AM</SelectItem>
+                <SelectItem value="PM">PM</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </PopoverContent>
     </Popover>
   );
 }
+
