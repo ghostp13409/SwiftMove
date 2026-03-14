@@ -212,8 +212,9 @@ const BrowseRequests = () => {
         {/* Detailed View & Offer Bar */}
         <div className="lg:col-span-2">
           {selected ? (
-            <Card className="shadow-md border-border/50 rounded-xl overflow-hidden bg-card/50 backdrop-blur-md sticky top-24">
+            <Card key={selected.id} className="shadow-md border-border/50 rounded-xl overflow-hidden bg-card/50 backdrop-blur-md sticky top-24 animate-slide-up">
               <CardHeader className="py-4 px-6 border-b bg-muted/20 flex flex-row items-center justify-between space-y-0">
+
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20 shrink-0">
                     <Package className="w-5 h-5" />

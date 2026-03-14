@@ -37,12 +37,16 @@ const DriverTrips = () => {
     queryKey: ["driverTrips", userId],
     queryFn: async () => {
       const driver = await driverService.getCurrentDriver();
-      const data = await tripService.getTripsByDriver(driver.id);
-      const populated = await Promise.all(
+      // Use driver.userId because move_offers.driver_id is a User ID
+      const data = await tripService.getTripsByDriver(driver.userId);
+      const results = await Promise.allSettled(
         data.map((t) => populationFactory.populateMoveTripDetailed(t))
       );
-      return populated;
+      return results
+        .filter((r): r is PromiseFulfilledResult<MoveTripDetailed> => r.status === "fulfilled")
+        .map((r) => r.value);
     },
+
     enabled: !!userId,
   });
 
@@ -89,13 +93,14 @@ const DriverTrips = () => {
       <div className="h-[80vh] flex items-center justify-center">
         <EmptyState
           icon={Truck}
-          title="No assignments yet"
+          title="No trips yet"
           description="Your scheduled and completed trips will appear here once clients accept your offers."
           action={{
             label: "Browse Requests",
             onClick: () => window.location.href = "/driver/browse"
           }}
         />
+
       </div>
     );
   }
@@ -104,13 +109,14 @@ const DriverTrips = () => {
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter text-foreground">My Assignments</h1>
+          <h1 className="text-3xl font-black tracking-tighter text-foreground">Move Trips</h1>
           <p className="text-muted-foreground text-sm mt-1 font-medium">Track your upcoming moves and earning history</p>
         </div>
+
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10">
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
-            Total Earnings: ${trips.filter(t => t.status === "COMPLETED").reduce((s, t) => s + t.moveOfferPopulated.price, 0).toLocaleString()}
+            Total Earnings: ${trips.filter(t => t.status === "COMPLETED").reduce((s, t) => s + (t.moveOfferPopulated?.price ?? 0), 0).toLocaleString()}
           </span>
         </div>
       </div>
@@ -119,9 +125,10 @@ const DriverTrips = () => {
         {/* Left: Trip List */}
         <div className="lg:col-span-1 space-y-4">
           <div className="flex items-center justify-between px-1">
-            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.2em]">Assignment List</p>
+            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.2em]">Trip List</p>
             <SortToggle order={sortOrder} setOrder={setSortOrder} />
           </div>
+
           <div className="space-y-3">
             {sortedTrips.map((trip) => {
               const isActive = selectedId === trip.id;
@@ -170,16 +177,18 @@ const DriverTrips = () => {
         {/* Right: Detailed View */}
         <div className="lg:col-span-2">
           {selectedTrip ? (
-            <Card className="shadow-md border-border/50 rounded-xl overflow-hidden bg-card/50 backdrop-blur-md sticky top-24">
+            <Card key={selectedTrip.id} className="shadow-md border-border/50 rounded-xl overflow-hidden bg-card/50 backdrop-blur-md sticky top-24 animate-slide-up">
               <CardHeader className="p-6 border-b bg-muted/20 flex flex-row items-center justify-between space-y-0">
+
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20 shrink-0 shadow-sm">
                     <Truck className="w-6 h-6" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-bold tracking-tight">Assignment Details</CardTitle>
+                    <CardTitle className="text-lg font-bold tracking-tight">Trip Details</CardTitle>
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Job: SM-{selectedTrip?.id?.toString().padStart(5, '0')}</p>
                   </div>
+
                 </div>
                 <div className="flex items-center gap-3">
                   {selectedTrip?.status === "SCHEDULED" && (
@@ -315,9 +324,10 @@ const DriverTrips = () => {
             </Card>
           ) : (
             <div className="h-full flex items-center justify-center border-2 border-dashed rounded-2xl bg-muted/10 border-border/50 text-muted-foreground">
-              Select an assignment to view details
+              Select a trip to view details
             </div>
           )}
+
         </div>
       </div>
     </div>

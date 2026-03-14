@@ -13,13 +13,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "@/components/StatusBadge";
 import SortToggle, { SortOrder } from "@/components/SortToggle";
 import LoadingDelight from "@/components/LoadingDelight";
-
 import EmptyState from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { tripService } from "@/services/tripService";
 import { populationFactory } from "@/services/populationFactory";
-import { getVehicleString, getGoogleMapsAddressLink } from "@/utils";
+import { getVehicleString, getGoogleMapsAddressLink, getGoogleMapsDirectionsLink } from "@/utils";
 import { useToast } from "@/hooks/use-toast";
 import type { MoveTripDetailed } from "@/types";
 
@@ -35,10 +34,12 @@ const ClientTrips = () => {
     queryFn: async () => {
       if (!userId) return [];
       const data = await tripService.getTripsByClient(userId);
-      const populated = await Promise.all(
+      const results = await Promise.allSettled(
         data.map((t) => populationFactory.populateMoveTripDetailed(t))
       );
-      return populated;
+      return results
+        .filter((r): r is PromiseFulfilledResult<MoveTripDetailed> => r.status === "fulfilled")
+        .map((r) => r.value);
     },
     enabled: !!userId,
   });
@@ -57,7 +58,6 @@ const ClientTrips = () => {
       setSelectedId(sortedTrips[0].id);
     }
   }, [sortedTrips, selectedId]);
-
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => tripService.deleteTrip(String(id)),
@@ -97,7 +97,7 @@ const ClientTrips = () => {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in text-foreground/90 font-medium">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black tracking-tighter text-foreground">Move Trips</h1>
@@ -121,7 +121,6 @@ const ClientTrips = () => {
           <div className="space-y-3">
             {sortedTrips.map((trip) => {
               const isActive = selectedId === trip.id;
-
               return (
                 <button
                   key={trip.id}
@@ -165,8 +164,9 @@ const ClientTrips = () => {
         {/* Right: Detailed View */}
         <div className="lg:col-span-2">
           {selectedTrip ? (
-            <Card className="shadow-md border-border/50 rounded-xl overflow-hidden bg-card/50 backdrop-blur-md sticky top-24">
+            <Card key={selectedTrip.id} className="shadow-md border-border/50 rounded-xl overflow-hidden bg-card/50 backdrop-blur-md sticky top-24 animate-slide-up">
               <CardHeader className="p-6 border-b bg-muted/20 flex flex-row items-center justify-between space-y-0">
+
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20 shrink-0 shadow-sm">
                     <Route className="w-6 h-6" />

@@ -61,13 +61,17 @@ const HistoryPage = () => {
         data = await tripService.getTripsByClient(userId);
       } else {
         const driver = await driverService.getCurrentDriver();
-        data = await tripService.getTripsByDriver(driver.id);
+        data = await tripService.getTripsByDriver(driver.userId);
       }
-      const populated = await Promise.all(data.map(t => populationFactory.populateMoveTripDetailed(t)));
-      return populated.filter(t => t.status === "COMPLETED" || t.status === "CANCELLED");
-    },
-    enabled: !!userId,
-  });
+      const results = await Promise.allSettled(data.map(t => populationFactory.populateMoveTripDetailed(t)));
+      return results
+        .filter((r): r is PromiseFulfilledResult<MoveTripDetailed> => r.status === "fulfilled")
+        .map(r => r.value)
+        .filter(t => t.status === "COMPLETED" || t.status === "CANCELLED");
+      },
+      enabled: !!userId,
+      });
+
 
   const sortItems = (items: any[]) => {
     return [...items].sort((a, b) => {

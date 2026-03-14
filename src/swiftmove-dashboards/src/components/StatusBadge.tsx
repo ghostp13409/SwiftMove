@@ -24,8 +24,10 @@ const statusConfig: Record<
   // MoveTrip statuses
   SCHEDULED: { label: "Scheduled", variant: "success" },
   IN_PROGRESS: { label: "In Progress", variant: "default" },
+  COMPLETED_BY_DRIVER: { label: "Waiting for Confirmation", variant: "secondary" },
   COMPLETED: { label: "Completed", variant: "outline" },
 };
+
 
 
 interface StatusBadgeProps {
