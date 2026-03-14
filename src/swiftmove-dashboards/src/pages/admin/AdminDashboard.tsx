@@ -8,12 +8,14 @@ import {
   Activity,
   UserPlus,
   PlusCircle,
+  BarChart3
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import StatsCard from "@/components/StatsCard";
 import EmptyState from "@/components/EmptyState";
 import LoadingDelight from "@/components/LoadingDelight";
+import { StatusPieChart, SimpleLineChart } from "@/components/MoveCharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { userService } from "@/services/userService";
 import { moveRequestService } from "@/services/moveRequestService";
@@ -47,6 +49,28 @@ const AdminDashboard = () => {
         0,
       );
 
+      // Group requests by status for the pie chart
+      const statusCounts = requestsData.reduce((acc: any, req) => {
+        acc[req.status] = (acc[req.status] || 0) + 1;
+        return acc;
+      }, {});
+
+      const statusData = Object.keys(statusCounts).map(status => ({
+        name: status,
+        value: statusCounts[status]
+      }));
+
+      // Dummy trend data for visualization (would ideally come from an analytics endpoint)
+      const trendData = [
+        { date: "Mar 08", amount: 12 },
+        { date: "Mar 09", amount: 18 },
+        { date: "Mar 10", amount: 15 },
+        { date: "Mar 11", amount: 25 },
+        { date: "Mar 12", amount: 32 },
+        { date: "Mar 13", amount: 28 },
+        { date: "Mar 14", amount: requestsData.length },
+      ];
+
       return {
         totalUsers: usersData.length,
         totalDrivers: drivers.length,
@@ -56,9 +80,12 @@ const AdminDashboard = () => {
         completedTrips: completedTrips.length,
         totalVehicles: vehiclesData.length,
         totalRevenue: revenue,
+        statusData,
+        trendData
       };
     },
   });
+
 
   if (isLoading) {
     return <LoadingDelight label="Analyzing platform health..." />;
@@ -104,6 +131,31 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-3">
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary/80" /> System Metrics
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <StatusPieChart data={stats.statusData} title="Request Status Distribution" />
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 py-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary/80" /> Move Request Trend
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <SimpleLineChart data={stats.trendData} title="Daily Move Volume (Last 7 Days)" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-4">
+
 
         <Card className="shadow-card overflow-hidden">
           <CardHeader className="border-b bg-muted/30 py-4">
