@@ -29,7 +29,8 @@ const DriverDashboard = () => {
   });
 
 
-  const driverId = driver?.id;
+  const driverInfoId = driver?.id;
+  const driverUserId = driver?.userId;
 
   // Fetch available requests
   const { data: pendingRequests = [], isLoading: isLoadingRequests } = useQuery({
@@ -42,35 +43,39 @@ const DriverDashboard = () => {
 
   // Fetch driver offers
   const { data: myOffers = [], isLoading: isLoadingOffers } = useQuery({
-    queryKey: ["driverOffers", driverId],
+    queryKey: ["driverOffers", driverUserId],
     queryFn: async () => {
-      if (!driverId) return [];
-      const data = await moveOfferService.getOffersByDriver(driverId);
+      if (!driverUserId) return [];
+      const data = await moveOfferService.getOffersByDriver();
       return Promise.all(
         data.map((o) => populationFactory.populateMoveOffer(o))
       );
     },
-    enabled: !!driverId,
+    enabled: !!driverUserId,
   });
 
   // Fetch driver trips
   const { data: myTrips = [], isLoading: isLoadingTrips } = useQuery({
-    queryKey: ["driverTrips", driverId],
+    queryKey: ["driverTrips", driverUserId],
     queryFn: async () => {
-      if (!driverId) return [];
-      const data = await tripService.getTripsByDriver(driverId);
-      return Promise.all(
+      if (!driverUserId) return [];
+      const data = await tripService.getTripsByDriver(driverUserId);
+      const results = await Promise.allSettled(
         data.map((t) => populationFactory.populateMoveTripDetailed(t))
       );
+      return results
+        .filter((r): r is PromiseFulfilledResult<MoveTripDetailed> => r.status === "fulfilled")
+        .map((r) => r.value);
     },
-    enabled: !!driverId,
+    enabled: !!driverUserId,
   });
+
 
   // Fetch driver vehicles
   const { data: myVehicles = [], isLoading: isLoadingVehicles } = useQuery({
-    queryKey: ["driverVehicles", driverId],
-    queryFn: () => driverId ? vehicleService.getVehiclesByDriver(driverId) : [],
-    enabled: !!driverId,
+    queryKey: ["driverVehicles", driverInfoId],
+    queryFn: () => driverInfoId ? vehicleService.getVehiclesByDriver(driverInfoId) : [],
+    enabled: !!driverInfoId,
   });
 
   const isLoading = isLoadingDriver || isLoadingRequests || isLoadingOffers || isLoadingTrips || isLoadingVehicles;
@@ -82,7 +87,7 @@ const DriverDashboard = () => {
 
   const activeTripsCount = myTrips.filter((t) => t.status === "SCHEDULED").length;
   const completedTrips = myTrips.filter((t) => t.status === "COMPLETED");
-  const earnings = completedTrips.reduce((s, t) => s + t.moveOfferPopulated.price, 0);
+  const earnings = completedTrips.reduce((s, t) => s + (t.moveOfferPopulated?.price ?? 0), 0);
 
   // Group trips by status for charts
   const tripStatusData = myTrips.reduce((acc: any, t) => {
@@ -199,15 +204,15 @@ const DriverDashboard = () => {
                   <div key={trip.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
                     <div className="space-y-1">
                       <p className="text-sm font-medium">
-                        {trip.moveRequestPopulated.fromAddress.city} → {trip.moveRequestPopulated.toAddress.city}
+                        {trip.moveRequestPopulated?.fromAddress?.city ?? 'Unknown'} → {trip.moveRequestPopulated?.toAddress?.city ?? 'Unknown'}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Client: {trip.moveRequestPopulated.client.firstName} {trip.moveRequestPopulated.client.lastName}
+                        Client: {trip.moveRequestPopulated?.client?.firstName} {trip.moveRequestPopulated?.client?.lastName}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-semibold text-sm">
-                        ${trip.moveOfferPopulated.price}
+                        ${trip.moveOfferPopulated?.price ?? 0}
                       </span>
                       <StatusBadge status={trip.status} />
                     </div>
@@ -256,4 +261,3 @@ const DriverDashboard = () => {
 };
 
 export default DriverDashboard;
-
