@@ -294,6 +294,23 @@ const BrowseRequests = () => {
                   )}
                 </div>
 
+                {/* Luggage Inventory */}
+                <div className="p-8">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">Luggage Inventory</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selected.luggageEntries?.length ? (
+                      selected.luggageEntries.map((l, i) => (
+                        <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-background border border-border/50 shadow-sm ring-1 ring-black/5">
+                          <span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary rounded-md text-[10px] font-black">{l.quantity}</span>
+                          <span className="text-[11px] font-bold text-foreground/80">{l.luggageType?.name}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">No items listed</p>
+                    )}
+                  </div>
+                </div>
+
                 {/* Offer Submission Row - THE NEW DESIGN */}
                 <div className="p-6 lg:p-8 bg-primary/5 border-t-2 border-primary/10">
                   <div className="flex flex-col gap-5">

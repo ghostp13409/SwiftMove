@@ -70,6 +70,7 @@ export const SimpleBarChart = ({ data, title }: { data: DataPoint[], title?: str
             tickLine={false} 
             axisLine={false} 
             tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            tickFormatter={(value) => typeof value === 'number' ? value.toFixed(2) : value}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
           <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={30} />
@@ -98,6 +99,7 @@ export const SimpleLineChart = ({ data, title }: { data: TrendPoint[], title?: s
             tickLine={false} 
             axisLine={false}
             tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            tickFormatter={(value) => typeof value === 'number' ? value.toFixed(2) : value}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
           <Line 
