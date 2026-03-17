@@ -284,6 +284,10 @@ const ClientMoveRequests = () => {
       toast({ title: "Missing Information", description: "Please fill in all required fields.", variant: "destructive" });
       return;
     }
+    if (parseFloat(maxBudget) <= 0) {
+      toast({ title: "Invalid Budget", description: "Please enter a positive budget amount.", variant: "destructive" });
+      return;
+    }
     setStep(2);
   };
 

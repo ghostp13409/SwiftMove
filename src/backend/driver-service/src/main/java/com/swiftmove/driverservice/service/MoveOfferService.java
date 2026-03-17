@@ -1,5 +1,6 @@
 package com.swiftmove.driverservice.service;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -276,6 +277,12 @@ public class MoveOfferService {
             errorMessage.append("Status cannot be null or empty.");
         }
 
+        if(moveOfferDto.getOfferDate() == null) {
+            errorMessage.append("Offer date is required.");
+        } else if (moveOfferDto.getOfferDate().isBefore(Instant.now().minusSeconds(300))) {
+            errorMessage.append("Offer date cannot be in the past.");
+        }
+
         if(errorMessage.length() > 0) {
             throw new IllegalArgumentException(errorMessage.toString());
         }
@@ -308,6 +315,12 @@ public class MoveOfferService {
 
         if(moveOfferDto.getStatus() == null || moveOfferDto.getStatus().trim().isEmpty()) {
             errorMessage.append("Status cannot be null or empty.");
+        }
+
+        if(moveOfferDto.getOfferDate() == null) {
+            errorMessage.append("Offer date is required.");
+        } else if (moveOfferDto.getOfferDate().isBefore(Instant.now().minusSeconds(300))) {
+            errorMessage.append("Offer date cannot be in the past.");
         }
 
         if(errorMessage.length() > 0) {
