@@ -45,6 +45,8 @@ const defaultChartConfig: ChartConfig = {
 const statusChartConfig: ChartConfig = {
   CREATED: { label: "Created", color: "hsl(var(--muted-foreground))" },
   ACCEPTED: { label: "Accepted", color: "hsl(var(--primary))" },
+  SCHEDULED: { label: "Scheduled", color: "hsl(162, 84%, 40%)" },
+  IN_PROGRESS: { label: "In Progress", color: "hsl(var(--primary))" },
   COMPLETED: { label: "Completed", color: "hsl(162, 84%, 20%)" },
   CANCELLED: { label: "Cancelled", color: "hsl(var(--destructive))" },
 };
