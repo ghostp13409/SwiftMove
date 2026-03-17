@@ -39,6 +39,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { clientService } from "@/services/clientService";
+import { userService } from "@/services/userService";
 import { moveOfferService } from "@/services/moveOfferService";
 import { moveRequestService } from "@/services/moveRequestService";
 import { addressService } from "@/services/addressService";
@@ -62,6 +64,22 @@ const ClientMoveRequests = () => {
   const [selected, setSelected] = useState<MoveRequestPopulated | null>(null);
   const [myRequests, setMyRequests] = useState<MoveRequestPopulated[]>([]);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [currentClient, setCurrentClient] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchClient = async () => {
+      if (userId) {
+        try {
+          const client = await clientService.getClient(userId);
+          const address = await userService.getUserAddress(userId);
+          setCurrentClient({ ...client, address });
+        } catch (error) {
+          console.error("Error fetching client for prefill:", error);
+        }
+      }
+    };
+    fetchClient();
+  }, [userId]);
 
   const sortedRequests = useMemo(() => {
     return [...myRequests].sort((a, b) => {
@@ -339,8 +357,23 @@ const ClientMoveRequests = () => {
   };
 
   const resetForm = () => {
-    setIsEditing(false); setCurrentRequestId(null);
-    setFromLine1(""); setFromLine2(""); setFromCity(""); setFromState(""); setFromCountry("Canada"); setFromPostal(""); setFromLat(null); setFromLon(null);
+    setIsEditing(false);
+    setCurrentRequestId(null);
+
+    if (currentClient?.address) {
+      const addr = currentClient.address;
+      setFromLine1(addr.line1 || "");
+      setFromLine2(addr.line2 || "");
+      setFromCity(addr.city || "");
+      setFromState(addr.stateOrProvince || "");
+      setFromCountry(addr.country || "Canada");
+      setFromPostal(addr.postalOrZipCode || "");
+      setFromLat(addr.latitude || null);
+      setFromLon(addr.longitude || null);
+    } else {
+      setFromLine1(""); setFromLine2(""); setFromCity(""); setFromState(""); setFromCountry("Canada"); setFromPostal(""); setFromLat(null); setFromLon(null);
+    }
+
     setToLine1(""); setToLine2(""); setToCity(""); setToState(""); setToCountry("Canada"); setToPostal(""); setToLat(null); setToLon(null);
     setMoveDate(undefined); setMaxBudget(""); setNotes(""); setHasFurniture(false);
     const empty: Record<string, number> = {};
@@ -364,7 +397,7 @@ const ClientMoveRequests = () => {
           <h1 className="text-2xl font-bold">Move Requests</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage your moving requests</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(val) => { setDialogOpen(val); if (!val) resetForm(); }}>
+        <Dialog open={dialogOpen} onOpenChange={(val) => { setDialogOpen(val); if (val && !isEditing) resetForm(); else if (!val) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="gap-2 shadow-lg h-10 px-6 font-semibold">
               <Plus className="w-4 h-4" /> New Request
@@ -386,11 +419,11 @@ const ClientMoveRequests = () => {
                   <div className="space-y-4">
                     <div className="space-y-3">
                       <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest px-1">Pick-up Location</Label>
-                      <AddressAutocomplete onAddressSelect={onFromAddressSelect} defaultValue={fromLine1 ? `${fromLine1}, ${fromCity}` : ""} placeholder="Search pick-up address..." />
+                      <AddressAutocomplete onAddressSelect={onFromAddressSelect} defaultValue={fromLine1 ? `${fromLine1}, ${fromCity}, ${fromState}` : ""} placeholder="Search pick-up address..." />
                     </div>
                     <div className="space-y-3 pt-2">
                       <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest px-1">Destination</Label>
-                      <AddressAutocomplete onAddressSelect={onToAddressSelect} defaultValue={toLine1 ? `${toLine1}, ${toCity}` : ""} placeholder="Search destination address..." />
+                      <AddressAutocomplete onAddressSelect={onToAddressSelect} defaultValue={toLine1 ? `${toLine1}, ${toCity}, ${toState}` : ""} placeholder="Search destination address..." />
                     </div>
                   </div>
                   <div className="space-y-4 pt-2">
