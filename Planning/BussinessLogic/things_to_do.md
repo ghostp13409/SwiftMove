@@ -1,7 +1,6 @@
 **Things to do:**
 
-- Even after sending a move offer, the driver can still see the move request in the browse move requests page and send multiple offers for the same move request unlesss they refresh. We need to to show move request already sent instead of the send offer button for the move request for which they have already sent an offer.
-- While, selecting the move date, both driver and customer can select the date in the past. We need to restrict them from selecting the past date for move date.
-- I have implemented zod for all types but it seems i'm not doing any validations for the types. I need to check and add validations whenever relevant.
-- On the smaller laptop screens, the driver's send move offer form goes out of the screen, it needs to be responsive and fit the screen size.
-- even if no move requests are available for the driver, they can still see them on their dashboard metrics.
+- When browsing move requests, drive is not able to see the luggage details. they need to be shown in the move request details in the browse move request component.
+- Move Trip doesn't show the luggage details.
+- Client's Move Request details doesn't show the time of the move request, it only shows the date.
+- in the charts for the luggage types and vehicle types, the unit seems to be different from each other, also it shows wayy too many degits after the decimal. can you make it fixed to 2 degits.

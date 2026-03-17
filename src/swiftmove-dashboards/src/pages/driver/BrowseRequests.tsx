@@ -309,35 +309,35 @@ const BrowseRequests = () => {
                     </div>
 
 
-                    <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
-                      {/* Vehicle Select */}
-                      <div className="flex-1 space-y-1.5">
-                        <Label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Select Vehicle</Label>
-                        <Select onValueChange={setSelectedVehicleId} value={selectedVehicleId} disabled={hasAlreadyOffered}>
-                          <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 font-bold text-[13px] shadow-sm px-4">
-                            <SelectValue placeholder="Vehicle" />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl border-border/50 min-w-[280px]">
-                            {filteredVehicles.map((v) => (
-                              <SelectItem key={v.id} value={String(v.id)} className="py-3 px-3 cursor-pointer focus:bg-primary/5">
-                                <div className="flex items-center justify-between w-[220px]">
-                                  <span className="font-bold text-[13px] text-foreground/90 truncate mr-2">{getVehicleString(v)}</span>
-                                  <div className="flex flex-col items-end shrink-0">
-                                    <span className="text-xs font-black text-primary tracking-tighter leading-none">${v.pricePerKm}</span>
-                                    <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 whitespace-nowrap">per km</span>
+                    <div className="flex flex-col gap-6">
+                      {/* Row 1: Inputs */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Vehicle Select */}
+                        <div className="space-y-1.5 min-w-0">
+                          <Label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Select Vehicle</Label>
+                          <Select onValueChange={setSelectedVehicleId} value={selectedVehicleId} disabled={hasAlreadyOffered}>
+                            <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 font-bold text-[13px] shadow-sm px-4 w-full">
+                              <SelectValue placeholder="Vehicle" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border/50 min-w-[280px]">
+                              {filteredVehicles.map((v) => (
+                                <SelectItem key={v.id} value={String(v.id)} className="py-3 px-3 cursor-pointer focus:bg-primary/5">
+                                  <div className="flex items-center justify-between w-full min-w-[220px]">
+                                    <span className="font-bold text-[13px] text-foreground/90 truncate mr-2">{getVehicleString(v)}</span>
+                                    <div className="flex flex-col items-end shrink-0">
+                                      <span className="text-xs font-black text-primary tracking-tighter leading-none">${v.pricePerKm}</span>
+                                      <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 whitespace-nowrap">per km</span>
+                                    </div>
                                   </div>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-
-                      {/* Date Display/Suggest */}
-                      <div className="flex-1 space-y-1.5">
-                        <Label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Proposed Date</Label>
-                        <div className="flex gap-2">
+                        {/* Date Display/Suggest */}
+                        <div className="space-y-1.5 min-w-0">
+                          <Label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Proposed Date</Label>
                           <DateTimePicker 
                             date={offeredDateTime} 
                             setDate={setOfferedDateTime} 
@@ -345,32 +345,33 @@ const BrowseRequests = () => {
                             trigger={
                               <Button 
                                 variant="outline" 
-                                className="h-11 flex-1 px-3 bg-card border-border/50 rounded-xl justify-start text-xs font-bold text-foreground shadow-sm"
+                                className="h-11 w-full px-3 bg-card border-border/50 rounded-xl justify-start text-xs font-bold text-foreground shadow-sm truncate"
                                 disabled={hasAlreadyOffered}
                               >
-                                <CalendarClock className="mr-2 h-4 w-4 text-primary" />
-                                {offeredDateTime ? (
-                                  `${offeredDateTime.toLocaleDateString()} · ${offeredDateTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
-                                ) : (
-                                  "Select Time"
-                                )}
+                                <CalendarClock className="mr-2 h-4 w-4 text-primary shrink-0" />
+                                <span className="truncate">
+                                  {offeredDateTime ? (
+                                    `${offeredDateTime.toLocaleDateString()} · ${offeredDateTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
+                                  ) : (
+                                    "Select Time"
+                                  )}
+                                </span>
                               </Button>
                             }
                           />
                         </div>
                       </div>
 
-
-                      {/* Calculated Price & Submit */}
-                      <div className="flex items-center gap-4 lg:pl-4 border-t lg:border-t-0 lg:border-l border-primary/10 pt-4 lg:pt-0">
-                        <div className="text-right min-w-[80px]">
-                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Your Price</p>
-                          <p className="text-2xl font-black text-primary tracking-tighter leading-none">${currentPrice}</p>
+                      {/* Row 2: Price & Submit */}
+                      <div className="flex flex-row items-center justify-between gap-4 pt-4 border-t border-primary/10">
+                        <div className="space-y-0.5">
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Your Total Price</p>
+                          <p className="text-3xl font-black text-primary tracking-tighter leading-none">${currentPrice}</p>
                         </div>
                         <Button 
                           onClick={handleSubmitOffer}
                           disabled={isSubmitting || !selectedVehicleId || driverVehicles.length === 0 || hasAlreadyOffered}
-                          className={`h-11 px-8 rounded-xl font-black uppercase tracking-widest shadow-md active:scale-95 group ${hasAlreadyOffered ? "bg-muted text-muted-foreground" : ""}`}
+                          className={`h-12 px-6 sm:px-10 rounded-xl font-black uppercase tracking-widest shadow-md active:scale-95 group shrink-0 ${hasAlreadyOffered ? "bg-muted text-muted-foreground" : ""}`}
                         >
                           {isSubmitting ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
