@@ -45,6 +45,8 @@ const defaultChartConfig: ChartConfig = {
 const statusChartConfig: ChartConfig = {
   CREATED: { label: "Created", color: "hsl(var(--muted-foreground))" },
   ACCEPTED: { label: "Accepted", color: "hsl(var(--primary))" },
+  SCHEDULED: { label: "Scheduled", color: "hsl(162, 84%, 40%)" },
+  IN_PROGRESS: { label: "In Progress", color: "hsl(var(--primary))" },
   COMPLETED: { label: "Completed", color: "hsl(162, 84%, 20%)" },
   CANCELLED: { label: "Cancelled", color: "hsl(var(--destructive))" },
 };
@@ -70,6 +72,7 @@ export const SimpleBarChart = ({ data, title }: { data: DataPoint[], title?: str
             tickLine={false} 
             axisLine={false} 
             tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            tickFormatter={(value) => typeof value === 'number' ? value.toFixed(2) : value}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
           <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={30} />
@@ -98,6 +101,7 @@ export const SimpleLineChart = ({ data, title }: { data: TrendPoint[], title?: s
             tickLine={false} 
             axisLine={false}
             tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            tickFormatter={(value) => typeof value === 'number' ? value.toFixed(2) : value}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
           <Line 

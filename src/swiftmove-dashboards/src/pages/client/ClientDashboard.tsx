@@ -98,7 +98,7 @@ const ClientDashboard = () => {
           Welcome back, {displayName} 👋
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {pendingRequests > 0 
+          {pendingRequests > 0
             ? `You have ${pendingRequests} active move request${pendingRequests > 1 ? 's' : ''} in progress.`
             : "Ready for your next move? Create a request to get started."}
         </p>
@@ -125,30 +125,6 @@ const ClientDashboard = () => {
           icon={<Route className="w-4 h-4" />}
           description="Scheduled moves"
         />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-3">
-        <Card className="shadow-card overflow-hidden">
-          <CardHeader className="border-b bg-muted/30 py-4">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <ChartIcon className="w-4 h-4 text-primary/80" /> Spending Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <SimpleLineChart data={spendTrendData} title="Monthly Moving Expenses" />
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-card overflow-hidden">
-          <CardHeader className="border-b bg-muted/30 py-4">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <PieIcon className="w-4 h-4 text-primary/80" /> Request Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <StatusPieChart data={statusData} title="Move Request Distribution" />
-          </CardContent>
-        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up animate-stagger-4">
@@ -225,4 +201,3 @@ const ClientDashboard = () => {
 };
 
 export default ClientDashboard;
-

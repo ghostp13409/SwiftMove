@@ -48,6 +48,10 @@ export const AddressAutocomplete = ({
   const [suggestions, setSuggestions] = useState<AddressResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
+
   // Debounced search
   useEffect(() => {
     const timeoutId = setTimeout(() => {

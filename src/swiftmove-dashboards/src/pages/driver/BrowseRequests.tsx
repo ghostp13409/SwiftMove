@@ -63,6 +63,7 @@ const BrowseRequests = () => {
 
   const [driverVehicles, setDriverVehicles] = useState<Vehicle[]>([]);
   const [driverInfo, setDriverInfo] = useState<DriverInfo | null>(null);
+  const [myOffers, setMyOffers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dateDialogOpen, setDateDialogOpen] = useState(false);
@@ -77,15 +78,17 @@ const BrowseRequests = () => {
       const driver = await driverService.getDriverByUserId(userId);
       if (driver) {
         setDriverInfo(driver);
-        const [requests, vehicles] = await Promise.all([
+        const [requests, vehicles, offers] = await Promise.all([
           tripService.browseRequests(driver.userId),
           vehicleService.getVehiclesByDriver(driver.id),
+          moveOfferService.getOffersByDriver(),
         ]);
         
         const populatedPending = await Promise.all(
           requests.map((req) => populationFactory.populateMoveRequest(req)),
         );
         setPendingRequests(populatedPending);
+        setMyOffers(offers);
         const activeVehicles = vehicles.filter((v) => v.isActive);
         setDriverVehicles(activeVehicles);
       }
@@ -126,12 +129,17 @@ const BrowseRequests = () => {
     return 0;
   }, [selected, selectedVehicleId, driverVehicles]);
 
+  const hasAlreadyOffered = useMemo(() => {
+    if (!selected || !myOffers) return false;
+    return myOffers.some(o => o.moveRequestId === selected.id && o.status !== "CANCELLED" && o.status !== "REJECTED");
+  }, [selected, myOffers]);
+
   const handleSubmitOffer = async () => {
     if (!driverInfo || !selected || !selectedVehicleId || !offeredDateTime) return;
     
     setIsSubmitting(true);
     try {
-      await moveOfferService.createMoveOffer({
+      const newOffer = await moveOfferService.createMoveOffer({
         moveRequestId: selected.id,
         driverId: driverInfo.userId,
         vehicleId: parseInt(selectedVehicleId),
@@ -140,8 +148,8 @@ const BrowseRequests = () => {
         status: "OFFER_SENT",
       });
       toast({ title: "Offer Submitted", description: "Your offer has been sent to the client." });
+      setMyOffers(prev => [...prev, newOffer]);
       fetchRequests(); // Refresh list
-      setSelected(null);
     } catch (err: any) {
       toast({ 
         title: "Offer Failed", 
@@ -286,49 +294,67 @@ const BrowseRequests = () => {
                   )}
                 </div>
 
+                {/* Luggage Inventory */}
+                <div className="p-8">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">Luggage Inventory</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selected.luggageEntries?.length ? (
+                      selected.luggageEntries.map((l, i) => (
+                        <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-background border border-border/50 shadow-sm ring-1 ring-black/5">
+                          <span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary rounded-md text-[10px] font-black">{l.quantity}</span>
+                          <span className="text-[11px] font-bold text-foreground/80">{l.luggageType?.name}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">No items listed</p>
+                    )}
+                  </div>
+                </div>
+
                 {/* Offer Submission Row - THE NEW DESIGN */}
-                <div className="p-8 bg-primary/5 border-t-2 border-primary/10">
-                  <div className="flex flex-col gap-6">
+                <div className="p-6 lg:p-8 bg-primary/5 border-t-2 border-primary/10">
+                  <div className="flex flex-col gap-5">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
-                        <Send className="w-4 h-4" /> Quick Offer
+                        <Send className="w-4 h-4" /> {hasAlreadyOffered ? "Offer Details" : "Quick Offer"}
                       </h3>
+                      {hasAlreadyOffered && (
+                        <Badge className="bg-primary/20 text-primary border-primary/20 font-black uppercase text-[10px] tracking-widest px-3 py-1">
+                          Offer Already Sent
+                        </Badge>
+                      )}
                     </div>
 
 
-                    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
-                      {/* Vehicle Select */}
-                      <div className="flex-1 space-y-1.5">
-                        <Label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Select Vehicle</Label>
-                        <Select onValueChange={setSelectedVehicleId} value={selectedVehicleId}>
-                          <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 font-bold text-[13px] shadow-sm px-4">
-                            <SelectValue placeholder="Vehicle" />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl border-border/50 min-w-[280px]">
-                            {filteredVehicles.map((v) => (
-                              <SelectItem key={v.id} value={String(v.id)} className="py-3 px-3 cursor-pointer focus:bg-primary/5">
-                                <div className="flex items-center justify-between w-[220px]">
-                                  <span className="font-bold text-[13px] text-foreground/90 truncate mr-2">{getVehicleString(v)}</span>
-                                  <div className="flex flex-col items-end shrink-0">
-                                    <span className="text-xs font-black text-primary tracking-tighter leading-none">${v.pricePerKm}</span>
-                                    <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 whitespace-nowrap">per km</span>
+                    <div className="flex flex-col gap-6">
+                      {/* Row 1: Inputs */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Vehicle Select */}
+                        <div className="space-y-1.5 min-w-0">
+                          <Label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Select Vehicle</Label>
+                          <Select onValueChange={setSelectedVehicleId} value={selectedVehicleId} disabled={hasAlreadyOffered}>
+                            <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 font-bold text-[13px] shadow-sm px-4 w-full">
+                              <SelectValue placeholder="Vehicle" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border/50 min-w-[280px]">
+                              {filteredVehicles.map((v) => (
+                                <SelectItem key={v.id} value={String(v.id)} className="py-3 px-3 cursor-pointer focus:bg-primary/5">
+                                  <div className="flex items-center justify-between w-full min-w-[220px]">
+                                    <span className="font-bold text-[13px] text-foreground/90 truncate mr-2">{getVehicleString(v)}</span>
+                                    <div className="flex flex-col items-end shrink-0">
+                                      <span className="text-xs font-black text-primary tracking-tighter leading-none">${v.pricePerKm}</span>
+                                      <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 whitespace-nowrap">per km</span>
+                                    </div>
                                   </div>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-
-
-
-                        </Select>
-                      </div>
-
-
-                      {/* Date Display/Suggest */}
-                      <div className="flex-1 space-y-1.5">
-                        <Label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Proposed Date</Label>
-                        <div className="flex gap-2">
+                        {/* Date Display/Suggest */}
+                        <div className="space-y-1.5 min-w-0">
+                          <Label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Proposed Date</Label>
                           <DateTimePicker 
                             date={offeredDateTime} 
                             setDate={setOfferedDateTime} 
@@ -336,34 +362,38 @@ const BrowseRequests = () => {
                             trigger={
                               <Button 
                                 variant="outline" 
-                                className="h-11 flex-1 px-3 bg-card border-border/50 rounded-xl justify-start text-xs font-bold text-foreground shadow-sm"
+                                className="h-11 w-full px-3 bg-card border-border/50 rounded-xl justify-start text-xs font-bold text-foreground shadow-sm truncate"
+                                disabled={hasAlreadyOffered}
                               >
-                                <CalendarClock className="mr-2 h-4 w-4 text-primary" />
-                                {offeredDateTime ? (
-                                  `${offeredDateTime.toLocaleDateString()} · ${offeredDateTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
-                                ) : (
-                                  "Select Time"
-                                )}
+                                <CalendarClock className="mr-2 h-4 w-4 text-primary shrink-0" />
+                                <span className="truncate">
+                                  {offeredDateTime ? (
+                                    `${offeredDateTime.toLocaleDateString()} · ${offeredDateTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
+                                  ) : (
+                                    "Select Time"
+                                  )}
+                                </span>
                               </Button>
                             }
                           />
                         </div>
                       </div>
 
-
-                      {/* Calculated Price & Submit */}
-                      <div className="flex items-center gap-4 md:pl-4 border-t md:border-t-0 md:border-l border-primary/10 pt-4 md:pt-0">
-                        <div className="text-right min-w-[80px]">
-                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Your Price</p>
-                          <p className="text-2xl font-black text-primary tracking-tighter leading-none">${currentPrice}</p>
+                      {/* Row 2: Price & Submit */}
+                      <div className="flex flex-row items-center justify-between gap-4 pt-4 border-t border-primary/10">
+                        <div className="space-y-0.5">
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Your Total Price</p>
+                          <p className="text-3xl font-black text-primary tracking-tighter leading-none">${currentPrice}</p>
                         </div>
                         <Button 
                           onClick={handleSubmitOffer}
-                          disabled={isSubmitting || !selectedVehicleId || driverVehicles.length === 0}
-                          className="h-11 px-8 rounded-xl font-black uppercase tracking-widest shadow-md active:scale-95 group"
+                          disabled={isSubmitting || !selectedVehicleId || driverVehicles.length === 0 || hasAlreadyOffered}
+                          className={`h-12 px-6 sm:px-10 rounded-xl font-black uppercase tracking-widest shadow-md active:scale-95 group shrink-0 ${hasAlreadyOffered ? "bg-muted text-muted-foreground" : ""}`}
                         >
                           {isSubmitting ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : hasAlreadyOffered ? (
+                            "Offer Sent"
                           ) : (
                             <>Send Offer <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
                           )}
@@ -371,7 +401,7 @@ const BrowseRequests = () => {
                       </div>
                     </div>
                     
-                    {driverVehicles.length === 0 && (
+                    {driverVehicles.length === 0 && !hasAlreadyOffered && (
                       <div className="flex items-center gap-2 text-[10px] font-bold text-destructive uppercase bg-destructive/5 p-3 rounded-lg border border-destructive/10">
                         <Info className="w-3.5 h-3.5" /> You need an active vehicle to make offers.
                       </div>

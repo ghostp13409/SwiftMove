@@ -16,7 +16,13 @@ export const MoveOfferSchema = z.object({
 
 export const MoveOfferFormSchema = z.object({
   price: z.number().positive({ message: "Price must be a positive number" }),
-  offerDate: z.string().datetime().pipe(z.coerce.date()),
+  offerDate: z
+    .string()
+    .datetime()
+    .pipe(z.coerce.date())
+    .refine((date) => date >= new Date(new Date().getTime() - 300000), {
+      message: "Offer date cannot be in the past",
+    }),
   moveRequestId: z.number(),
   driverId: z.number(),
   vehicleId: z.number(),
