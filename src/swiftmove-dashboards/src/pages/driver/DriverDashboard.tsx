@@ -34,11 +34,12 @@ const DriverDashboard = () => {
 
   // Fetch available requests
   const { data: pendingRequests = [], isLoading: isLoadingRequests } = useQuery({
-    queryKey: ["allRequests"],
+    queryKey: ["availableRequests", driverUserId],
     queryFn: async () => {
-      const data = await moveRequestService.getAllMoveRequests();
-      return data.filter((r) => r.status === "CREATED");
+      if (!driverUserId) return [];
+      return tripService.browseRequests(driverUserId);
     },
+    enabled: !!driverUserId,
   });
 
   // Fetch driver offers

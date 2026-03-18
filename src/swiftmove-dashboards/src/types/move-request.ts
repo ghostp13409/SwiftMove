@@ -20,8 +20,14 @@ export const MoveRequestSchema = z.object({
 });
 
 export const MoveRequestFormSchema = z.object({
-  moveDate: z.string().datetime().pipe(z.coerce.date()),
-  maxBudget: z.number(),
+  moveDate: z
+    .string()
+    .datetime()
+    .pipe(z.coerce.date())
+    .refine((date) => date >= new Date(new Date().getTime() - 300000), {
+      message: "Move date cannot be in the past",
+    }),
+  maxBudget: z.number().min(1, { message: "Budget must be at least $1" }),
   clientId: z.number(),
   fromAddressId: z.number(),
   toAddressId: z.number(),

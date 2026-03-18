@@ -305,7 +305,7 @@ const Vehicles = () => {
                         key={vt.id ?? idx}
                         value={String(vt.id ?? idx + 1)}
                       >
-                        {vt.type} (Max: {vt.maxWeight} kg, {vt.maxCapacity} cu
+                        {vt.type} (Max: {vt.maxWeight?.toFixed(2)} kg, {vt.maxCapacity?.toFixed(2)} cu
                         ft)
                       </SelectItem>
                     ))}

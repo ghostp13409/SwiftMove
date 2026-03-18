@@ -106,6 +106,7 @@ export function DateTimePicker({ date, setDate, placeholder = "Pick a date", tri
           mode="single"
           selected={selectedDate}
           onSelect={handleSelectDate}
+          disabled={{ before: new Date() }}
           initialFocus
         />
         <div className="p-3 border-t border-border flex items-center justify-between gap-2">
