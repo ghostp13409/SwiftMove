@@ -2,8 +2,8 @@
 
 ## Technical Documentation Report
 
-**Parth**  
-**Annlin**  
+**Parth**
+**Annlin**
 **Carlos**
 
 **INFO3220**
@@ -15,6 +15,19 @@
 SwiftMove is a microservice-based moving platform with a React dashboard frontend and a Spring Boot 4 / Spring Cloud 2025.1 backend. The backend uses Eureka for service discovery and Spring Cloud Gateway as the single external entry point. Core business domains implemented include authentication/users, clients & move-requests, drivers & offers/vehicles, trips & matching, and addresses with geocoding.
 
 ---
+
+## Tech Stack
+
+- **Backend:** Java 21, Spring Boot, Spring
+- **Service Discovery:** Spring Cloud Netflix Eureka
+- **API Gateway:** Spring Cloud Gateway
+- **Frontend:** Vite + React 18 + TypeScript
+- **Database:** PostgreSQL (via Docker)
+- **Geocoding:** Nominatim (OpenStreetMap)
+- **Messaging Broker:** RabbitMQ (planned for async communication, not yet implemented)
+- **Microservices:** Docker Compose for local orchestration (not fully utilized yet)
+- **Build Tool:** Maven
+- **Testing:** JUnit
 
 ## 2. Repository Layout
 
@@ -46,7 +59,7 @@ Located in `src/backend/service`, plus infrastructure:
 ### Database
 
 - `docker-compose.yml` provisions Postgres on port 5432
-- Several services connect to:  
+- Several services connect to:
   `jdbc:postgresql://127.0.0.1:5432/postgres`
 - Uses `ddl-auto=update` — dev-friendly but riskier for production
 
@@ -56,7 +69,7 @@ Located in `src/backend/service`, plus infrastructure:
 
 ### 4.1 api-gateway
 
-**Purpose:** edge routing, intended JWT enforcement, and CORS  
+**Purpose:** edge routing, intended JWT enforcement, and CORS
 **Port:** 8000
 
 #### Routing
@@ -80,7 +93,7 @@ Gateway uses a hard-coded base64 secret constant in `JwtUtil`, while `auth-servi
 
 ### 4.2 eureka-server
 
-**Purpose:** service registry using Netflix Eureka  
+**Purpose:** service registry using Netflix Eureka
 **Port:** 8761
 
 Configured to:
@@ -92,7 +105,7 @@ Configured to:
 
 ### 4.3 config-service
 
-**Purpose:** Spring Cloud Config Server  
+**Purpose:** Spring Cloud Config Server
 **Port:** 8888
 
 Configured with:
@@ -105,7 +118,7 @@ Note: No evidence of other services using config-server as a config client yet.
 
 ### 4.4 auth-service
 
-**Purpose:** authentication and token issuance  
+**Purpose:** authentication and token issuance
 **Port:** 8090
 
 #### Endpoints (`/auth`)
@@ -129,7 +142,7 @@ Note: No evidence of other services using config-server as a config client yet.
 
 ### 4.5 user-service
 
-**Purpose:** user CRUD and lookup  
+**Purpose:** user CRUD and lookup
 **Port:** 8070
 
 #### Endpoints (`/users`)
@@ -164,7 +177,7 @@ Note: No evidence of other services using config-server as a config client yet.
 
 ### 4.6 location-service
 
-**Purpose:** addresses and automatic geocoding  
+**Purpose:** addresses and automatic geocoding
 **Port:** 8050
 
 #### Endpoints (`/addresses`)
@@ -186,7 +199,7 @@ Note: No evidence of other services using config-server as a config client yet.
 
 ### 4.7 client-service
 
-**Purpose:** client views, move-requests, and luggage management  
+**Purpose:** client views, move-requests, and luggage management
 **Port:** 8002
 
 #### Key Endpoints (`/clients`)
@@ -215,7 +228,7 @@ Note: No evidence of other services using config-server as a config client yet.
 
 ### 4.8 driver-service
 
-**Purpose:** driver data, vehicles, offers, trip creation  
+**Purpose:** driver data, vehicles, offers, trip creation
 **Port:** 8003
 
 #### Key Endpoints (`/drivers`)
@@ -249,7 +262,7 @@ Note: No evidence of other services using config-server as a config client yet.
 
 ### 4.9 trip-service
 
-**Purpose:** trips, matching engine, budget suggestion  
+**Purpose:** trips, matching engine, budget suggestion
 **Port:** 8060
 
 #### Endpoints (`/trips`)
@@ -290,7 +303,7 @@ Note: No evidence of other services using config-server as a config client yet.
 
 ### Stack
 
-- Vite + React 18 + TypeScript
+- **FrontEnd**: Vite + React 18 + TypeScript
 - shadcn-ui / Radix UI
 - Axios + React Query
 - Role normalization utilities
@@ -359,7 +372,6 @@ Recommended: use **Flyway or Liquibase** for migrations.
 ## 8. Operational & Deployment Notes
 
 - `docker-compose.yml` runs:
-
   - Postgres
   - Eureka
 
