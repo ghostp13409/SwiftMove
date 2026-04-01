@@ -67,6 +67,7 @@ const BrowseRequests = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dateDialogOpen, setDateDialogOpen] = useState(false);
+  const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
 
   // Offer form state
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
@@ -292,6 +293,16 @@ const BrowseRequests = () => {
                       </div>
                     </div>
                   )}
+                  {selected.note && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 rounded-lg bg-primary/5 border-primary/20 text-primary hover:bg-primary/10 text-[10px] font-black uppercase tracking-wider"
+                      onClick={() => setIsNoteDialogOpen(true)}
+                    >
+                      <Info className="w-3.5 h-3.5 mr-1.5" /> View Notes
+                    </Button>
+                  )}
                 </div>
 
                 {/* Luggage Inventory */}
@@ -446,6 +457,31 @@ const BrowseRequests = () => {
               onClick={() => setDateDialogOpen(false)}
             >
               Confirm Selection
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Note Dialog */}
+      <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
+        <DialogContent className="rounded-2xl border-border/50 sm:max-w-[400px] p-0 overflow-hidden">
+          <div className="bg-primary/10 p-6 border-b border-primary/10">
+            <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-primary">
+              <Info className="w-5 h-5" /> Client Note
+            </h3>
+          </div>
+          <div className="p-8">
+            <p className="text-sm font-medium text-foreground leading-relaxed italic bg-muted/30 p-4 rounded-xl border border-border/50">
+              "{selected?.note}"
+            </p>
+          </div>
+          <div className="p-6 pt-0 flex justify-end">
+            <Button 
+              variant="secondary" 
+              className="rounded-xl font-bold uppercase text-[10px] tracking-widest px-6"
+              onClick={() => setIsNoteDialogOpen(false)}
+            >
+              Close
             </Button>
           </div>
         </DialogContent>

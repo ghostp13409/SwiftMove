@@ -29,12 +29,12 @@ public class JwtAuthenticationFilter implements GatewayFilter {
         final List<String> publicEndpoints = List.of(
                 "/auth/login", "/auth/register", "/auth/logout", "/auth/check",
                 "/v1/auth/login", "/v1/auth/register", "/v1/auth/logout", "/v1/auth/check",
-                "/eureka"
+                "/eureka", "/payments"
         );
 
         // Check if request path matches any public endpoint
         boolean isPublicEndpoint = publicEndpoints.stream()
-                .anyMatch(endpoint -> request.getURI().getPath().contains(endpoint));
+                .anyMatch(endpoint -> request.getURI().getPath().startsWith(endpoint));
 
         // If it's a public endpoint, skip JWT validation
         if (isPublicEndpoint) {

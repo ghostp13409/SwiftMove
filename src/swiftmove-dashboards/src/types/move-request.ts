@@ -17,6 +17,7 @@ export const MoveRequestSchema = z.object({
   toLongitude: z.number().optional(),
   status: z.enum(["CREATED", "OFFER_AVAILABLE", "ACCEPTED", "CANCELLED"]),
   hasFurniture: z.boolean().default(false),
+  note: z.string().optional(),
 });
 
 export const MoveRequestFormSchema = z.object({
@@ -38,6 +39,7 @@ export const MoveRequestFormSchema = z.object({
   toLongitude: z.number().optional(),
   status: z.enum(["CREATED", "OFFER_AVAILABLE", "ACCEPTED", "CANCELLED"]),
   hasFurniture: z.boolean().default(false),
+  note: z.string().optional(),
 });
 
 export const MoveRequestPopulatedSchema = MoveRequestSchema.extend({

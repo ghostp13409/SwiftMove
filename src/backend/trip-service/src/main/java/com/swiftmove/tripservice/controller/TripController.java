@@ -65,7 +65,7 @@ class TripController {
         return ResponseEntity.ok(moveTripService.getAll());
     }
 
-    @PatchMapping("/{id}/status")
+    @PostMapping("/{id}/status")
     public ResponseEntity<MoveTripDto> updateStatus(@PathVariable Long id, @RequestParam String status) {
         try {
             return ResponseEntity.ok(moveTripService.updateStatus(id, status));

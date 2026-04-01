@@ -253,6 +253,11 @@ const ClientMoveRequests = () => {
     setLuggageQuantities((prev) => ({ ...prev, [key]: Math.max(0, (prev[key] || 0) + delta) }));
   };
 
+  const setLuggageQuantity = (id: string | number, value: string) => {
+    const qty = parseInt(value) || 0;
+    setLuggageQuantities((prev) => ({ ...prev, [String(id)]: Math.max(0, qty) }));
+  };
+
   const handleEditRequest = (req: MoveRequestPopulated) => {
     setIsEditing(true);
     setCurrentRequestId(req.id);
@@ -275,6 +280,7 @@ const ClientMoveRequests = () => {
     setMoveDate(req.moveDate);
     setMaxBudget(String(req.maxBudget));
     setHasFurniture(req.hasFurniture || false);
+    setNotes(req.note || "");
     const newQtys: Record<string, number> = {};
     luggageTypes.forEach((t) => {
       const key = String(t.id || t.type || t.luggageTypeEnum);
@@ -324,13 +330,15 @@ const ClientMoveRequests = () => {
         ]);
         await moveRequestService.updateMoveRequest(currentRequestId!, {
           clientId: userId!, fromAddressId: selected.fromAddressId, toAddressId: selected.toAddressId,
-          moveDate, maxBudget: parseFloat(maxBudget), status: selected.status as any, hasFurniture
+          moveDate, maxBudget: parseFloat(maxBudget), status: selected.status as any, hasFurniture,
+          note: notes
         });
       } else {
         const [from, to] = await Promise.all([addressService.createAddress(addrFrom), addressService.createAddress(addrTo)]);
         const newReq = await moveRequestService.createMoveRequest({
           clientId: userId!, fromAddressId: from.id, toAddressId: to.id,
-          moveDate, maxBudget: parseFloat(maxBudget), status: "CREATED", hasFurniture
+          moveDate, maxBudget: parseFloat(maxBudget), status: "CREATED", hasFurniture,
+          note: notes
         });
         reqId = newReq.id;
       }
@@ -457,10 +465,15 @@ const ClientMoveRequests = () => {
                           <div className="flex flex-col"><span className="text-sm font-bold">{t.name}</span><span className="text-[10px] text-muted-foreground uppercase">{(t.luggageTypeEnum || t.type || "").replace(/_/g, " ")}</span></div>
                           <div className="flex items-center gap-3 bg-background/80 rounded-xl p-1 border shadow-sm group-hover:bg-background transition-colors">
                             <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive" onClick={() => updateLuggageQuantity(key, -1)} disabled={!luggageQuantities[key]}><Minus className="h-3 w-3" /></Button>
-                            <span className="text-sm font-bold w-6 text-center">{luggageQuantities[key] || 0}</span>
+                            <Input 
+                              type="number" 
+                              min="0"
+                              className="h-8 w-12 border-none bg-transparent text-center font-bold text-sm focus-visible:ring-0 focus-visible:ring-offset-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                              value={luggageQuantities[key] || 0}
+                              onChange={(e) => setLuggageQuantity(key, e.target.value)}
+                            />
                             <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary" onClick={() => updateLuggageQuantity(key, 1)}><Plus className="h-3 w-3" /></Button>
-                          </div>
-                        </div>
+                          </div>                        </div>
                       );
                     })}
                   </div>
@@ -493,7 +506,29 @@ const ClientMoveRequests = () => {
                 <CardContent className="flex-1 overflow-auto p-0 divide-y divide-border/40 text-foreground/90 font-medium">
                   <div className="p-6 bg-background/50"><div className="relative flex flex-col gap-10 pl-10 before:absolute before:left-[15px] before:top-2 before:bottom-10 before:w-[2px] before:bg-border/60 before:rounded-full"><div className="relative"><div className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-primary/10 ring-offset-2 ring-offset-background z-10" /><div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2"><div className="space-y-0.5"><p className="text-[10px] font-bold uppercase text-primary tracking-widest leading-none mb-1.5">Pick-up</p><p className="text-sm font-bold text-foreground leading-tight">{selected.fromAddress?.line1}</p><p className="text-xs text-muted-foreground mt-0.5">{selected.fromAddress?.city}, {selected.fromAddress?.stateOrProvince}</p></div><Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-bold text-primary opacity-60 hover:opacity-100" asChild><a href={getGoogleMapsAddressLink(selected.fromAddress)} target="_blank" rel="noopener noreferrer">Maps <ExternalLink className="ml-1 w-2.5 h-2.5" /></a></Button></div></div><div className="relative"><div className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-foreground/80 ring-4 ring-foreground/5 ring-offset-2 ring-offset-background z-10" /><div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2"><div className="space-y-0.5"><p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest leading-none mb-1.5">Destination</p><p className="text-sm font-bold text-foreground leading-tight">{selected.toAddress?.line1}</p><p className="text-xs text-muted-foreground mt-0.5">{selected.toAddress?.city}, {selected.toAddress?.stateOrProvince}</p></div><Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-bold text-primary opacity-60 hover:opacity-100" asChild><a href={getGoogleMapsAddressLink(selected.toAddress)} target="_blank" rel="noopener noreferrer">Maps <ExternalLink className="ml-1 w-2.5 h-2.5" /></a></Button></div></div></div></div>
                   <div className="px-6 py-4 flex flex-wrap gap-6 bg-muted/10"><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-background border border-border/50 flex items-center justify-center shadow-sm text-muted-foreground"><Clock className="w-4 h-4" /></div><div><p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Scheduled</p><p className="text-xs font-bold mt-0.5">{new Date(selected.moveDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p></div></div><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-background border border-border/50 flex items-center justify-center shadow-sm text-primary"><span className="text-xs font-black">$</span></div><div><p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Budget</p><p className="text-xs font-bold mt-0.5">${selected.maxBudget}</p></div></div>{selected.hasFurniture && (<div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shadow-sm text-primary"><Armchair className="w-4 h-4" /></div><div><p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Furniture</p><p className="text-xs font-bold mt-0.5 text-primary">Included</p></div></div>)}</div>
-                  <div className="p-6"><p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">Luggage Inventory</p><div className="flex flex-wrap gap-2">{selected.luggageEntries?.length ? (selected.luggageEntries.map((l, i) => (<div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-background border border-border/50 shadow-sm ring-1 ring-black/5"><span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary rounded-md text-[10px] font-black">{l.quantity}</span><span className="text-[11px] font-bold text-foreground/80">{l.luggageType?.name}</span></div>))) : (<p className="text-xs text-muted-foreground italic">No items listed</p>)}</div></div>
+                  <div className="p-6">
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">Luggage Inventory</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selected.luggageEntries?.length ? (
+                        selected.luggageEntries.map((l, i) => (
+                          <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-background border border-border/50 shadow-sm ring-1 ring-black/5">
+                            <span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary rounded-md text-[10px] font-black">{l.quantity}</span>
+                            <span className="text-[11px] font-bold text-foreground/80">{l.luggageType?.name}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">No items listed</p>
+                      )}
+                    </div>
+                    {selected.note && (
+                      <div className="mt-6 pt-6 border-t border-border/40">
+                        <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-2">My Note</p>
+                        <p className="text-xs font-medium text-foreground/80 bg-muted/30 p-3 rounded-xl border border-border/40 italic">
+                          "{selected.note}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
                   <div className="p-6 bg-muted/5 flex-1"><div className="flex items-center justify-between mb-4"><h3 className="text-sm font-bold tracking-tight text-foreground flex items-center gap-2">Driver Offers <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-black">{offersForRequest.length}</span></h3></div>{offersForRequest.length === 0 ? (<div className="text-center py-8 bg-background border border-dashed border-border/60 rounded-xl"><p className="text-xs font-semibold text-muted-foreground/60">Waiting for driver offers...</p></div>) : (<div className="space-y-3">{offersForRequest.map((offer) => (<div key={offer.id} className="p-4 rounded-xl bg-card border border-border/50 shadow-sm flex items-center justify-between group hover:border-primary/30 transition-all"><div className="flex items-center gap-4"><div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center text-xs font-bold text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors uppercase">{offer.driver.user.firstName[0]}{offer.driver.user.lastName[0]}</div><div><p className="text-xs font-bold text-foreground">{offer.driver.user.firstName} {offer.driver.user.lastName}</p><p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{getVehicleString(offer.vehicle)}</p></div></div><div className="flex items-center gap-4"><div className="text-right"><p className="text-base font-black text-primary tracking-tighter leading-none">${offer.price}</p><p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Fixed</p></div><div className="flex items-center gap-2">{offer.status === "OFFER_SENT" && (selected.status === "CREATED" || selected.status === "OFFER_AVAILABLE") ? (<div className="flex items-center gap-2"><Button size="sm" variant="ghost" onClick={() => handleRejectOffer(offer.id)} className="h-8 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider text-destructive hover:bg-destructive/5 hover:text-destructive">Reject</Button><Button size="sm" onClick={() => handleAcceptOffer(offer.id)} className="h-8 px-4 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">Accept</Button></div>) : (<StatusBadge status={offer.status} />)}</div></div></div>))}</div>)}</div>
                 </CardContent>
               </Card>

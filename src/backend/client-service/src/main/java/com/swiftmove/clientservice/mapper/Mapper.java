@@ -48,6 +48,7 @@ public class Mapper {
         moveRequest.setMaxBudget(moveRequestDto.getMaxBudget());
         moveRequest.setMoveDate(moveRequestDto.getMoveDate());
         moveRequest.setHasFurniture(moveRequestDto.getHasFurniture());
+        moveRequest.setNote(moveRequestDto.getNote());
         if (moveRequestDto.getStatus() != null) {
             moveRequest.setStatus(MoveStatus.valueOf(moveRequestDto.getStatus()));
         }
@@ -70,6 +71,7 @@ public class Mapper {
         moveRequestDto.setMaxBudget(moveRequest.getMaxBudget());
         moveRequestDto.setMoveDate(moveRequest.getMoveDate());
         moveRequestDto.setHasFurniture(moveRequest.getHasFurniture());
+        moveRequestDto.setNote(moveRequest.getNote());
         if (moveRequest.getStatus() != null) {
             moveRequestDto.setStatus(moveRequest.getStatus().name());
         }
@@ -90,6 +92,7 @@ public class Mapper {
             moveRequest.setMaxBudget(createMoveRequestDto.getMaxBudget());
             moveRequest.setMoveDate(createMoveRequestDto.getMoveDate());
             moveRequest.setHasFurniture(createMoveRequestDto.getHasFurniture());
+            moveRequest.setNote(createMoveRequestDto.getNote());
             if (createMoveRequestDto.getStatus() != null) {
                 moveRequest.setStatus(MoveStatus.valueOf(createMoveRequestDto.getStatus()));
             }
@@ -110,6 +113,7 @@ public class Mapper {
         moveRequest.setMaxBudget(moveRequestDto.getMaxBudget());
         moveRequest.setMoveDate(moveRequestDto.getMoveDate());
         moveRequest.setHasFurniture(moveRequestDto.getHasFurniture());
+        moveRequest.setNote(moveRequestDto.getNote());
         if (moveRequestDto.getStatus() != null) {
             moveRequest.setStatus(MoveStatus.valueOf(moveRequestDto.getStatus()));
         }

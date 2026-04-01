@@ -7,14 +7,29 @@ export const MoveTripSchema = z.object({
   id: z.string(),
   moveRequestId: z.number(),
   moveOfferId: z.number(),
-  //   "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
-  status: z.enum(["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+  status: z.enum([
+    "SCHEDULED",
+    "IN_PROGRESS",
+    "COMPLETED",
+    "CANCELLED",
+    "PAYMENT_PENDING",
+    "DRIVER_COMPLETED",
+    "COMPLETED_BY_DRIVER"
+  ]),
 });
 
 export const MoveTripFormSchema = z.object({
   moveRequestId: z.number(),
   moveOfferId: z.number(),
-  status: z.enum(["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+  status: z.enum([
+    "SCHEDULED",
+    "IN_PROGRESS",
+    "COMPLETED",
+    "CANCELLED",
+    "PAYMENT_PENDING",
+    "DRIVER_COMPLETED",
+    "COMPLETED_BY_DRIVER"
+  ]),
 });
 
 export const MoveTripPopulatedSchema = MoveTripSchema.extend({
