@@ -42,7 +42,7 @@ export const tripService = {
 
   // Update trip status
   updateTripStatus: async (id: string | number, status: string): Promise<MoveTrip> => {
-    const response = await apiClient.patch(`${API_BASE}/${id}/status?status=${status}`);
+    const response = await apiClient.post(`${API_BASE}/${id}/status?status=${status}`);
     return response.data.data || response.data;
   },
 

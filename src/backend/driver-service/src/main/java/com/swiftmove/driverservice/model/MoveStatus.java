@@ -9,10 +9,12 @@ public enum MoveStatus {
     CANCELLED,
     SCHEDULED,
     IN_PROGRESS,
-    COMPLETED_BY_DRIVER,
+    DRIVER_COMPLETED,
+    COMPLETED_BY_DRIVER, // Keep for backward compatibility if used, but we'll use DRIVER_COMPLETED mostly
     COMPLETED,
     PENDING,
     CONFIRMED,
     PAYMENT_COMPLETED,
+    PAYMENT_PENDING,
     REFUNDED
 }

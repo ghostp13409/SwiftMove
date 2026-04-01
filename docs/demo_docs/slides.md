@@ -1,7 +1,7 @@
 ---
 
 Slide 1: Title – SwiftMove
-Header: SwiftMove: Revolutionizing the Moving Experience
+Header: SwiftMove: Your Ride. Your
 Content:
 
 - Sub-headline: A Transparent, Decentralized Open Marketplace for Moving Services.

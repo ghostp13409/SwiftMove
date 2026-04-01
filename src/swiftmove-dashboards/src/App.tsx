@@ -11,6 +11,7 @@ import Register from "@/pages/auth/Register";
 import ClientDashboard from "@/pages/client/ClientDashboard";
 import ClientMoveRequests from "@/pages/client/ClientMoveRequests";
 import ClientTrips from "@/pages/client/ClientTrips";
+import PaymentSuccess from "@/pages/client/PaymentSuccess";
 import HistoryPage from "@/pages/shared/History";
 import DriverDashboard from "@/pages/driver/DriverDashboard";
 
@@ -50,6 +51,7 @@ const App = () => (
                 <Route path="history" element={<HistoryPage />} />
                 <Route path="profile" element={<Profile />} />
               </Route>
+              <Route path="/payment/success" element={<PaymentSuccess />} />
 
               {/* Driver Routes */}
               <Route path="/driver" element={<DashboardLayout role="DRIVER" />}>

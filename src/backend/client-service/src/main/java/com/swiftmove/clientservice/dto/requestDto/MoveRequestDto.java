@@ -25,4 +25,5 @@ public class MoveRequestDto {
     private Double toLongitude;
     private String status;
     private Boolean hasFurniture;
+    private String note;
 }

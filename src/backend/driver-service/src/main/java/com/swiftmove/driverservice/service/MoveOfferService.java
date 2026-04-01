@@ -175,7 +175,7 @@ public class MoveOfferService {
             CreateMoveTripDto tripDto = new CreateMoveTripDto();
             tripDto.setMoveRequestId(offer.getMoveRequestId());
             tripDto.setMoveOfferId(offer.getId());
-            tripDto.setStatus("SCHEDULED");
+            tripDto.setStatus("PAYMENT_PENDING");
             tripServiceClient.createTrip(tripDto);
 
             return Mapper.toMoveOfferDto(offer);

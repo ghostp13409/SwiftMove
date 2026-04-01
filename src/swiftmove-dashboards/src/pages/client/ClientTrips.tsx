@@ -8,15 +8,32 @@ import {
   Truck,
   ExternalLink,
   Trash2,
+  CreditCard,
+  CheckCircle,
+  Loader2,
+  Lock,
+  Wallet,
+  Info,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import StatusBadge from "@/components/StatusBadge";
 import SortToggle, { SortOrder } from "@/components/SortToggle";
 import LoadingDelight from "@/components/LoadingDelight";
 import EmptyState from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { tripService } from "@/services/tripService";
+import { paymentService } from "@/services/paymentService";
 import { populationFactory } from "@/services/populationFactory";
 import {
   getVehicleString,
@@ -32,6 +49,8 @@ const ClientTrips = () => {
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [tripToPay, setTripToPay] = useState<MoveTripDetailed | null>(null);
 
   const { data: trips = [], isLoading } = useQuery({
     queryKey: ["clientTrips", userId],
@@ -89,6 +108,46 @@ const ClientTrips = () => {
       });
     },
   });
+
+  const paymentMutation = useMutation({
+    mutationFn: async (tripId: number) => {
+      // Simulate payment processing delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return await paymentService.confirmPaymentSuccess(tripId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clientTrips"] });
+      toast({
+        title: "Payment Successful!",
+        description: "Your move has been successfully scheduled.",
+      });
+      setIsPaymentDialogOpen(false);
+      setTripToPay(null);
+    },
+    onError: () => {
+      toast({
+        title: "Payment Error",
+        description: "Failed to process payment. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const completeMutation = useMutation({
+    mutationFn: (id: number) => tripService.updateTripStatus(String(id), "COMPLETED"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clientTrips"] });
+      toast({
+        title: "Move Completed",
+        description: "Thank you for moving with SwiftMove!",
+      });
+    },
+  });
+
+  const handlePayNow = (trip: MoveTripDetailed) => {
+    setTripToPay(trip);
+    setIsPaymentDialogOpen(true);
+  };
 
   const selectedTrip = trips.find((t) => t.id === selectedId);
 
@@ -216,7 +275,28 @@ const ClientTrips = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {selectedTrip?.status === "SCHEDULED" && (
+                  {selectedTrip?.status === "PAYMENT_PENDING" && (
+                    <Button
+                      size="sm"
+                      className="h-9 px-4 text-xs font-black uppercase tracking-wider bg-primary hover:bg-primary/90 shadow-sm flex items-center gap-2"
+                      onClick={() => handlePayNow(selectedTrip)}
+                    >
+                      <CreditCard className="w-3.5 h-3.5" />
+                      Pay Now
+                    </Button>
+                  )}
+                  {(selectedTrip?.status === "DRIVER_COMPLETED" || selectedTrip?.status === "COMPLETED_BY_DRIVER") && (
+                    <Button
+                      size="sm"
+                      className="h-9 px-4 text-xs font-black uppercase tracking-wider bg-primary hover:bg-primary/90 shadow-sm flex items-center gap-2"
+                      onClick={() => completeMutation.mutate(selectedTrip.id)}
+                      disabled={completeMutation.isPending}
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Complete Move
+                    </Button>
+                  )}
+                  {(selectedTrip?.status === "SCHEDULED" || selectedTrip?.status === "PAYMENT_PENDING") && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -278,6 +358,17 @@ const ClientTrips = () => {
                       </p>
                     </div>
                   </div>
+
+                  {selectedTrip?.moveRequestPopulated?.note && (
+                    <div className="md:col-span-2 pt-2">
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 ml-1">
+                        My Note to Driver
+                      </p>
+                      <p className="text-xs font-medium text-foreground/80 bg-muted/30 p-3 rounded-xl border border-border/40 italic">
+                        "{selectedTrip.moveRequestPopulated.note}"
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Route Timeline */}
@@ -438,6 +529,112 @@ const ClientTrips = () => {
           )}
         </div>
       </div>
+
+      {/* Payment Dialog */}
+      <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+        <DialogContent className="sm:max-w-[450px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="bg-primary p-8 text-primary-foreground relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-12 -mb-12 blur-xl" />
+            
+            <DialogHeader className="relative z-10">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                  <Wallet className="w-5 h-5 text-white" />
+                </div>
+                <DialogTitle className="text-2xl font-black tracking-tight text-white">
+                  Payment Details
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-primary-foreground/80 font-medium">
+                Complete your booking for SM-{tripToPay?.id?.toString().padStart(5, "0")}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="p-8 space-y-6 bg-card">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="card-number" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Card Number
+                  </Label>
+                  <Input 
+                    id="card-number" 
+                    placeholder="**** **** **** 4242" 
+                    className="h-12 bg-muted/30 border-none rounded-xl font-mono text-sm focus-visible:ring-primary/20"
+                    defaultValue="4242 4242 4242 4242"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="expiry" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Expiry Date
+                  </Label>
+                  <Input 
+                    id="expiry" 
+                    placeholder="MM/YY" 
+                    className="h-12 bg-muted/30 border-none rounded-xl font-mono text-sm focus-visible:ring-primary/20"
+                    defaultValue="12/26"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cvc" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  CVC
+                </Label>
+                <Input 
+                  id="cvc" 
+                  placeholder="***" 
+                  type="password"
+                  className="h-12 bg-muted/30 border-none rounded-xl font-mono text-sm focus-visible:ring-primary/20"
+                  defaultValue="123"
+                />
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">
+                  Amount to Pay
+                </p>
+                <p className="text-2xl font-black text-primary tracking-tighter">
+                  ${tripToPay?.moveOfferPopulated?.price ?? 0}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">
+                  Currency
+                </p>
+                <p className="text-sm font-black text-foreground uppercase tracking-tight">
+                  CAD
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider justify-center">
+              <Lock className="w-3 h-3" />
+              Secure Encrypted Payment
+            </div>
+          </div>
+
+          <DialogFooter className="p-8 pt-0 bg-card">
+            <Button 
+              className="w-full h-14 rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              onClick={() => tripToPay && paymentMutation.mutate(tripToPay.id)}
+              disabled={paymentMutation.isPending}
+            >
+              {paymentMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                `Pay $${tripToPay?.moveOfferPopulated?.price ?? 0} Now`
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

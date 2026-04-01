@@ -81,17 +81,30 @@ public class MoveTripService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Move Trip Not Found"));
         
         MoveStatus newStatus = MoveStatus.valueOf(status);
+        MoveStatus currentStatus = trip.getStatus();
 
-        // Enforce flow: only if status is changing to COMPLETED
-        if (newStatus == MoveStatus.COMPLETED) {
-            if (trip.getStatus() != MoveStatus.COMPLETED_BY_DRIVER) {
+        // Enforce Flow as per demo_flow.md
+        if (newStatus == MoveStatus.SCHEDULED) {
+            if (currentStatus != MoveStatus.PAYMENT_PENDING) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Trip must be in PAYMENT_PENDING to become SCHEDULED");
+            }
+        } else if (newStatus == MoveStatus.IN_PROGRESS) {
+            if (currentStatus != MoveStatus.SCHEDULED) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Trip must be SCHEDULED to become IN_PROGRESS");
+            }
+        } else if (newStatus == MoveStatus.DRIVER_COMPLETED || newStatus == MoveStatus.COMPLETED_BY_DRIVER) {
+            if (currentStatus != MoveStatus.IN_PROGRESS) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Trip must be IN_PROGRESS to be marked as completed by driver");
+            }
+            // Use DRIVER_COMPLETED for consistency
+            newStatus = MoveStatus.DRIVER_COMPLETED;
+        } else if (newStatus == MoveStatus.COMPLETED) {
+            if (currentStatus != MoveStatus.DRIVER_COMPLETED && currentStatus != MoveStatus.COMPLETED_BY_DRIVER) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Move must be marked as completed by driver first.");
             }
         }
         
-        if (status != null) {
-            trip.setStatus(newStatus);
-        }
+        trip.setStatus(newStatus);
         return Mapper.toMoveTripDto(moveTripRepository.save(trip));
     }
 
