@@ -506,24 +506,26 @@ const ClientMoveRequests = () => {
                 <CardContent className="flex-1 overflow-auto p-0 divide-y divide-border/40 text-foreground/90 font-medium">
                   <div className="p-6 bg-background/50"><div className="relative flex flex-col gap-10 pl-10 before:absolute before:left-[15px] before:top-2 before:bottom-10 before:w-[2px] before:bg-border/60 before:rounded-full"><div className="relative"><div className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-primary/10 ring-offset-2 ring-offset-background z-10" /><div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2"><div className="space-y-0.5"><p className="text-[10px] font-bold uppercase text-primary tracking-widest leading-none mb-1.5">Pick-up</p><p className="text-sm font-bold text-foreground leading-tight">{selected.fromAddress?.line1}</p><p className="text-xs text-muted-foreground mt-0.5">{selected.fromAddress?.city}, {selected.fromAddress?.stateOrProvince}</p></div><Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-bold text-primary opacity-60 hover:opacity-100" asChild><a href={getGoogleMapsAddressLink(selected.fromAddress)} target="_blank" rel="noopener noreferrer">Maps <ExternalLink className="ml-1 w-2.5 h-2.5" /></a></Button></div></div><div className="relative"><div className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-foreground/80 ring-4 ring-foreground/5 ring-offset-2 ring-offset-background z-10" /><div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2"><div className="space-y-0.5"><p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest leading-none mb-1.5">Destination</p><p className="text-sm font-bold text-foreground leading-tight">{selected.toAddress?.line1}</p><p className="text-xs text-muted-foreground mt-0.5">{selected.toAddress?.city}, {selected.toAddress?.stateOrProvince}</p></div><Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-bold text-primary opacity-60 hover:opacity-100" asChild><a href={getGoogleMapsAddressLink(selected.toAddress)} target="_blank" rel="noopener noreferrer">Maps <ExternalLink className="ml-1 w-2.5 h-2.5" /></a></Button></div></div></div></div>
                   <div className="px-6 py-4 flex flex-wrap gap-6 bg-muted/10"><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-background border border-border/50 flex items-center justify-center shadow-sm text-muted-foreground"><Clock className="w-4 h-4" /></div><div><p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Scheduled</p><p className="text-xs font-bold mt-0.5">{new Date(selected.moveDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p></div></div><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-background border border-border/50 flex items-center justify-center shadow-sm text-primary"><span className="text-xs font-black">$</span></div><div><p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Budget</p><p className="text-xs font-bold mt-0.5">${selected.maxBudget}</p></div></div>{selected.hasFurniture && (<div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shadow-sm text-primary"><Armchair className="w-4 h-4" /></div><div><p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Furniture</p><p className="text-xs font-bold mt-0.5 text-primary">Included</p></div></div>)}</div>
-                  <div className="p-6">
-                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">Luggage Inventory</p>
-                    <div className="flex flex-wrap gap-2">
-                      {selected.luggageEntries?.length ? (
-                        selected.luggageEntries.map((l, i) => (
-                          <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-background border border-border/50 shadow-sm ring-1 ring-black/5">
-                            <span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary rounded-md text-[10px] font-black">{l.quantity}</span>
-                            <span className="text-[11px] font-bold text-foreground/80">{l.luggageType?.name}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-xs text-muted-foreground italic">No items listed</p>
-                      )}
+                  <div className={`p-6 grid grid-cols-1 ${selected.note ? "md:grid-cols-2" : ""} gap-8`}>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">Luggage Inventory</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selected.luggageEntries?.length ? (
+                          selected.luggageEntries.map((l, i) => (
+                            <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-background border border-border/50 shadow-sm ring-1 ring-black/5">
+                              <span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary rounded-md text-[10px] font-black">{l.quantity}</span>
+                              <span className="text-[11px] font-bold text-foreground/80">{l.luggageType?.name}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">No items listed</p>
+                        )}
+                      </div>
                     </div>
                     {selected.note && (
-                      <div className="mt-6 pt-6 border-t border-border/40">
-                        <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-2">My Note</p>
-                        <p className="text-xs font-medium text-foreground/80 bg-muted/30 p-3 rounded-xl border border-border/40 italic">
+                      <div className="border-l border-border/40 pl-8">
+                        <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">My Note</p>
+                        <p className="text-xs font-medium text-foreground/80 bg-muted/30 p-4 rounded-xl border border-border/40 italic leading-relaxed">
                           "{selected.note}"
                         </p>
                       </div>
