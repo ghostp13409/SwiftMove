@@ -23,7 +23,8 @@ public class CorsConfig {
                 "https://localhost:3000",
                 "https://localhost:5173",
                 "https://127.0.0.1:3000",
-                "https://127.0.0.1:5173"));
+                "https://127.0.0.1:5173",
+                "https://swiftmove-frontend-production.up.railway.app/")); // Railway Frontend
         corsConfig.setAllowedMethods(Arrays.asList(
                 "GET",
                 "POST",

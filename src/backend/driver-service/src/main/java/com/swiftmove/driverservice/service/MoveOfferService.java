@@ -19,6 +19,9 @@ import com.swiftmove.driverservice.model.MoveOffer;
 import com.swiftmove.driverservice.model.MoveStatus;
 import com.swiftmove.driverservice.repository.MoveOfferRepository;
 
+import com.swiftmove.driverservice.messaging.NotificationService;
+import com.swiftmove.driverservice.model.DriverInfo;
+import com.swiftmove.driverservice.repository.DriverInfoRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,6 +33,8 @@ public class MoveOfferService {
     private final ClientServiceClient clientServiceClient;
     private final TripServiceClient tripServiceClient;
     private final VehicleService vehicleService;
+    private final NotificationService notificationService;
+    private final DriverInfoRepository driverInfoRepository;
 
 //    Get All
     public List<MoveOfferDto> getAll(){
@@ -107,9 +112,17 @@ public class MoveOfferService {
                     moveRequest.setStatus("OFFER_AVAILABLE");
                     clientServiceClient.updateMoveRequest(moveRequest.getId(), moveRequest);
                 }
+                
+                // Notify Client
+                notificationService.sendNotification(
+                    moveRequest.getClientId().toString(),
+                    "OFFER_RECEIVED",
+                    "A driver has made an offer for your move request!",
+                    newMoveOffer
+                );
             } catch (Exception e) {
                 // Log error but don't fail offer creation
-                System.err.println("Failed to update move request status: " + e.getMessage());
+                System.err.println("Failed to update move request status or send notification: " + e.getMessage());
             }
 
             return Mapper.toMoveOfferDto(newMoveOffer);
@@ -178,6 +191,21 @@ public class MoveOfferService {
             tripDto.setStatus("PAYMENT_PENDING");
             tripServiceClient.createTrip(tripDto);
 
+            // Notify Driver
+            try {
+                DriverInfo driverInfo = driverInfoRepository.findById(offer.getDriverId()).orElse(null);
+                if (driverInfo != null) {
+                    notificationService.sendNotification(
+                            driverInfo.getUserId().toString(),
+                            "OFFER_ACCEPTED",
+                            "Your offer for move request #" + offer.getMoveRequestId() + " has been accepted!",
+                            Mapper.toMoveOfferDto(offer)
+                    );
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to send notification to driver: " + e.getMessage());
+            }
+
             return Mapper.toMoveOfferDto(offer);
         } catch (Exception e) {
             System.err.println("Error in MoveOfferService.accept: " + e.getMessage());
@@ -194,6 +222,22 @@ public class MoveOfferService {
 
         offer.setStatus(MoveStatus.REJECTED);
         moveOfferRepository.save(offer);
+
+        // Notify Driver
+        try {
+            DriverInfo driverInfo = driverInfoRepository.findById(offer.getDriverId()).orElse(null);
+            if (driverInfo != null) {
+                notificationService.sendNotification(
+                        driverInfo.getUserId().toString(),
+                        "OFFER_REJECTED",
+                        "Your offer for move request #" + offer.getMoveRequestId() + " was rejected.",
+                        Mapper.toMoveOfferDto(offer)
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send notification to driver: " + e.getMessage());
+        }
+
         return Mapper.toMoveOfferDto(offer);
     }
 
@@ -204,6 +248,22 @@ public class MoveOfferService {
 
         offer.setStatus(MoveStatus.CANCELLED);
         moveOfferRepository.save(offer);
+
+        // Notify Client
+        try {
+            MoveRequestDto moveRequest = clientServiceClient.getMoveRequestById(offer.getMoveRequestId());
+            if (moveRequest != null) {
+                notificationService.sendNotification(
+                        moveRequest.getClientId().toString(),
+                        "OFFER_CANCELLED",
+                        "A driver has cancelled their offer for your move request.",
+                        Mapper.toMoveOfferDto(offer)
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send notification to client: " + e.getMessage());
+        }
+
         return Mapper.toMoveOfferDto(offer);
     }
 
