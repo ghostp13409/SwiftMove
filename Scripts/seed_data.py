@@ -3,225 +3,110 @@ from faker import Faker
 from faker_vehicle import VehicleProvider
 import bcrypt
 import os
+import random
+from datetime import datetime, date, timedelta
 
-fake = Faker()
+fake = Faker('en_CA')
 fake.add_provider(VehicleProvider)
 
-# Real-ish addresses for geocoding friendliness
+def sql_val(val):
+    """Robust SQL value escaping and quoting."""
+    if val is None:
+        return "NULL"
+    if isinstance(val, bool):
+        return "true" if val else "false"
+    if isinstance(val, (int, float)):
+        return str(val)
+    # Quote everything else (strings, dates, datetimes)
+    return "'" + str(val).replace("'", "''") + "'"
+
+# Real Waterloo/Kitchener addresses
 real_addresses = [
-    {"line1": "1600 Amphitheatre Parkway", "city": "Mountain View", "state": "CA", "zip": "94043", "country": "USA", "lat": 37.422, "lon": -122.084},
-    {"line1": "1 Infinite Loop", "city": "Cupertino", "state": "CA", "zip": "95014", "country": "USA", "lat": 37.331, "lon": -122.031},
-    {"line1": "350 5th Ave", "city": "New York", "state": "NY", "zip": "10118", "country": "USA", "lat": 40.748, "lon": -73.985},
-    {"line1": "233 S Wacker Dr", "city": "Chicago", "state": "IL", "zip": "60606", "country": "USA", "lat": 41.878, "lon": -87.635},
-    {"line1": "100 Universal City Plaza", "city": "Universal City", "state": "CA", "zip": "91608", "country": "USA", "lat": 34.138, "lon": -118.353},
-    {"line1": "2000 Post St", "city": "San Francisco", "state": "CA", "zip": "94115", "country": "USA", "lat": 37.785, "lon": -122.432},
-    {"line1": "1060 West Addison Street", "city": "Chicago", "state": "IL", "zip": "60613", "country": "USA", "lat": 41.948, "lon": -87.655},
-    {"line1": "700 Boylston St", "city": "Boston", "state": "MA", "zip": "02116", "country": "USA", "lat": 42.349, "lon": -71.078},
-    {"line1": "1111 S Figueroa St", "city": "Los Angeles", "state": "CA", "zip": "90015", "country": "USA", "lat": 34.043, "lon": -118.267},
-    {"line1": "600 E Grand Ave", "city": "Chicago", "state": "IL", "zip": "60611", "country": "USA", "lat": 41.891, "lon": -87.609}
+    {"line1": "75 University Ave W", "city": "Waterloo", "state": "ON", "zip": "N2L 3C5", "country": "Canada", "lat": 43.4738, "lon": -80.5275},
+    {"line1": "200 University Ave W", "city": "Waterloo", "state": "ON", "zip": "N2L 3G1", "country": "Canada", "lat": 43.4723, "lon": -80.5449},
+    {"line1": "100 Regina St S", "city": "Waterloo", "state": "ON", "zip": "N2J 4A8", "country": "Canada", "lat": 43.4643, "lon": -80.5204},
+    {"line1": "200 King St W", "city": "Kitchener", "state": "ON", "zip": "N2G 4G7", "country": "Canada", "lat": 43.4516, "lon": -80.4925},
+    {"line1": "51 Breithaupt St", "city": "Kitchener", "state": "ON", "zip": "N2H 5G5", "country": "Canada", "lat": 43.4529, "lon": -80.4876},
+    {"line1": "10 King St W", "city": "Kitchener", "state": "ON", "zip": "N2G 1A3", "country": "Canada", "lat": 43.4501, "lon": -80.4895},
+    {"line1": "25 Regina St S", "city": "Waterloo", "state": "ON", "zip": "N2J 1R8", "country": "Canada", "lat": 43.4632, "lon": -80.5201},
+    {"line1": "43 Weber St W", "city": "Kitchener", "state": "ON", "zip": "N2H 3Z1", "country": "Canada", "lat": 43.4521, "lon": -80.4912},
+    {"line1": "50 Westmount Rd N", "city": "Waterloo", "state": "ON", "zip": "N2L 2R5", "country": "Canada", "lat": 43.4604, "lon": -80.5401},
+    {"line1": "80 King St S", "city": "Waterloo", "state": "ON", "zip": "N2J 1P5", "country": "Canada", "lat": 43.4612, "lon": -80.5198},
+    {"line1": "150 Main St", "city": "Cambridge", "state": "ON", "zip": "N1R 6P5", "country": "Canada", "lat": 43.3595, "lon": -80.3130},
+    {"line1": "299 Doon Valley Dr", "city": "Kitchener", "state": "ON", "zip": "N2G 4M4", "country": "Canada", "lat": 43.3917, "lon": -80.4031},
 ]
 
-# Generate addresses
 addresses = []
-for i in range(1, 201):
+for i in range(1, 41):
     if i <= len(real_addresses):
         ra = real_addresses[i-1]
-        addr = {
-            'id': i,
-            'line1': ra['line1'],
-            'line2': '',
-            'city': ra['city'],
-            'state_or_province': ra['state'],
-            'country': ra['country'],
-            'postal_or_zip_code': ra['zip'],
-            'lat': ra['lat'],
-            'lon': ra['lon']
-        }
+        addr = {'line1': ra['line1'], 'line2': '', 'city': ra['city'], 'state': ra['state'], 'zip': ra['zip'], 'country': ra['country'], 'lat': ra['lat'], 'lon': ra['lon']}
     else:
-        # Use more realistic faker data
-        addr = {
-            'id': i,
-            'line1': fake.street_address(),
-            'line2': fake.secondary_address() if fake.boolean(chance_of_getting_true=20) else '',
-            'city': fake.city(),
-            'state_or_province': fake.state_abbr(),
-            'country': 'USA',
-            'postal_or_zip_code': fake.zipcode(),
-            'lat': None,
-            'lon': None
-        }
+        addr = {'line1': fake.street_address(), 'line2': fake.secondary_address() if fake.boolean(chance_of_getting_true=20) else '', 'city': fake.city(), 'state': fake.province_abbr(), 'country': 'Canada', 'zip': fake.postcode(), 'lat': None, 'lon': None}
     addresses.append(addr)
 
-# Specific Test Driver in Waterloo
-waterloo_address = {
-    'id': 201,
-    'line1': '75 University Ave W',
-    'line2': '',
-    'city': 'Waterloo',
-    'state_or_province': 'ON',
-    'country': 'Canada',
-    'postal_or_zip_code': 'N2L 3C5',
-    'lat': 43.4723,
-    'lon': -80.5449
-}
-addresses.append(waterloo_address)
-
-# Generate users
 users = []
-roles = ['CLIENT', 'DRIVER', 'ADMIN']
-for i in range(1, 81):
-    role = fake.random_element(roles)
-    pwd_hash = bcrypt.hashpw(b"test", bcrypt.gensalt()).decode('utf-8')
-    user = {
-        'id': i,
-        'username': fake.user_name(),
-        'password_hash': pwd_hash,
-        'f_name': fake.first_name(),
-        'l_name': fake.last_name(),
-        'email': fake.email(),
-        'dob': fake.date_of_birth(minimum_age=18, maximum_age=80),
-        'rating': round(fake.random.uniform(1, 5), 1) if fake.boolean(chance_of_getting_true=70) else None,
-        'role': role,
-        'address_id': fake.random_int(1, 200)
-    }
-    users.append(user)
-
-# Add Manual Entries
 pwd_hash_test = bcrypt.hashpw(b"test", bcrypt.gensalt()).decode('utf-8')
-admin_user = {'id': 81, 'username': 'admin', 'password_hash': pwd_hash_test, 'f_name': 'Test', 'l_name': 'Admin', 'email': 'test@admin.com', 'dob': '1990-01-01', 'rating': None, 'role': 'ADMIN', 'address_id': 1}
-driver_user = {'id': 82, 'username': 'driver', 'password_hash': pwd_hash_test, 'f_name': 'Test', 'l_name': 'Driver', 'email': 'test@driver.com', 'dob': '1990-01-01', 'rating': 4.5, 'role': 'DRIVER', 'address_id': 2}
-client_user = {'id': 83, 'username': 'client', 'password_hash': pwd_hash_test, 'f_name': 'Test', 'l_name': 'Client', 'email': 'test@client.com', 'dob': '1990-01-01', 'rating': 4.8, 'role': 'CLIENT', 'address_id': 3}
+users.append({'username': 'test', 'password_hash': pwd_hash_test, 'f_name': 'Test', 'l_name': 'Admin', 'email': 'test@admin.com', 'dob': '1990-01-01', 'rating': None, 'role': 'ADMIN', 'address_id': 1})
+users.append({'username': 'driver', 'password_hash': pwd_hash_test, 'f_name': 'John', 'l_name': 'Driver', 'email': 'driver@swiftmove.com', 'dob': '1985-06-15', 'rating': 4.5, 'role': 'DRIVER', 'address_id': 2})
+users.append({'username': 'client', 'password_hash': pwd_hash_test, 'f_name': 'Jane', 'l_name': 'Client', 'email': 'client@swiftmove.com', 'dob': '1992-03-22', 'rating': 4.8, 'role': 'CLIENT', 'address_id': 3})
+users.append({'username': 'test_driver', 'password_hash': pwd_hash_test, 'f_name': 'Dave', 'l_name': 'Professional', 'email': 'dave@swiftmove.com', 'dob': '1988-11-05', 'rating': 5.0, 'role': 'DRIVER', 'address_id': 4})
 
-test_driver_user = {
-    'id': 84,
-    'username': 'test_driver',
-    'password_hash': pwd_hash_test,
-    'f_name': 'test',
-    'l_name': 'driver',
-    'email': 'testdriver@move.com',
-    'dob': '1995-05-05',
-    'rating': 5.0,
-    'role': 'DRIVER',
-    'address_id': 201
-}
-users.extend([admin_user, driver_user, client_user, test_driver_user])
+for _ in range(16):
+    role = fake.random_element(['CLIENT', 'DRIVER'])
+    users.append({'username': fake.user_name(), 'password_hash': pwd_hash_test, 'f_name': fake.first_name(), 'l_name': fake.last_name(), 'email': fake.email(), 'dob': fake.date_of_birth(minimum_age=18, maximum_age=70), 'rating': round(random.uniform(3.5, 5.0), 1) if fake.boolean(chance_of_getting_true=80) else None, 'role': role, 'address_id': random.randint(1, 20)})
 
-# Driver infos
-drivers = [u for u in users if u['role'] == 'DRIVER']
 driver_infos = []
-for idx, d in enumerate(drivers, 1):
-    drange = 500 if d['username'] == 'test_driver' else fake.random_int(50, 500)
-    # Get lat/lon from address
-    addr = next((a for a in addresses if a['id'] == d['address_id']), None)
-    di = {
-        'id': idx,
-        'driving_experience': fake.random_int(1, 20),
-        'range': drange,
-        'driving_license': fake.bothify(text='??######'),
-        'user_id': d['id'],
-        'lat': addr['lat'] if addr else None,
-        'lon': addr['lon'] if addr else None
-    }
-    driver_infos.append(di)
+for idx, u in enumerate(users, 1):
+    if u['role'] == 'DRIVER':
+        drange = 500 if 'driver' in u['username'] else random.randint(50, 300)
+        addr = addresses[u['address_id']-1]
+        driver_infos.append({'driving_experience': random.randint(2, 15), 'range': drange, 'license': fake.bothify(text='??######'), 'user_id': idx, 'lat': addr['lat'], 'lon': addr['lon']})
 
-# Vehicles
 vehicles = []
-vid = 1
-for d in driver_infos:
-    num_veh = 1 if users[d['user_id']-1]['username'] == 'test_driver' else fake.random_int(1, 2)
-    for _ in range(num_veh):
-        is_test_driver = users[d['user_id']-1]['username'] == 'test_driver'
-        # use faker's vehicle provider for realistic makes/models
-        vehicle_make = 'Mercedes' if is_test_driver else fake.vehicle_make()
-        vehicle_model = 'Sprinter' if is_test_driver else fake.vehicle_model()
-        veh = {
-            'id': vid,
-            'model': vehicle_model,
-            'make': vehicle_make,
-            'year': 2022 if is_test_driver else fake.vehicle_year(),
-            'color': 'White' if is_test_driver else fake.color_name(),
-            'price_per_km': 5 if is_test_driver else fake.random_int(2, 20),
-            'is_active': True,
-            'can_carry_furniture': True if is_test_driver else fake.boolean(),
-            'driver_id': d['id'],
-            'vehicle_type_id': 5 if is_test_driver else fake.random_int(1, 6)
-        }
-        vehicles.append(veh)
-        vid += 1
+for idx, d in enumerate(driver_infos, 1):
+    is_special = users[d['user_id']-1]['username'] in ['driver', 'test_driver']
+    vehicles.append({'model': 'Transit' if is_special else fake.vehicle_model(), 'make': 'Ford' if is_special else fake.vehicle_make(), 'year': 2023 if is_special else fake.vehicle_year(), 'color': 'White' if is_special else fake.color_name(), 'price': 10 if is_special else random.randint(5, 15), 'active': True, 'furniture': True, 'driver_id': idx, 'v_type': 5})
 
-# Move requests, Luggage entries, Move offers, Move trips are commented out
 move_requests = []
-luggage_entries = []
-move_offers = []
-move_trips = []
+clients = [i for i, u in enumerate(users, 1) if u['role'] == 'CLIENT']
+for i in range(1, 5):
+    f_addr_idx = random.randint(0, len(real_addresses)-1)
+    t_addr_idx = random.choice([x for x in range(len(real_addresses)) if x != f_addr_idx])
+    move_requests.append({'date': (datetime.now() + timedelta(days=random.randint(1, 30))).strftime('%Y-%m-%d %H:%M:%S'), 'budget': random.randint(100, 500), 'client_id': random.choice(clients), 'from_id': f_addr_idx+1, 'to_id': t_addr_idx+1, 'dist': round(random.uniform(5.0, 25.0), 2), 'f_lat': real_addresses[f_addr_idx]['lat'], 'f_lon': real_addresses[f_addr_idx]['lon'], 't_lat': real_addresses[t_addr_idx]['lat'], 't_lon': real_addresses[t_addr_idx]['lon'], 'status': 'CREATED', 'furniture': fake.boolean(), 'note': f'Demo request {i}'})
 
-# Write to SQL file
-script_dir = os.path.dirname(os.path.abspath(__file__))
-output_file = os.path.join(script_dir, 'seed_data.sql')
+luggage = []
+for i, mr in enumerate(move_requests, 1):
+    for _ in range(random.randint(2, 4)):
+        luggage.append({'qty': random.randint(1, 5), 'mr_id': i, 'type_id': random.randint(1, 5)})
 
+output_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'seed_data.sql')
 with open(output_file, 'w') as f:
-    f.write("-- Seed data generated by seed_data.py\n\n")
     f.write("TRUNCATE TABLE move_trips, move_offers, luggage_entries, move_requests, vehicles, driver_infos, users, addresses, luggage_types, vehicle_types RESTART IDENTITY CASCADE;\n\n")
 
-    # Vehicle types
-    f.write("INSERT INTO vehicle_types (type, max_weight, capacity) VALUES\n")
-    vt_values = [
-        "('SEDAN', 340.19, 67.08)",
-        "('SUV', 589.6, 120)",
-        "('HATCHBACK', 362.8, 50.50)",
-        "('MINIVAN', 544.31, 140.61)",
-        "('VAN', 1088.62, 294.4)",
-        "('TRUCK', 589.67, 70.0)"
-    ]
-    f.write(",\n".join(vt_values) + ";\n\n")
+    f.write("INSERT INTO vehicle_types (type, max_weight, capacity) VALUES\n('SEDAN',340,67),('SUV',589,120),('HATCHBACK',362,50),('MINIVAN',544,140),('VAN',1088,294),('TRUCK',589,70);\n\n")
+    f.write("INSERT INTO luggage_types (type, name, volume, weight) VALUES\n('SMALL','Small Box',1,6),('MEDIUM','Medium Box',2,9),('LARGE','Large Box',3,13),('EXTRA_LARGE','Extra Large Box',3,22),('EXTRA_EXTRA_LARGE','Extra Extra Large Box',5,27);\n\n")
 
-    # Luggage types
-    f.write("INSERT INTO luggage_types (type, name, volume, weight) VALUES\n")
-    lt_values = [
-        "('SMALL', 'Small Box', 1.38, 6.80)",
-        "('MEDIUM', 'Medium Box', 2.99, 9.07)",
-        "('LARGE', 'Large Box', 3.40, 13.60)",
-        "('EXTRA_LARGE', 'Extra Large Box', 3.75, 22.67)",
-        "('EXTRA_EXTRA_LARGE', 'Extra Extra Large Box', 5.83, 27.0)"
-    ]
-    f.write(",\n".join(lt_values) + ";\n\n")
+    f.write("INSERT INTO addresses (line1, line2, city, state_or_province, country, postal_or_zip_code, latitude, longitude) VALUES\n")
+    f.write(",\n".join([f"({sql_val(a['line1'])},{sql_val(a['line2'])},{sql_val(a['city'])},{sql_val(a['state'])},{sql_val(a['country'])},{sql_val(a['zip'])},{sql_val(a['lat'])},{sql_val(a['lon'])})" for a in addresses]) + ";\n\n")
 
-    # Addresses
-    f.write("INSERT INTO addresses (id, line1, line2, city, state_or_province, country, postal_or_zip_code, latitude, longitude) VALUES\n")
-    addr_values = []
-    for a in addresses:
-        line2 = f"'{a['line2']}'" if a['line2'] else 'NULL'
-        lat = str(a['lat']) if a['lat'] else 'NULL'
-        lon = str(a['lon']) if a['lon'] else 'NULL'
-        val = f"({a['id']}, '{a['line1']}', {line2}, '{a['city']}', '{a['state_or_province']}', '{a['country']}', '{a['postal_or_zip_code']}', {lat}, {lon})"
-        addr_values.append(val)
-    f.write(",\n".join(addr_values) + ";\n\n")
-
-    # Users
     f.write("INSERT INTO users (username, password_hash, f_name, l_name, email, dob, rating, role, address_id) VALUES\n")
-    user_values = []
-    for u in users:
-        rating = str(u['rating']) if u['rating'] else 'NULL'
-        val = f"('{u['username']}', '{u['password_hash']}', '{u['f_name']}', '{u['l_name']}', '{u['email']}', '{u['dob']}', {rating}, '{u['role']}', {u['address_id']})"
-        user_values.append(val)
-    f.write(",\n".join(user_values) + ";\n\n")
+    f.write(",\n".join([f"({sql_val(u['username'])},{sql_val(u['password_hash'])},{sql_val(u['f_name'])},{sql_val(u['l_name'])},{sql_val(u['email'])},{sql_val(u['dob'])},{sql_val(u['rating'])},{sql_val(u['role'])},{sql_val(u['address_id'])})" for u in users]) + ";\n\n")
 
-    # Driver infos
     f.write("INSERT INTO driver_infos (driving_experience, range, driving_license, user_id, current_latitude, current_longitude) VALUES\n")
-    di_values = []
-    for di in driver_infos:
-        lat = str(di['lat']) if di['lat'] else 'NULL'
-        lon = str(di['lon']) if di['lon'] else 'NULL'
-        val = f"({di['driving_experience']}, {di['range']}, '{di['driving_license']}', {di['user_id']}, {lat}, {lon})"
-        di_values.append(val)
-    f.write(",\n".join(di_values) + ";\n\n")
+    f.write(",\n".join([f"({sql_val(d['driving_experience'])},{sql_val(d['range'])},{sql_val(d['license'])},{sql_val(d['user_id'])},{sql_val(d['lat'])},{sql_val(d['lon'])})" for d in driver_infos]) + ";\n\n")
 
-    # Vehicles
     f.write("INSERT INTO vehicles (model, make, year, color, price_per_km, is_active, can_carry_furniture, driver_id, vehicle_type_id) VALUES\n")
-    veh_values = []
-    for v in vehicles:
-        val = f"('{v['model']}', '{v['make']}', {v['year']}, '{v['color']}', {v['price_per_km']}, {str(v['is_active']).lower()}, {str(v['can_carry_furniture']).lower()}, {v['driver_id']}, {v['vehicle_type_id']})"
-        veh_values.append(val)
-    f.write(",\n".join(veh_values) + ";\n\n")
+    f.write(",\n".join([f"({sql_val(v['model'])},{sql_val(v['make'])},{sql_val(v['year'])},{sql_val(v['color'])},{sql_val(v['price'])},{sql_val(v['active'])},{sql_val(v['furniture'])},{sql_val(v['driver_id'])},{sql_val(v['v_type'])})" for v in vehicles]) + ";\n\n")
+
+    f.write("INSERT INTO move_requests (move_date, max_budget, client_id, from_address_id, to_address_id, distance, from_latitude, from_longitude, to_latitude, to_longitude, status, has_furniture, note) VALUES\n")
+    f.write(",\n".join([f"({sql_val(mr['date'])},{sql_val(mr['budget'])},{sql_val(mr['client_id'])},{sql_val(mr['from_id'])},{sql_val(mr['to_id'])},{sql_val(mr['dist'])},{sql_val(mr['f_lat'])},{sql_val(mr['f_lon'])},{sql_val(mr['t_lat'])},{sql_val(mr['t_lon'])},{sql_val(mr['status'])},{sql_val(mr['furniture'])},{sql_val(mr['note'])})" for mr in move_requests]) + ";\n\n")
+
+    f.write("INSERT INTO luggage_entries (quantity, move_request_id, luggage_type_id) VALUES\n")
+    f.write(",\n".join([f"({sql_val(l['qty'])},{sql_val(l['mr_id'])},{sql_val(l['type_id'])})" for l in luggage]) + ";\n\n")
+
+    f.write("-- Sync sequences\n")
+    for t in ["addresses", "users", "driver_infos", "vehicles", "move_requests", "luggage_entries", "vehicle_types", "luggage_types", "move_offers", "move_trips"]:
+        f.write(f"SELECT setval(pg_get_serial_sequence('{t}', 'id'), COALESCE((SELECT MAX(id) FROM {t}), 0) + 1);\n")
 
 print(f"Seed data generated in {output_file}")
