@@ -89,6 +89,8 @@ Annlin:
 
 Parth: "on the day of the move, Driver can start the move, and once completed, they can mark it as completed. Once, the client also confirms the move is completed, the payment will be released to the driver and both parties can rate each other."
 
+<!-- TODO: ADD SECITON 6 AND 7 OVER HERE -->
+
 ### 8. Conclusion and Wrap-up (Slide 12) (Parth)
 
 "In summary, SwiftMove isn't just another moving app. It’s a blueprint for how marketplaces _should_ work. By removing the predatory middleman and replacing 'black-box' algorithms with transparent matching logic, we’ve created a system that is sustainable, scalable, and most importantly, fair.
