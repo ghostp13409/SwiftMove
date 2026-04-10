@@ -32,13 +32,15 @@
 - **Carlos**: "I'm Carlos, researcher responsible for the industry research and frontend infrastructure."
 - **Annlin**: "And I'm Annlin, core backend developer focusing on the database and API design."
 
-**Transition**: (Slide 4) "...And as students, we’ve all experienced the unique chaos of moving day. So, let us start with that one experience that started it all"
+**Transition**: (Slide 4) "...And as students, we’ve all experienced the unique chaos of moving day.
+
+"So, let us start with that one experience that started it all"
 
 ### 3. The Problem: The "Moving Trap" (Slide 5-6) (Annlin George)
 
 "Last year, I had to move just 7 kilometers. Since I don't have a license, I couldn't rent a U-Haul and Professional movers quoted me hundreds of dollars. So My only option? Booking an Uber XL.
 
-But when the driver arrived and saw my boxes, the dynamic changed. He demanded a $40 'off-app tip' or threatened to cancel the ride right there. Stuck with my belongings on the sidewalk, I had no choice but to pay. I ended up paying $70 for a 10-minute drive.
+But when the driver arrived and saw my boxes, the dynamic changed. He demanded a $40 additional tip on top of the original fare or threatened to cancel the ride right there. Stuck with my belongings on the sidewalk, I had no choice but to pay. I ended up paying $70 for a 10-minute drive.
 
 This isn't just a bad experience; it’s a systemic failure caused by three core issues:" (Slide 6)
 
