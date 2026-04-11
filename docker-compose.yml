@@ -1,70 +1,33 @@
+version: '3.8'
+
+x-backend-env: &backend-env
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/microservice
+  PGUSER: postgres
+  PGPASSWORD: postgres
+  EUREKA_URI: http://eureka-server:8761/eureka
+  RABBITMQ_HOST: rabbitmq
+  RABBITMQ_PORT: 5672
+  RABBITMQ_USER: guest
+  RABBITMQ_PASS: guest
+  PORT: ${SERVICE_PORT:-8080}
+
 services:
   postgres:
+    image: postgres:15-alpine
     container_name: postgres
-    image: postgres:latest
     environment:
       POSTGRES_USER: postgres
-      # From .env file
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: microservice
     volumes:
-      # Newer Postgres images (18+) expect a single mount at /var/lib/postgresql
-      # so that the database directory (e.g. main) is managed by pg_ctlcluster and
-      # allows pg_upgrade to work correctly.  See error message and
-      # https://github.com/docker-library/postgres/issues/37
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-
-  # zookeeper:
-  #   container_name: zookeeper
-  #   image: "docker.io/zookeeper:latest"
-  #   ports:
-  #     - "2181:2181"
-  #   volumes:
-  #     - "zookeeper_data:/bitnami"
-  #   environment:
-  #     - ALLOW_ANONYMOUS_LOGIN=yes
-
-  # kafka:
-  #   container_name: kafka
-  #   image: "docker.io/apache/kafka:3.9.2-rc1"
-  #   ports:
-  #     - "9092:9092"
-  #   expose:
-  #     - "9093"
-  #   volumes:
-  #     - "kafka_data:/bitnami"
-  #   environment:
-  #     - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-  #     - ALLOW_PLAINTEXT_LISTENER=yes
-  #     - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka:9093,OUTSIDE://localhost:9092
-  #     - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-  #     - KAFKA_LISTENERS=INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
-  #     - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
-  #     - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-  #   depends_on:
-  #     - zookeeper
-
-  # kafka-ui:
-  #   container_name: kafka-ui
-  #   image: provectuslabs/kafka-ui
-  #   ports:
-  #     - "9090:8080"
-  #   restart: always
-  #   environment:
-  #     - KAFKA_CLUSTERS_0_NAME=local
-  #     - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9093
-  #     - KAFKA_CLUSTERS_0_ZOOKEEPER=localhost:2181
-
-  eureka-server:
-    container_name: eureka-server
-    build:
-      context: ./src/backend/eureka-server
-    ports:
-      - "8761:8761"
-    depends_on:
-      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d microservice"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:4.0.7-management-alpine
@@ -75,41 +38,135 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # config-service:
-  #   container_name: config-service
-  #   build:
-  #     context: ./src/backend/config-service
-  #   ports:
-  #     - "8888:8888"
-  #   depends_on:
-  #     - eureka-server
+  eureka-server:
+    container_name: eureka-server
+    build:
+      context: ./src/backend/eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      PORT: 8761
+    depends_on:
+      - postgres
+      - rabbitmq
 
-  # api-gateway:
-  #   container_name: api-gateway
-  #   build:
-  #     context: ./src/backend/api-gateway
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - eureka-server
-  #     - config-service
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: ./src/backend/api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *backend-env
+      PORT: 8000
+    depends_on:
+      eureka-server:
+        condition: service_started
 
-  # user-service:
-  #   container_name: user-service
-  #   build:
-  #     context: ./src/backend/user-service
-  #   ports:
-  #     - "8081:8081"
-  #   depends_on:
-  #     - eureka-server
-  #     - config-service
-  #     - api-gateway
+  auth-service:
+    container_name: auth-service
+    build:
+      context: ./src/backend/auth-service
+    environment:
+      <<: *backend-env
+      PORT: 8090
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  user-service:
+    container_name: user-service
+    build:
+      context: ./src/backend/user-service
+    environment:
+      <<: *backend-env
+      PORT: 8070
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  client-service:
+    container_name: client-service
+    build:
+      context: ./src/backend/client-service
+    environment:
+      <<: *backend-env
+      PORT: 8002
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  driver-service:
+    container_name: driver-service
+    build:
+      context: ./src/backend/driver-service
+    environment:
+      <<: *backend-env
+      PORT: 8061
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  location-service:
+    container_name: location-service
+    build:
+      context: ./src/backend/location-service
+    environment:
+      <<: *backend-env
+      PORT: 8099
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  notification-service:
+    container_name: notification-service
+    build:
+      context: ./src/backend/notification-service
+    environment:
+      <<: *backend-env
+      PORT: 8091
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  payment-service:
+    container_name: payment-service
+    build:
+      context: ./src/backend/payment-service
+    environment:
+      <<: *backend-env
+      PORT: 8088
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  trip-service:
+    container_name: trip-service
+    build:
+      context: ./src/backend/trip-service
+    environment:
+      <<: *backend-env
+      PORT: 8060
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  frontend:
+    container_name: swiftmove-frontend
+    build:
+      context: ./src/swiftmove-dashboards
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "80:3000"
+    depends_on:
+      - api-gateway
 
 volumes:
-  # zookeeper_data:
-  #   driver: local
-  # kafka_data:
-  #   driver: local
   postgres_data:
-    driver: local
