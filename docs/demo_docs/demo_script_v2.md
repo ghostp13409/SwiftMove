@@ -96,9 +96,9 @@ What does this mean for our users? For the driver, it means every notification i
 
 ### 7. Engineering for the Future: Sustainability & Prowess (Slide 11) (Carlos)
 
-"Now, let's talk about the foundation. We didn't just build another app; we have engineered a sustainable ecosystem. It sets a new standard for how marketplaces can operate without the need for predatory fees or venture capital.
+"Now, let's talk about the foundation. we have engineered a sustainable ecosystem. It sets a new standard for how marketplaces can operate without the need for predatory fees or venture capital.
 
-First, let's look at the **Economics of Engineering**. We chose a lean, microservices-based architecture specifically to minimize operating costs. By utilizing serverless data patterns and open-source geospatial APIs like Nominatim and OSRM, we’ve eliminated the massive 'hidden' API fees that sink other startups. This is why SwiftMove is so cost-effective: our platform is built to be a 'Low-Maintenance Utility,' meaning we never have to hike our fees just to keep the lights on. This also empowers us to be independent from venture capital and investor pressures, allowing us to grow sustainably and focus on our users.
+First, let's take a deep dive into our engineering approach. We chose a lean, microservices-based architecture specifically to minimize **operating** costs. By utilizing serverless data patterns and open-source **geospatial** APIs like **Nominatim** and OSRM, we’ve **eliminated** the massive 'hidden' API fees that sink other startups. This is why SwiftMove is so cost-effective: our platform is built to be a 'Low-Maintenance Utility,' meaning we never have to hike our fees just to keep the lights on. This also empowers us to be independent from venture capital and investor pressures, allowing us to grow sustainably and focus on our users.
 
 Second, we’ve built for **Scalability**. Using Domain-Driven Design (DDD) approach, each service—from Payments to Trip Orchestration—is isolated and independent. This modularity is our true strength. Whether we need to scale from 10 moves to 10,000, or pivot our matching algorithm, we can do so without any downtime or code refactoring. Our use of the Strategy Design Pattern for our matching logic means we can evolve our algorithms as the market changes, without ever disrupting the user experience.
 
