@@ -1,13 +1,12 @@
 package com.swiftmove.apigateway.config;
 
+import java.util.Arrays;
+import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 public class CorsConfig {
@@ -15,29 +14,24 @@ public class CorsConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(Arrays.asList(
+        corsConfig.setAllowedOrigins(
+            Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:5173",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:5173",
-                "https://localhost:3000",
-                "https://localhost:5173",
-                "https://127.0.0.1:3000",
-                "https://127.0.0.1:5173",
-                "https://swiftmove-frontend-production.up.railway.app/")); // Railway Frontend
-        corsConfig.setAllowedMethods(Arrays.asList(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH",
-                "OPTIONS"));
+                "https://swiftorg.me",
+                "https://api.swiftorg.me"
+            )
+        );
+        corsConfig.setAllowedMethods(
+            Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+        );
         corsConfig.setAllowedHeaders(Collections.singletonList("*"));
-        corsConfig.setExposedHeaders(Collections.singletonList("*"));
+        corsConfig.setExposedHeaders(Arrays.asList("Authorization", "*"));
         corsConfig.setAllowCredentials(true);
         corsConfig.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);
 
         return new CorsWebFilter(source);

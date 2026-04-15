@@ -1,5 +1,10 @@
 # Build stage
 FROM node:20-alpine AS builder
+
+# Accept build arguments FIRST before anything else
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 WORKDIR /app
 
 # Install dependencies
@@ -9,6 +14,9 @@ RUN npm ci
 
 # Copy source and build app
 COPY . .
+
+# Log the variable during build to verify it exists
+RUN echo "Building with VITE_API_BASE_URL=${VITE_API_BASE_URL}"
 RUN npm run build
 
 # Run stage (static server with Node + serve)
