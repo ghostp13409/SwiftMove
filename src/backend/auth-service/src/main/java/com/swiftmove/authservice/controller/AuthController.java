@@ -1,9 +1,17 @@
 package com.swiftmove.authservice.controller;
 
+import com.swiftmove.authservice.client.UserDTO;
+import com.swiftmove.authservice.dto.AuthResponse;
+import com.swiftmove.authservice.dto.LoginRequest;
+import com.swiftmove.authservice.dto.RegisterRequest;
+import com.swiftmove.authservice.dto.UserInfoResponse;
+import com.swiftmove.authservice.service.AuthService;
+import com.swiftmove.authservice.util.JwtTokenProvider;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.swiftmove.authservice.client.UserDTO;
+import java.util.concurrent.CompletableFuture;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,18 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.concurrent.CompletableFuture;
-
-import com.swiftmove.authservice.dto.AuthResponse;
-import com.swiftmove.authservice.dto.LoginRequest;
-import com.swiftmove.authservice.dto.RegisterRequest;
-import com.swiftmove.authservice.dto.UserInfoResponse;
-import com.swiftmove.authservice.service.AuthService;
-import com.swiftmove.authservice.util.JwtTokenProvider;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -35,22 +31,37 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
-    public CompletableFuture<ResponseEntity<AuthResponse>> login(@RequestBody LoginRequest loginRequest) {
-        return authService.login(loginRequest)
-                .thenApply(ResponseEntity::ok)
-                .exceptionally(ex -> {
-                    log.error("Login failed for email {}: {}", loginRequest.getEmail(), ex.getMessage(), ex);
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                });
+    public ResponseEntity<AuthResponse> login(
+        @RequestBody LoginRequest loginRequest
+    ) {
+        try {
+            AuthResponse authResponse = authService.login(loginRequest);
+            return ResponseEntity.ok(authResponse);
+        } catch (Exception e) {
+            log.error(
+                "Login failed for email {}: {}",
+                loginRequest.getEmail(),
+                e.getMessage(),
+                e
+            );
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<AuthResponse> register(
+        @RequestBody RegisterRequest registerRequest
+    ) {
         try {
             AuthResponse authResponse = authService.register(registerRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
         } catch (RuntimeException e) {
-            log.error("Register failed for email {}: {}", registerRequest.getEmail(), e.getMessage(), e);
+            log.error(
+                "Register failed for email {}: {}",
+                registerRequest.getEmail(),
+                e.getMessage(),
+                e
+            );
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -63,7 +74,11 @@ public class AuthController {
 
     @GetMapping("/check")
     public ResponseEntity<Map<String, Object>> checkAuth(
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        @RequestHeader(
+            value = "Authorization",
+            required = false
+        ) String authHeader
+    ) {
         Map<String, Object> response = new HashMap<>();
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -84,7 +99,11 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getCurrentUser(
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        @RequestHeader(
+            value = "Authorization",
+            required = false
+        ) String authHeader
+    ) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

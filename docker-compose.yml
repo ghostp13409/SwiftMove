@@ -1,30 +1,33 @@
-version: '3.8'
-
 x-backend-env: &backend-env
-  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/microservice
-  PGUSER: postgres
-  PGPASSWORD: postgres
-  EUREKA_URI: http://eureka-server:8761/eureka
-  RABBITMQ_HOST: rabbitmq
-  RABBITMQ_PORT: 5672
-  RABBITMQ_USER: guest
-  RABBITMQ_PASS: guest
-  PORT: ${SERVICE_PORT:-8080}
+  SPRING_DATASOURCE_URL: ${POSTGRES_URI}
+  SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+  SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+  EUREKA_URI: http://eureka-server:8761/eureka/
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+  SPRING_PROFILES_ACTIVE: docker
+  RABBITMQ_HOST: ${RABBITMQ_HOST}
+  RABBITMQ_PORT: ${RABBITMQ_PORT}
+  RABBITMQ_USER: ${RABBITMQ_USER}
+  RABBITMQ_PASS: ${RABBITMQ_PASS}
+  JWT_SECRET: ${JWT_SECRET}
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
 
 services:
   postgres:
     image: postgres:15-alpine
     container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: microservice
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d microservice"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,9 +55,20 @@ services:
       - "8761:8761"
     environment:
       PORT: 8761
+      SERVER_PORT: 8761
     depends_on:
       - postgres
       - rabbitmq
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:8761/actuator/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   api-gateway:
     container_name: api-gateway
@@ -62,12 +76,17 @@ services:
       context: ./src/backend/api-gateway
     ports:
       - "8000:8000"
+    volumes:
+      - ./src/backend/api-gateway/src/main/resources/application.properties:/app/config/application.properties:ro
     environment:
       <<: *backend-env
       PORT: 8000
+      SERVER_PORT: 8000
+      HOSTNAME: api-gateway
+      SPRING_CONFIG_LOCATION: file:/app/config/application.properties
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
   auth-service:
     container_name: auth-service
@@ -76,9 +95,11 @@ services:
     environment:
       <<: *backend-env
       PORT: 8090
+      SERVER_PORT: 8090
+      HOSTNAME: auth-service
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
   user-service:
     container_name: user-service
@@ -87,9 +108,11 @@ services:
     environment:
       <<: *backend-env
       PORT: 8070
+      SERVER_PORT: 8070
+      HOSTNAME: user-service
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
   client-service:
     container_name: client-service
@@ -98,9 +121,11 @@ services:
     environment:
       <<: *backend-env
       PORT: 8002
+      SERVER_PORT: 8002
+      HOSTNAME: client-service
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
   driver-service:
     container_name: driver-service
@@ -109,9 +134,11 @@ services:
     environment:
       <<: *backend-env
       PORT: 8061
+      SERVER_PORT: 8061
+      HOSTNAME: driver-service
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
   location-service:
     container_name: location-service
@@ -120,20 +147,11 @@ services:
     environment:
       <<: *backend-env
       PORT: 8099
+      SERVER_PORT: 8099
+      HOSTNAME: location-service
     depends_on:
       eureka-server:
-        condition: service_started
-
-  notification-service:
-    container_name: notification-service
-    build:
-      context: ./src/backend/notification-service
-    environment:
-      <<: *backend-env
-      PORT: 8091
-    depends_on:
-      eureka-server:
-        condition: service_started
+        condition: service_healthy
 
   payment-service:
     container_name: payment-service
@@ -142,9 +160,11 @@ services:
     environment:
       <<: *backend-env
       PORT: 8088
+      SERVER_PORT: 8088
+      HOSTNAME: payment-service
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
   trip-service:
     container_name: trip-service
@@ -153,19 +173,38 @@ services:
     environment:
       <<: *backend-env
       PORT: 8060
+      SERVER_PORT: 8060
+      HOSTNAME: trip-service
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
   frontend:
     container_name: swiftmove-frontend
     build:
       context: ./src/swiftmove-dashboards
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+        VITE_API_BASE_URL: https://api.swiftorg.me
+    environment:
+      - VITE_API_BASE_URL=https://api.swiftorg.me
     ports:
-      - "80:3000"
+      - "3000:3000"
+    restart: always
     depends_on:
+      - api-gateway
+
+  # Cloudflare Tunnel Service
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: swiftmove-tunnel
+    restart: always
+    command: tunnel --config /etc/cloudflared/config.yaml run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    volumes:
+      - ./cloudflare-tunnel-config.yaml:/etc/cloudflared/config.yaml:ro
+    depends_on:
+      - frontend
       - api-gateway
 
 volumes:

@@ -1,24 +1,24 @@
 package com.swiftmove.authservice.util;
 
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import java.security.Key;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret:5367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432A462D4A614E645267556B58703272357538782F413F4428472B4B62}")
+    @Value(
+        "${jwt.secret:5367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432A462D4A614E645267556B58703272357538782F413F4428472B4B62}"
+    )
     private String jwtSecret;
 
     @Value("${jwt.expiration:86400000}")
@@ -38,12 +38,12 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
-                .compact();
+            .setClaims(claims)
+            .setSubject(subject)
+            .setIssuedAt(now)
+            .setExpiration(expiryDate)
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
     }
 
     public boolean validateToken(String token) {
@@ -70,14 +70,13 @@ public class JwtTokenProvider {
 
     private Claims parseClaims(String token) {
         return Jwts.parser()
-                .verifyWith((javax.crypto.SecretKey) getSignKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+            .verifyWith((javax.crypto.SecretKey) getSignKey())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
     }
 
     private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 }
