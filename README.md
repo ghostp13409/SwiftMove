@@ -96,9 +96,9 @@ mvn spring-boot:run
 
 ## 📸 Demo & Screenshots
 
-|                    Client Dashboard                     |                    Driver Dashboard                     |
-| :-----------------------------------------------------: | :-----------------------------------------------------: |
-| ![Client Dashboard](Screenshots/Client%20Dashboard.png) | ![Driver Dashboard](Screenshots/Driver%20Dashboard.png) |
+|                   Client Dashboard                   |                   Driver Dashboard                    |
+| :--------------------------------------------------: | :---------------------------------------------------: |
+| ![Client Dashboard](docs/demo_docs/media/image2.png) | ![Driver Dashboard](docs/demo_docs/media/image13.png) |
 
 _For a full walkthrough, check our [User Guide](docs/demo_docs/user_guides.md)._
 
