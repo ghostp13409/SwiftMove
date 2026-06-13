@@ -106,9 +106,9 @@ _For a full walkthrough, check our [User Guide](docs/demo_docs/user_guides.md)._
 
 ## 👥 The Team
 
-- **Parth Gajjar** - Lead Developer (System Design & Orchestration)
-- **Carlos Flores** - Architect (R&D & Frontend Infrastructure)
-- **Annlin George** - UX Engineer (Client Experience & Backend)
+- **Parth Gajjar** - Lead Developer (System Design Integration & Orchestration)
+- **Carlos Flores** - Frontend Developer (R&D & Frontend Infrastructure)
+- **Annlin George** - Backend Engineer (Client Experience & Backend)
 
 ---
 
