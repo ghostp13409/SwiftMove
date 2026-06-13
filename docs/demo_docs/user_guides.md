@@ -1,7 +1,5 @@
 # User Guide
 
-## Updated User Guide
-
 ---
 
 ## Login Page
