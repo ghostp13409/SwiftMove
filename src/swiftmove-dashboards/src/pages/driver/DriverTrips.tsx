@@ -10,6 +10,8 @@ import {
   Package,
   ExternalLink,
   Trash2,
+  CheckCircle,
+  Info,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "@/components/StatusBadge";
@@ -83,11 +85,14 @@ const DriverTrips = () => {
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       tripService.updateTripStatus(String(id), status),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["driverTrips"] });
+      const isCompleted = data.status === "COMPLETED";
       toast({
-        title: "Status Updated",
-        description: "Trip status has been updated successfully.",
+        title: isCompleted ? "Payment Released!" : "Status Updated",
+        description: isCompleted 
+          ? "The client has confirmed completion and payment has been released to your account."
+          : "Trip status has been updated successfully.",
       });
     },
   });
@@ -224,6 +229,12 @@ const DriverTrips = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
+                  {selectedTrip?.status === "COMPLETED" && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400">
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">Payment Received</span>
+                    </div>
+                  )}
                   {selectedTrip?.status === "SCHEDULED" && (
                     <Button
                       size="sm"
@@ -245,7 +256,7 @@ const DriverTrips = () => {
                       onClick={() =>
                         statusMutation.mutate({
                           id: selectedTrip.id,
-                          status: "COMPLETED_BY_DRIVER",
+                          status: "DRIVER_COMPLETED",
                         })
                       }
                     >
@@ -299,6 +310,17 @@ const DriverTrips = () => {
                       </p>
                     </div>
                   </div>
+
+                  {selectedTrip?.moveRequestPopulated?.note && (
+                    <div className="md:col-span-2 pt-2">
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 ml-1">
+                        Client Instructions
+                      </p>
+                      <p className="text-xs font-medium text-foreground/80 bg-muted/30 p-3 rounded-xl border border-border/40 italic">
+                        "{selectedTrip.moveRequestPopulated.note}"
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Route Timeline */}
@@ -379,35 +401,46 @@ const DriverTrips = () => {
                   </div>
                 </div>
 
-                {/* Luggage Inventory */}
-                <div className="p-8">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">
-                    Luggage Inventory
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedTrip?.moveRequestPopulated?.luggageEntries
-                      ?.length ? (
-                      selectedTrip.moveRequestPopulated.luggageEntries.map(
-                        (l, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-background border border-border/50 shadow-sm ring-1 ring-black/5"
-                          >
-                            <span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary rounded-md text-[10px] font-black">
-                              {l.quantity}
-                            </span>
-                            <span className="text-[11px] font-bold text-foreground/80">
-                              {l.luggageType?.name}
-                            </span>
-                          </div>
-                        ),
-                      )
-                    ) : (
-                      <p className="text-xs text-muted-foreground italic">
-                        No items listed
-                      </p>
-                    )}
+                <div className={`p-8 grid grid-cols-1 ${selectedTrip?.moveRequestPopulated?.note ? "md:grid-cols-2" : ""} gap-8`}>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">
+                      Luggage Inventory
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTrip?.moveRequestPopulated?.luggageEntries
+                        ?.length ? (
+                        selectedTrip.moveRequestPopulated.luggageEntries.map(
+                          (l, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-background border border-border/50 shadow-sm ring-1 ring-black/5"
+                            >
+                              <span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary rounded-md text-[10px] font-black">
+                                {l.quantity}
+                              </span>
+                              <span className="text-[11px] font-bold text-foreground/80">
+                                {l.luggageType?.name}
+                              </span>
+                            </div>
+                          ),
+                        )
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">
+                          No items listed
+                        </p>
+                      )}
+                    </div>
                   </div>
+                  {selectedTrip?.moveRequestPopulated?.note && (
+                    <div className="border-l border-border/40 pl-8">
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4">
+                        Client Instructions
+                      </p>
+                      <p className="text-xs font-medium text-foreground/80 bg-muted/30 p-4 rounded-xl border border-border/40 italic leading-relaxed">
+                        "{selectedTrip.moveRequestPopulated.note}"
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Earning Stats & Actions */}

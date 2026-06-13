@@ -24,6 +24,8 @@ const statusConfig: Record<
   // MoveTrip statuses
   SCHEDULED: { label: "Scheduled", variant: "success" },
   IN_PROGRESS: { label: "In Progress", variant: "default" },
+  PAYMENT_PENDING: { label: "Payment Pending", variant: "secondary" },
+  DRIVER_COMPLETED: { label: "Driver Completed", variant: "secondary" },
   COMPLETED_BY_DRIVER: { label: "Waiting for Confirmation", variant: "secondary" },
   COMPLETED: { label: "Completed", variant: "outline" },
 };

@@ -7,10 +7,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "client-service")
+@FeignClient(name = "CLIENT-SERVICE")
 public interface ClientServiceClient {
     @PutMapping("/clients/move-requests/{id}")
-    MoveRequestDto updateMoveRequest(@PathVariable("id") Long id, @RequestBody MoveRequestDto moveRequestDto);
+    MoveRequestDto updateMoveRequest(
+        @PathVariable("id") Long id,
+        @RequestBody MoveRequestDto moveRequestDto
+    );
 
     @GetMapping("/clients/move-requests/{id}")
     MoveRequestDto getMoveRequestById(@PathVariable("id") Long id);

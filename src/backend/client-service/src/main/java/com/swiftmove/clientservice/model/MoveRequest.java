@@ -57,6 +57,8 @@ public class MoveRequest {
     private MoveStatus status;
     @Column(name = "has_furniture")
     private Boolean hasFurniture;
+    @Column(name = "note")
+    private String note;
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

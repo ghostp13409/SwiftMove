@@ -1,61 +1,51 @@
+x-backend-env: &backend-env
+  SPRING_DATASOURCE_URL: ${POSTGRES_URI}
+  SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+  SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+  EUREKA_URI: http://eureka-server:8761/eureka/
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+  SPRING_PROFILES_ACTIVE: docker
+  RABBITMQ_HOST: ${RABBITMQ_HOST}
+  RABBITMQ_PORT: ${RABBITMQ_PORT}
+  RABBITMQ_USER: ${RABBITMQ_USER}
+  RABBITMQ_PASS: ${RABBITMQ_PASS}
+  JWT_SECRET: ${JWT_SECRET}
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+
 services:
   postgres:
+    image: postgres:15-alpine
     container_name: postgres
-    image: postgres:latest
     environment:
-      POSTGRES_USER: postgres
-      # From .env file
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: microservice
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      # Newer Postgres images (18+) expect a single mount at /var/lib/postgresql
-      # so that the database directory (e.g. main) is managed by pg_ctlcluster and
-      # allows pg_upgrade to work correctly.  See error message and
-      # https://github.com/docker-library/postgres/issues/37
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # zookeeper:
-  #   container_name: zookeeper
-  #   image: "docker.io/zookeeper:latest"
-  #   ports:
-  #     - "2181:2181"
-  #   volumes:
-  #     - "zookeeper_data:/bitnami"
-  #   environment:
-  #     - ALLOW_ANONYMOUS_LOGIN=yes
-
-  # kafka:
-  #   container_name: kafka
-  #   image: "docker.io/apache/kafka:3.9.2-rc1"
-  #   ports:
-  #     - "9092:9092"
-  #   expose:
-  #     - "9093"
-  #   volumes:
-  #     - "kafka_data:/bitnami"
-  #   environment:
-  #     - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-  #     - ALLOW_PLAINTEXT_LISTENER=yes
-  #     - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka:9093,OUTSIDE://localhost:9092
-  #     - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-  #     - KAFKA_LISTENERS=INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
-  #     - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
-  #     - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-  #   depends_on:
-  #     - zookeeper
-
-  # kafka-ui:
-  #   container_name: kafka-ui
-  #   image: provectuslabs/kafka-ui
-  #   ports:
-  #     - "9090:8080"
-  #   restart: always
-  #   environment:
-  #     - KAFKA_CLUSTERS_0_NAME=local
-  #     - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9093
-  #     - KAFKA_CLUSTERS_0_ZOOKEEPER=localhost:2181
+  rabbitmq:
+    image: rabbitmq:4.0.7-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   eureka-server:
     container_name: eureka-server
@@ -63,43 +53,159 @@ services:
       context: ./src/backend/eureka-server
     ports:
       - "8761:8761"
+    environment:
+      PORT: 8761
+      SERVER_PORT: 8761
     depends_on:
       - postgres
+      - rabbitmq
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:8761/actuator/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
-  # config-service:
-  #   container_name: config-service
-  #   build:
-  #     context: ./src/backend/config-service
-  #   ports:
-  #     - "8888:8888"
-  #   depends_on:
-  #     - eureka-server
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: ./src/backend/api-gateway
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src/backend/api-gateway/src/main/resources/application.properties:/app/config/application.properties:ro
+    environment:
+      <<: *backend-env
+      PORT: 8000
+      SERVER_PORT: 8000
+      HOSTNAME: api-gateway
+      SPRING_CONFIG_LOCATION: file:/app/config/application.properties
+    depends_on:
+      eureka-server:
+        condition: service_healthy
 
-  # api-gateway:
-  #   container_name: api-gateway
-  #   build:
-  #     context: ./src/backend/api-gateway
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - eureka-server
-  #     - config-service
+  auth-service:
+    container_name: auth-service
+    build:
+      context: ./src/backend/auth-service
+    environment:
+      <<: *backend-env
+      PORT: 8090
+      SERVER_PORT: 8090
+      HOSTNAME: auth-service
+    depends_on:
+      eureka-server:
+        condition: service_healthy
 
-  # user-service:
-  #   container_name: user-service
-  #   build:
-  #     context: ./src/backend/user-service
-  #   ports:
-  #     - "8081:8081"
-  #   depends_on:
-  #     - eureka-server
-  #     - config-service
-  #     - api-gateway
+  user-service:
+    container_name: user-service
+    build:
+      context: ./src/backend/user-service
+    environment:
+      <<: *backend-env
+      PORT: 8070
+      SERVER_PORT: 8070
+      HOSTNAME: user-service
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  client-service:
+    container_name: client-service
+    build:
+      context: ./src/backend/client-service
+    environment:
+      <<: *backend-env
+      PORT: 8002
+      SERVER_PORT: 8002
+      HOSTNAME: client-service
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  driver-service:
+    container_name: driver-service
+    build:
+      context: ./src/backend/driver-service
+    environment:
+      <<: *backend-env
+      PORT: 8061
+      SERVER_PORT: 8061
+      HOSTNAME: driver-service
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  location-service:
+    container_name: location-service
+    build:
+      context: ./src/backend/location-service
+    environment:
+      <<: *backend-env
+      PORT: 8099
+      SERVER_PORT: 8099
+      HOSTNAME: location-service
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  payment-service:
+    container_name: payment-service
+    build:
+      context: ./src/backend/payment-service
+    environment:
+      <<: *backend-env
+      PORT: 8088
+      SERVER_PORT: 8088
+      HOSTNAME: payment-service
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  trip-service:
+    container_name: trip-service
+    build:
+      context: ./src/backend/trip-service
+    environment:
+      <<: *backend-env
+      PORT: 8060
+      SERVER_PORT: 8060
+      HOSTNAME: trip-service
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  frontend:
+    container_name: swiftmove-frontend
+    build:
+      context: ./src/swiftmove-dashboards
+      args:
+        VITE_API_BASE_URL: https://api.swiftorg.me
+    environment:
+      - VITE_API_BASE_URL=https://api.swiftorg.me
+    ports:
+      - "3000:3000"
+    restart: always
+    depends_on:
+      - api-gateway
+
+  # Cloudflare Tunnel Service
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: swiftmove-tunnel
+    restart: always
+    command: tunnel --config /etc/cloudflared/config.yaml run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    volumes:
+      - ./cloudflare-tunnel-config.yaml:/etc/cloudflared/config.yaml:ro
+    depends_on:
+      - frontend
+      - api-gateway
 
 volumes:
-  # zookeeper_data:
-  #   driver: local
-  # kafka_data:
-  #   driver: local
   postgres_data:
-    driver: local

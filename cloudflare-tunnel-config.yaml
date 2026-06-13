@@ -1,0 +1,17 @@
+tunnel: swiftmove-tunnel
+credentials-file: /etc/cloudflared/cred.json
+
+ingress:
+  # API Gateway routes - must come BEFORE frontend catch-all
+  - hostname: api.swiftorg.me
+    service: http://api-gateway:8000
+
+  # Frontend routes
+  - hostname: swiftorg.me
+    service: http://frontend:3000
+
+  - hostname: www.swiftorg.me
+    service: http://frontend:3000
+
+  # Catch-all - returns 404 for unmatched routes
+  - service: http_status:404

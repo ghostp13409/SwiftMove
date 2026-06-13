@@ -19,6 +19,8 @@ import com.swiftmove.clientservice.model.MoveStatus;
 import com.swiftmove.clientservice.repository.LuggageEntryRepository;
 import com.swiftmove.clientservice.repository.MoveRequestRepository;
 
+import com.swiftmove.clientservice.messaging.NotificationService;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,6 +29,7 @@ public class MoveRequestService {
     private final MoveRequestRepository moveRequestRepository;
     private final LuggageEntryRepository luggageEntryRepository;
     private final LocationServiceClient locationServiceClient;
+    private final NotificationService notificationService;
 
 
 //    CRUD
@@ -86,8 +89,21 @@ public class MoveRequestService {
             validateMoveRequest(moveRequest);
             // Make move Request Status to "CREATED"
             moveRequest.setStatus(MoveStatus.CREATED);
-            moveRequestRepository.save(moveRequest);
-            return Mapper.toMoveRequestDto(moveRequest);
+            MoveRequest savedRequest = moveRequestRepository.save(moveRequest);
+            
+            // Notify all drivers (via global topic)
+            try {
+                notificationService.sendNotification(
+                    "all", 
+                    "NEW_MOVE_REQUEST", 
+                    "A new move request is available!", 
+                    Mapper.toMoveRequestDto(savedRequest)
+                );
+            } catch (Exception e) {
+                System.err.println("Failed to send new request notification: " + e.getMessage());
+            }
+            
+            return Mapper.toMoveRequestDto(savedRequest);
         }catch(Exception e){
             System.err.println("Error adding move request: " + e.getMessage());
             return null;

@@ -16,3 +16,6 @@ We have designed our platform to be easy to maintain and update. We use modern d
 
 **Resilient**
 We have designed the system to be resilient the lowest of the lowest trafic and userbase eleminating the need to make money fast. This allows the platform to grow organically based on the needs of the users and not based on our ability to scale and make money. This also allows us to focus on providing a high-quality service for our users without worrying about the financial aspect of the business.
+
+**Cheap, but not cheap**
+We have designed our platform in a way that will allow us to maintain it a very low cost, but we are not looking to make a cheap product. We are looking to provide a high-quality service for our users at an affordable price. We have made strategic decisions in terms of technology and architecture to ensure that we can keep the costs low while still providing a great user experience. We are not looking to cut corners or sacrifice quality in order to save money, we are looking to create a sustainable business model that benefits everyone involved.

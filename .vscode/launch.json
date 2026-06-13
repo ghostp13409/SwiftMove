@@ -25,7 +25,7 @@
       "env": {
         "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
       },
-      "vmArgs": " -Dcom.sun.management.jmxremote"
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=41783 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=api-gateway"
     },
     {
       "type": "java",
@@ -39,7 +39,7 @@
       "env": {
         "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
       },
-      "vmArgs": " -Dcom.sun.management.jmxremote"
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=41889 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=auth-service"
     },
     {
       "type": "java",
@@ -53,7 +53,7 @@
       "env": {
         "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
       },
-      "vmArgs": " -Dcom.sun.management.jmxremote"
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=34317 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=client-service"
     },
     {
       "type": "java",
@@ -80,7 +80,7 @@
       "env": {
         "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
       },
-      "vmArgs": " -Dcom.sun.management.jmxremote"
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=40897 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=driver-service"
     },
     {
       "type": "java",
@@ -107,7 +107,7 @@
       "env": {
         "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
       },
-      "vmArgs": " -Dcom.sun.management.jmxremote"
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=43201 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=location-service"
     },
     {
       "type": "java",
@@ -146,7 +146,8 @@
       "envFile": "${workspaceFolder}/.env",
       "env": {
         "SPRING_CONFIG_ADDITIONAL_LOCATION": "${workspaceFolder}/src/backend/config/application.properties"
-      }
+      },
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=43499 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=user-service"
     },
     {
       "type": "java",
@@ -175,6 +176,27 @@
       "cwd": "${workspaceFolder}",
       "mainClass": "com.swiftmove.tripservice.TripServiceApplication",
       "projectName": "trip-service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env",
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=37931 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=trip-service"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-PaymentServiceApplication<payment-service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.swiftmove.payment_service.PaymentServiceApplication",
+      "projectName": "payment-service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-NotificationServiceApplication<notification-service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.swiftmove.notificationservice.NotificationServiceApplication",
+      "projectName": "notification-service",
       "args": "",
       "envFile": "${workspaceFolder}/.env"
     }
